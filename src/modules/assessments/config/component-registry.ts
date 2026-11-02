@@ -1,7 +1,7 @@
 /** Frontend-only *runtime* capabilities, independent of localStorage metadata. */
 import { mcqAssessmentAdapter } from "../components/type-specific/mcq";
 
-export type QuestionMode = "single-choice" | "short-answer" | "one-word" | "matching" | "image-based" | "true-false" | "fill-in-the-blanks" | "long-answer" | "drag-and-drop" | "memory-game" | "connect-the-dots" | "clickable-hotspot" | "assignment" | "problem-solving";
+export type QuestionMode = "single-choice" | "short-answer" | "one-word" | "matching" | "image-based" | "true-false" | "fill-in-the-blanks" | "long-answer" | "drag-and-drop" | "memory-game" | "connect-the-dots" | "clickable-hotspot" | "assignment" | "problem-solving" | "ai-interview";
 export interface AssessmentAdapter {
   code: string;
   questionMode: QuestionMode;
@@ -10,6 +10,12 @@ export interface AssessmentAdapter {
 
 /** Add another adapter here when its Creator, Viewer, evaluation and results are implemented. */
 export const ASSESSMENT_ADAPTERS: Record<string, AssessmentAdapter> = {
+  "ai-assessment": {code:"ai-assessment",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
+  "ai-interviews-and-quizes": {code:"ai-interviews-and-quizes",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
+  "ai-interviews-quizzes": {code:"ai-interviews-quizzes",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
+  "ai-interviews": {code:"ai-interviews",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
+  "ai-interview": {code:"ai-interview",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
+  "ai-interviews-and-quizzes": {code:"ai-interviews-and-quizzes",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
   "problem-solving-challenge": {code:"problem-solving-challenge",questionMode:"problem-solving",draftKeys:{details:"mcqAssessmentDraft",content:"problemSolvingContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
   "problem-solving": {code:"problem-solving",questionMode:"problem-solving",draftKeys:{details:"mcqAssessmentDraft",content:"problemSolvingContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
   "assignment": {code:"assignment",questionMode:"assignment",draftKeys:{details:"mcqAssessmentDraft",content:"assignmentContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},

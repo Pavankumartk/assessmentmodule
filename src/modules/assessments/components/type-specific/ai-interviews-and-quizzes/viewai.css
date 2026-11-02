@@ -1,0 +1,205 @@
+/* AI Interview preparation – Figma proportions, independent of all other viewers. */
+.viewaiPage{--vbg:#DFE6E9;--vtext:#374151;--vraised:-4px -4px 8px #FFFFFF,4px 4px 8px #C4C4C4;--vinset:inset -2px -2px 2px #FFFFFF,inset 2px 2px 2px #C4C4C4;min-height:100dvh;width:100%;margin:0;padding:0;background:var(--vbg);color:var(--vtext);font-family:"Segoe UI",Inter,Arial,sans-serif}
+.viewaiPage *,.viewaiPage *::before,.viewaiPage *::after{box-sizing:border-box}
+.viewaiPage button{font-family:inherit;cursor:pointer}
+.viewaiPage button:disabled{opacity:.65;cursor:wait}
+.viewaiPage :is(button,a):focus-visible{outline:2px solid #2D4CC8;outline-offset:3px}
+.viewaiShell{width:100%;max-width:none;margin:0;min-height:100dvh;background:var(--vbg);border-radius:0;box-shadow:none;overflow:hidden}
+.viewaiHeader{height:80px;min-height:80px;background:var(--vbg);border:1px solid #D8DAE0;box-shadow:-4px -4px 8px #FFFFFF,4px 4px 8px #C4C4C4;position:relative;z-index:1}
+.viewaiHeader>*{width:100%;height:100%}
+.viewaiScrollable{padding:24px 24px 56px;min-width:0}
+.viewaiBreadcrumb{display:flex;align-items:center;gap:9px;margin:0 0 24px;min-height:24px;line-height:24px;letter-spacing:.02em;font-size:16px;flex-wrap:wrap}
+.viewaiBreadcrumb span{color:#2F3547}.viewaiBreadcrumb strong{color:#2D4CC8;font-weight:700;overflow-wrap:anywhere}
+.viewaiBreadcrumb img{display:block;object-fit:contain;flex:none}.viewaiMissingIcon{width:18px;height:18px;display:inline-block;flex:none}
+.viewaiColumns{display:grid;grid-template-columns:minmax(0,456px) minmax(0,1fr);gap:24px;align-items:stretch;min-width:0}
+.viewaiOverview{min-width:0;min-height:772px;padding:24px 20px;background:var(--vbg);box-shadow:var(--vraised);border-radius:3px;display:flex;flex-direction:column;align-items:center}
+.viewaiOverview h1{margin:2px 0 6px;font-size:24px;line-height:32px;font-weight:700;letter-spacing:.02em;text-align:center}
+.viewaiMeta{margin:0 0 28px;font-size:14px;line-height:26px;font-weight:400;letter-spacing:.02em;text-align:center;white-space:normal}
+.viewaiMeta span{margin:0 7px}
+.viewaiCameraPanel{width:100%;max-width:408px;min-height:434px;padding:24px 15px 25px;background:var(--vbg);box-shadow:var(--vinset);border-radius:16px;display:flex;flex-direction:column;align-items:center;gap:24px}
+.viewaiCameraOval{position:relative;display:grid;place-items:center;overflow:hidden;width:min(100%,267px);height:315px;flex:0 0 315px;border:1px dashed #111;border-radius:50%;background:#D9D9D9;text-align:center}
+.viewaiCameraOval>span{padding:0 12px;font-size:14px;line-height:24px;letter-spacing:.01em;white-space:nowrap}
+.viewaiCameraVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.viewaiHiddenVideo{display:none}
+.viewaiCameraButton{width:156px;height:46px;flex:none;border:none;border-radius:32px;background:var(--vbg);box-shadow:-4px -4px 4px #fff,4px 4px 4px #c4c4c4;color:#2F3547;font-size:20px;font-weight:600;line-height:32px;letter-spacing:.02em}
+.viewaiCameraButton:active,.viewaiTestButton:active{box-shadow:var(--vinset)}
+.viewaiChecks{min-width:0;min-height:772px;background:var(--vbg);box-shadow:var(--vraised);border-radius:8px;padding:24px;display:flex;flex-direction:column;align-items:stretch}
+.viewaiInfoBanner{display:flex;align-items:center;justify-content:center;gap:12px;align-self:center;max-width:100%;min-height:51px;padding:10px 17px;background:var(--vbg);box-shadow:var(--vinset);border:solid #C05512;border-width:0 5px;border-radius:8px;color:#C05512;font-size:16px;font-weight:600;line-height:24px;letter-spacing:.02em;text-align:left}
+.viewaiInfoBanner img{flex:none;object-fit:contain}
+.viewaiChecks h2{margin:32px 0 28px;font-size:24px;line-height:28px;font-weight:700;letter-spacing:.02em}
+.viewaiCheckList{display:flex;flex-direction:column;gap:20px}
+.viewaiCheckRow{min-height:74px;padding:11px 24px 11px 16px;background:var(--vbg);box-shadow:var(--vinset);border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:18px;min-width:0}
+.viewaiCheckDescription{display:flex;align-items:center;gap:16px;min-width:0;flex:1 1 auto}
+.viewaiCheckDescription>div{min-width:0}
+.viewaiCheckDescription strong{display:block;font-size:16px;font-weight:600;line-height:24px;letter-spacing:.02em}
+.viewaiCheckDescription small{display:block;font-size:13px;color:#000;line-height:24px;letter-spacing:.01em}
+.viewaiCheckIcon{width:36px;height:36px;flex:0 0 36px;border-radius:50%;display:grid;place-items:center;background:var(--vbg);box-shadow:-2px -2px 2px #FFFFFF,2px 2px 2px #C4C4C4}
+.viewaiCheckIcon img{object-fit:contain}
+.viewaiColor-purple{color:#67096E}.viewaiColor-pink{color:#E01E5A}.viewaiColor-blue{color:#2D4CC8}
+.viewaiCheckActions{display:flex;align-items:center;gap:30px;flex:0 0 auto}
+.viewaiCheckStatus{min-width:92px;height:33px;border:1px solid #374151;border-radius:32px;display:flex;align-items:center;justify-content:center;padding:0 9px;font-weight:600;font-size:14px;line-height:22px;white-space:nowrap;color:#374151}
+.viewaiStatus-passed{border-color:#2A7308;color:#2A7308}.viewaiStatus-failed{border-color:#B32738;color:#B32738}.viewaiStatus-testing{border-color:#2D4CC8;color:#2D4CC8}
+.viewaiTestButton{width:102px;min-height:42px;border:0;background:var(--vbg);border-radius:32px;box-shadow:var(--vraised);font-size:20px;font-weight:600;color:#2F3547;line-height:32px}
+.viewaiMicMeter{height:5px;width:min(190px,100%);border-radius:6px;background:#c5cdd2;margin-top:2px;overflow:hidden}.viewaiMicMeter>span{display:block;height:100%;background:#67096e;transition:width .1s}
+.viewaiSettingsRow{display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-top:32px}
+.viewaiSetting{min-height:58px;padding:10px 18px 10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--vbg);box-shadow:var(--vinset);border-radius:8px;min-width:0;font-size:15px;line-height:24px;letter-spacing:.01em}
+.viewaiSetting>span{min-width:0;overflow-wrap:anywhere}
+.viewaiAgreement{margin-top:24px;min-height:58px;font-size:16px;font-weight:600}
+/* Figma switch: 72x36 shell, 62x28 track, 28x28 knob. */
+.viewaiToggle{position:relative;display:block;flex:0 0 72px;width:72px;height:36px;border:0;border-radius:32px;padding:0;background:var(--vbg);box-shadow:-4px -4px 4px rgba(255,255,255,.5),4px 4px 4px #C4C4C4}
+.viewaiToggleTrack{position:absolute;inset:4px 5px;width:62px;height:28px;background:#a8b1b9;display:block;border-radius:32px;overflow:hidden}
+.viewaiToggleOn .viewaiToggleTrack{background:linear-gradient(113.36deg,#2D4CC8 30.17%,#E01E5A 65.23%)}
+.viewaiToggleLabel{position:absolute;right:7px;top:4px;font-size:12px;font-weight:600;line-height:20px;color:white;letter-spacing:.03em}
+.viewaiToggleOn .viewaiToggleLabel{left:7px;right:auto}
+.viewaiToggleKnob{position:absolute;left:4px;top:4px;width:28px;height:28px;border-radius:50%;background:var(--vbg);box-shadow:0 -2px 4px rgba(0,0,0,.1),0 4px 4px rgba(0,0,0,.25);transition:left .17s ease}
+.viewaiToggleOn .viewaiToggleKnob{left:40px}
+.viewaiStartRow{display:flex;justify-content:center;margin-top:50px}
+.viewaiStartButton{display:grid;place-items:center;flex:none;min-width:221px;height:58px;padding:0 20px;border-radius:50px;border:1px solid transparent;background:linear-gradient(var(--vbg),var(--vbg)) padding-box,linear-gradient(90deg,#2D4CC8,#E01E5A) border-box;box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4}
+.viewaiStartButton span{font-size:20px;line-height:32px;letter-spacing:.02em;font-weight:600;color:#2D4CC8;background:linear-gradient(90deg,#2D4CC8,#E01E5A);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.viewaiStartButton:active{box-shadow:var(--vinset)}
+.viewaiNotice{align-self:stretch;margin:20px 2px 0;font-size:13px;line-height:20px;color:#9A3C12;text-align:center}.viewaiNoticeReady{color:#2A7308}
+@media(max-width:1200px){.viewaiPage{padding:0}.viewaiColumns{grid-template-columns:minmax(300px,38%) minmax(0,1fr);gap:18px}.viewaiChecks{padding:20px}.viewaiCheckActions{gap:13px}.viewaiCheckRow{padding-right:13px}.viewaiCheckDescription{gap:12px}.viewaiInfoBanner{font-size:14px}.viewaiSetting{font-size:13px;padding-inline:10px}.viewaiSettingsRow{gap:14px}}
+@media(max-width:980px){.viewaiColumns{grid-template-columns:minmax(0,1fr);gap:22px}.viewaiOverview,.viewaiChecks{min-height:0}.viewaiOverview{padding:24px 18px 32px}.viewaiCameraPanel{max-width:408px}.viewaiChecks{padding:24px}.viewaiShell{min-height:0}.viewaiChecks h2{margin-top:32px}}
+@media(max-width:600px){.viewaiPage{padding:0}.viewaiShell{border-radius:0}.viewaiHeader{height:70px;min-height:70px}.viewaiScrollable{padding:18px 12px 26px}.viewaiBreadcrumb{font-size:13px;line-height:20px;gap:6px;margin-bottom:18px}.viewaiBreadcrumb img{width:16px;height:16px}.viewaiOverview{padding:19px 12px 25px}.viewaiOverview h1{font-size:21px;line-height:28px}.viewaiMeta{font-size:12px;line-height:20px;margin-bottom:20px}.viewaiMeta span{margin:0 3px}.viewaiCameraPanel{min-height:0;padding:20px 8px}.viewaiCameraOval{width:min(70vw,245px);height:285px;flex-basis:285px}.viewaiCameraOval>span{font-size:12px;white-space:normal}.viewaiCameraButton{font-size:17px}.viewaiChecks{padding:20px 12px 26px}.viewaiInfoBanner{font-size:12px;line-height:19px;padding:9px 10px;gap:8px}.viewaiInfoBanner img{width:20px;height:20px}.viewaiChecks h2{font-size:20px;line-height:27px;margin:25px 0 22px}.viewaiCheckList{gap:14px}.viewaiCheckRow{padding:12px;gap:12px;align-items:flex-start;flex-direction:column}.viewaiCheckActions{width:100%;justify-content:flex-end;gap:14px}.viewaiCheckDescription strong{font-size:15px}.viewaiCheckDescription small{font-size:12px;line-height:18px}.viewaiCheckStatus{height:30px;font-size:12px}.viewaiTestButton{width:90px;min-height:36px;font-size:16px}.viewaiSettingsRow{grid-template-columns:1fr;gap:14px;margin-top:22px}.viewaiSetting{min-height:58px;font-size:13px;padding-inline:12px}.viewaiAgreement{font-size:13px;margin-top:14px}.viewaiStartRow{margin-top:32px}.viewaiStartButton{min-width:206px;height:54px}.viewaiStartButton span{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.viewaiToggleKnob,.viewaiMicMeter>span{transition:none}}
+
+/* Preflight live activity, passed/retest states and interview view. */
+.viewaiTopRow{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:0 0 24px;min-width:0}
+.viewaiTopRow .viewaiBreadcrumb{margin:0;min-width:0}
+.viewaiTopStats{display:flex;align-items:center;gap:21px;flex:0 0 auto}
+.viewaiTabCounter{height:48px;min-width:174px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 14px;border:1px solid #A91E2C;border-radius:32px;box-shadow:var(--vinset);font-size:14px;font-weight:600;color:#A91E2C;white-space:nowrap}
+.viewaiTabCounter img{object-fit:contain}
+.viewaiClock{height:48px;display:flex;align-items:center;gap:3px;padding:5px 7px;border:1px solid #D8DAE0;border-radius:8px;box-shadow:var(--vinset)}
+.viewaiClockSegment{display:flex;align-items:center;gap:4px}
+.viewaiClockColon{font-weight:700;font-size:23px}
+.viewaiClockDigit{display:grid;place-items:center;width:28px;height:29px;border-radius:5px;background:#DFE6E9;box-shadow:inset -2px -2px 3px white,inset 2px 2px 3px #b6bec4;font:600 20px/1 "Segoe UI",Arial,sans-serif;color:#374151}
+.viewaiCheckActions{min-width:0}
+.viewaiStatus-passed{background:#e5f2df;border-color:#2A7308;color:#2A7308;gap:5px}
+.viewaiStatus-passed img{object-fit:contain}
+.viewaiStatus-passed svg{flex:none}
+.viewaiWave{display:flex;align-items:center;justify-content:center;gap:3px;min-width:138px;width:138px;height:35px;flex:0 0 138px;overflow:hidden}
+.viewaiWave span{display:block;width:2px;min-height:3px;flex:0 0 2px;border-radius:2px;background:linear-gradient(180deg,#2D4CC8 0%,#8960df 43%,#E01E5A 100%);transition:height .09s linear}
+.viewaiWaveLarge{width:178px;min-width:178px;height:35px;gap:4px;flex-basis:178px}
+.viewaiWaveLive span{opacity:1}
+.viewaiInterview{min-width:0;min-height:772px;padding:24px;display:flex;flex-direction:column;align-items:stretch;border-radius:8px;background:var(--vbg);box-shadow:var(--vraised)}
+.viewaiProgress{display:grid;grid-template-columns:1fr 36px;align-items:center;gap:5px 12px;font-size:16px;line-height:24px;letter-spacing:.02em}
+.viewaiProgress>strong:first-child{grid-column:1 / -1}
+.viewaiProgressLine{height:20px;min-width:0;border-radius:50px;background:#DFE6E9;box-shadow:var(--vinset);padding:5px;overflow:hidden}
+.viewaiProgressLine>span{display:block;height:10px;min-width:10px;max-width:100%;background:#2A7308;border-radius:20px;box-shadow:-2px -2px 4px white,2px 2px 3px #C4C4C4;transition:width .25s}
+.viewaiPercent{font-size:16px;color:#2A7308;text-align:right}
+.viewaiListening{margin:24px auto 24px;display:flex;align-items:center;flex-direction:column;gap:8px;min-height:162px}
+.viewaiHeadsetRing{height:91px;width:91px;display:grid;place-items:center;border-radius:50%;border:1px dashed #E01E5A;position:relative}
+.viewaiHeadsetRing::before{content:"";position:absolute;inset:13px;border-radius:50%;border:1px dashed #67096E}
+.viewaiHeadsetInner{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#DFE6E9;box-shadow:-2px -2px 2px #FFF,2px 2px 2px #C4C4C4;z-index:1}
+.viewaiHeadsetInner img{object-fit:contain}
+.viewaiListening p{margin:0;font-size:16px;line-height:24px;letter-spacing:.03em;text-align:center}
+.viewaiQuestion{min-height:72px;display:flex;align-items:center;justify-content:center;padding:13px 20px;border-radius:8px;border-left:6px solid #E01E5A;border-right:6px solid #E01E5A;box-shadow:var(--vinset);font-size:22px;line-height:28px;font-weight:600;text-align:center;letter-spacing:.025em;overflow-wrap:anywhere}
+.viewaiTranscript{display:flex;flex-direction:column;gap:16px;margin-top:32px}
+.viewaiTranscript label{font-size:16px;line-height:24px;font-weight:700}
+.viewaiTranscript textarea{display:block;resize:vertical;width:100%;min-height:98px;padding:18px 24px;border:0;border-radius:8px;background:#DFE6E9;box-shadow:var(--vinset);color:#374151;font:400 16px/24px "Segoe UI",Arial,sans-serif;letter-spacing:.02em;outline:0}
+.viewaiTranscript textarea:focus-visible{outline:2px solid #2D4CC8;outline-offset:2px}
+.viewaiTranscript textarea::placeholder{color:#85919a;font-size:14px}
+.viewaiAnswerActions{display:flex;justify-content:center;align-items:center;gap:50px;margin:52px 0 0}
+.viewaiRepeat{width:136px;height:46px;display:flex;align-items:center;justify-content:center;gap:12px;border:0;border-radius:8px;background:#DFE6E9;box-shadow:var(--vraised);color:#374151;font-size:20px}
+.viewaiRepeat img{object-fit:contain}
+.viewaiStop{width:60px;height:60px;flex:0 0 60px;border:0;border-radius:50%;display:grid;place-items:center;background:#DFE6E9;box-shadow:-2px -2px 2px #fff,2px 2px 2px #C4C4C4}
+.viewaiStopSquare{width:25px;height:24px;background:#A91E2C;border-radius:2px}
+.viewaiPlayTriangle{width:0;height:0;border-top:13px solid transparent;border-bottom:13px solid transparent;border-left:20px solid #2D4CC8;margin-left:5px}
+.viewaiSubmit{min-width:206px;height:54px;padding:0 18px;border:1px solid #2D4CC8;border-radius:50px;background:#DFE6E9;box-shadow:var(--vraised);color:#2D4CC8;font-size:20px;font-weight:600}
+.viewaiRepeat:active,.viewaiStop:active,.viewaiSubmit:active{box-shadow:var(--vinset)}
+.viewaiCompleted{padding:45px 18px;text-align:center}
+.viewaiCompleted h2{font-size:24px;color:#2A7308}
+.viewaiCompleted p{font-size:16px;line-height:25px}
+@media(min-width:1210px){.viewaiChecks .viewaiCheckDescription{flex:1 1 auto}.viewaiChecks .viewaiCheckActions{gap:20px}}
+@media(max-width:1240px){.viewaiWave{min-width:90px;width:90px;flex-basis:90px;gap:2px}.viewaiWave span{width:2px;flex-basis:2px}.viewaiWaveLarge{width:178px;min-width:178px;flex-basis:178px;gap:4px}.viewaiCheckActions{gap:10px}.viewaiTopRow{flex-wrap:wrap}.viewaiTopStats{margin-left:auto}}
+@media(max-width:980px){.viewaiInterview{min-height:0}.viewaiTopRow{gap:12px}.viewaiCheckActions .viewaiWave{width:138px;min-width:138px;flex-basis:138px;gap:3px}}
+@media(max-width:600px){.viewaiTopStats{width:100%;justify-content:space-between;gap:8px}.viewaiTabCounter{min-width:0;flex:1 1 auto;height:42px;padding:0 8px;font-size:12px}.viewaiTabCounter img{width:19px;height:19px}.viewaiClock{height:42px;flex:none;padding:4px;gap:2px}.viewaiClockSegment{gap:2px}.viewaiClockDigit{width:18px;height:25px;font-size:15px}.viewaiClockColon{font-size:17px}.viewaiCheckActions{flex-wrap:wrap;align-items:center}.viewaiCheckActions .viewaiWave{margin-right:auto;min-width:80px;width:80px;flex-basis:80px;gap:2px}.viewaiCheckActions .viewaiWave span{width:2px;flex-basis:2px}.viewaiCheckActions .viewaiCheckStatus{min-width:76px}.viewaiInterview{padding:20px 12px 25px}.viewaiProgressLine{height:18px;padding:4px}.viewaiProgressLine>span{height:10px}.viewaiListening{margin:24px auto 20px}.viewaiQuestion{min-height:75px;padding:12px 10px;font-size:17px;line-height:24px;border-left-width:4px;border-right-width:4px}.viewaiTranscript{margin-top:22px;gap:10px}.viewaiTranscript textarea{padding:13px;font-size:14px;min-height:104px}.viewaiAnswerActions{flex-wrap:wrap;gap:14px;margin-top:27px}.viewaiRepeat{width:104px;height:43px;font-size:15px;gap:7px}.viewaiRepeat img{width:20px;height:20px}.viewaiStop{width:50px;height:50px;flex-basis:50px}.viewaiStopSquare{width:21px;height:20px}.viewaiSubmit{min-width:146px;height:47px;font-size:15px;padding:0 12px}.viewaiWaveLarge{min-width:178px;width:178px;flex-basis:178px;gap:4px}}
+@media(max-width:380px){.viewaiAnswerActions{gap:9px}.viewaiSubmit{min-width:128px;font-size:14px}.viewaiRepeat{width:92px}.viewaiTabCounter{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.viewaiWave span,.viewaiProgressLine>span{transition:none}}
+
+/* Keep the headset, live wave and caption together at the reference spacing. */
+.viewaiInterview .viewaiListening{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:91px 31px 24px;justify-items:center;align-items:center;align-content:start;row-gap:8px;width:max-content;max-width:100%;height:auto;min-height:0;flex:0 0 auto;margin:24px auto 24px;padding:0}
+.viewaiInterview .viewaiListening>.viewaiHeadsetRing{grid-row:1;grid-column:1;flex:0 0 91px;margin:0}
+.viewaiInterview .viewaiListening>.viewaiWaveLarge{grid-row:2;grid-column:1;flex:none;height:31px;min-height:31px;width:178px;min-width:178px;margin:0;padding:0;align-self:center}
+.viewaiInterview .viewaiListening>p{grid-row:3;grid-column:1;margin:0;padding:0;line-height:24px;min-height:24px;white-space:normal}
+/* Microphone symbol stays the same for pause and resume; state uses the button's shadow. */
+.viewaiStop img{width:24px;height:24px;object-fit:contain;display:block}
+.viewaiStopListening{box-shadow:inset -2px -2px 2px #FFFFFF,inset 2px 2px 2px #C4C4C4}
+.viewaiStopPaused{box-shadow:-2px -2px 2px #FFFFFF,2px 2px 2px #C4C4C4}
+@media(max-width:600px){.viewaiInterview .viewaiListening{margin:20px auto 20px;row-gap:8px}.viewaiInterview .viewaiListening>p{font-size:14px;line-height:24px}.viewaiStop img{width:22px;height:22px}}
+
+/* Session Complete — matches the Figma results screen without changing preparation. */
+.viewaiResults{min-width:0;width:100%;padding:24px 18px 38px;border-radius:8px;background:#DFE6E9;box-shadow:-4px -4px 8px #fff,4px 4px 8px #C4C4C4;display:flex;flex-direction:column;align-items:stretch;gap:24px}
+.viewaiResultsIntro{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px}
+.viewaiConfetti{display:grid;place-items:center;width:213px;height:157px;margin-bottom:-5px;pointer-events:none;overflow:visible}
+.viewaiConfetti img{display:block;width:213px;height:157px;object-fit:contain;transform-origin:50% 75%;animation:viewaiBlast 900ms cubic-bezier(.15,.65,.28,1.18) both}
+@keyframes viewaiBlast{0%{opacity:0;transform:translateY(15px) scale(.38) rotate(-9deg)}60%{opacity:1;transform:translateY(-6px) scale(1.1) rotate(4deg)}100%{opacity:1;transform:translateY(0) scale(1) rotate(0)}}
+.viewaiResultsIntro h1{margin:0;font-size:22px;line-height:34px;font-weight:700;letter-spacing:.03em}
+.viewaiResultsScore{display:block;color:#2A7308;font-size:32px;line-height:36px;font-weight:700;letter-spacing:.03em}
+.viewaiResultsOutcome{display:grid;place-items:center;min-width:172px;min-height:32px;padding:3px 14px;border-radius:32px;box-shadow:inset -2px -2px 2px #FFFFFF,inset 2px 2px 2px #C4C4C4;font-size:14px;font-weight:600;line-height:23px;color:#2A7308}
+.viewaiResultsOutcomeFail{color:#A91E2C}
+.viewaiResultsIntro .viewaiDemoNote{margin:2px 0 0;color:#7d5963;font-size:12px;line-height:19px}
+.viewaiResultsRubrics{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 25px;margin:0}
+.viewaiResultRubric{min-width:0;min-height:80px;padding:11px 13px;display:flex;flex-direction:column;justify-content:center;gap:10px;background:#DFE6E9;border-radius:8px;box-shadow:inset -2px -2px 2px #FFFFFF,inset 2px 2px 2px #C4C4C4;color:var(--result-color)}
+.viewaiResultRubric>strong{font-size:16px;font-weight:700;line-height:24px;letter-spacing:.02em}
+.viewaiResultBarRow{display:flex;align-items:center;min-width:0;gap:12px}
+.viewaiResultBar{display:block;flex:1 1 auto;height:20px;min-width:0;padding:5px;overflow:hidden;background:#DFE6E9;border-radius:50px;box-shadow:inset -2px -2px 2px #FFFFFF,inset 2px 2px 2px #C4C4C4}
+.viewaiResultBar>span{display:block;height:10px;background:var(--result-color);border-radius:100px;box-shadow:-2px -2px 3px #FFF,2px 2px 3px #C6C6C9;animation:viewaiBarFill 750ms ease-out both;transform-origin:left}
+@keyframes viewaiBarFill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.viewaiResultBarRow>b{flex:0 0 auto;min-width:30px;font-size:16px;font-weight:700;line-height:24px;text-align:right}
+.viewaiResultFeedback{padding:20px 24px;min-height:120px;display:flex;flex-direction:column;justify-content:center;gap:12px;background:#DFE6E9;border-radius:8px;box-shadow:inset -2px -2px 2px #FFFFFF,inset 2px 2px 2px #C4C4C4}
+.viewaiResultFeedback h2{font-size:22px;font-weight:700;line-height:30px;margin:0;letter-spacing:.02em}
+.viewaiResultFeedback p{font-size:16px;font-weight:400;line-height:26px;letter-spacing:.02em;margin:0}
+.viewaiResultFlag{align-self:center;max-width:100%;min-height:46px;padding:9px 16px;display:grid;place-items:center;background:#DFE6E9;border-radius:8px;box-shadow:inset -2px -2px 2px #FFFFFF,inset 2px 2px 2px #C4C4C4;color:#C05512;font-size:16px;font-weight:600;line-height:24px;letter-spacing:.02em;text-align:center}
+.viewaiResultTranscript{min-width:0;display:flex;flex-direction:column;gap:14px}
+.viewaiResultTranscript h2{margin:0 0 3px;font-size:20px;font-weight:700;line-height:26px;letter-spacing:.02em}
+.viewaiResultAnswer{min-width:0;min-height:105px;padding:16px;display:flex;flex-direction:column;gap:8px;background:#DFE6E9;border-radius:8px;box-shadow:inset -2px -2px 2px #FFFFFF,inset 2px 2px 2px #C4C4C4}
+.viewaiResultAnswer strong{font-size:16px;line-height:24px;font-weight:700;letter-spacing:.02em;overflow-wrap:anywhere}
+.viewaiResultAnswer p{margin:0;font-size:16px;line-height:27px;font-weight:400;letter-spacing:.02em;white-space:pre-wrap;overflow-wrap:anywhere}
+.viewaiResultRestart{align-self:center;min-width:156px;height:48px;padding:0 20px;margin:35px auto 0;border:1px solid transparent;border-radius:50px;background:linear-gradient(#DFE6E9,#DFE6E9) padding-box,linear-gradient(90deg,#2D4CC8,#E01E5A) border-box;box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4;color:#2D4CC8;font-size:18px;font-weight:600;letter-spacing:.02em}
+.viewaiResultRestart:active{box-shadow:inset -2px -2px 2px white,inset 2px 2px 2px #C4C4C4}
+/* Microphone icon (not a playback square/triangle) on both pause and resume. */
+.viewaiStop{display:grid;place-items:center;position:relative}
+.viewaiStop>img{width:24px;height:24px;display:block;object-fit:contain;margin:auto}
+.viewaiStopListening{box-shadow:inset -2px -2px 2px #FFF,inset 2px 2px 2px #C4C4C4}
+.viewaiStopPaused{box-shadow:-2px -2px 2px #FFF,2px 2px 2px #C4C4C4}
+/* Keep the concentric 91px / 63px / 42px headphones rings centered. */
+.viewaiHeadsetRing{flex:0 0 91px;width:91px;height:91px;position:relative;display:grid;place-items:center;border:1px dashed #E01E5A;border-radius:50%}
+.viewaiHeadsetRing::before{content:"";position:absolute;width:63px;height:63px;inset:auto;border:1px dashed #67096E;border-radius:50%}
+.viewaiHeadsetInner{position:relative;z-index:1;width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:#DFE6E9;box-shadow:-2px -2px 2px #fff,2px 2px 2px #C4C4C4}
+@media(max-width:1060px){.viewaiResultsRubrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.viewaiResultRubric{min-height:78px}}
+@media(max-width:600px){.viewaiResults{padding:18px 12px 30px;gap:20px}.viewaiConfetti{width:180px;height:135px}.viewaiConfetti img{width:180px;height:135px}.viewaiResultsIntro h1{font-size:20px}.viewaiResultsScore{font-size:30px}.viewaiResultsRubrics{grid-template-columns:1fr;gap:12px}.viewaiResultRubric{padding:10px 12px;min-height:72px;gap:7px}.viewaiResultRubric>strong{font-size:14px;line-height:21px}.viewaiResultBarRow>b{font-size:14px}.viewaiResultFeedback{padding:16px;min-height:0}.viewaiResultFeedback h2{font-size:20px}.viewaiResultFeedback p{font-size:14px;line-height:23px}.viewaiResultFlag{font-size:13px;line-height:20px}.viewaiResultTranscript h2{font-size:18px}.viewaiResultAnswer{padding:13px;min-height:80px}.viewaiResultAnswer strong,.viewaiResultAnswer p{font-size:13px;line-height:22px}.viewaiResultRestart{margin-top:20px}.viewaiStop>img{width:22px;height:22px}}
+@media(prefers-reduced-motion:reduce){.viewaiConfetti img,.viewaiResultBar>span{animation:none}}
+
+/* Existing AI interview visuals preserved; shared learner flow additions only. */
+.viewaiInstructionsList{margin:24px 0;padding-left:24px;display:grid;gap:17px;font-size:16px;line-height:25px;color:#374151}
+.viewaiInstructionCheckbox{display:flex;gap:14px;align-items:center;min-height:56px;font-size:15px;font-weight:600;cursor:pointer}
+.viewaiInstructionCheckbox input{accent-color:#2D4CC8;width:19px;height:19px;flex:none}
+.viewaiSuccess{display:grid;place-items:center;min-height:540px}
+.viewaiModalBackdrop{position:fixed;inset:0;z-index:1100;background:rgba(25,30,49,.42);display:grid;place-items:center;padding:20px}
+.viewaiModal{width:min(100%,470px);max-height:calc(100dvh - 30px);overflow-y:auto;padding:28px;background:#DFE6E9;border-radius:16px;box-shadow:-6px -6px 12px #FFFFFF,6px 6px 14px #91999F;color:#374151;font-family:Segoe UI,Inter,Arial,sans-serif}
+.viewaiModal h2{margin:0 0 16px;font-size:21px}.viewaiModal p{font-size:16px;line-height:25px}.viewaiModalActions{display:flex;justify-content:flex-end;gap:14px;flex-wrap:wrap;margin-top:24px}.viewaiModalActions button{min-width:130px;min-height:45px;padding:10px 17px;border:0;border-radius:24px;background:#DFE6E9;box-shadow:-3px -3px 4px #fff,3px 3px 5px #C4C4C4;font-size:15px;font-weight:700}.viewaiModalActions button:last-child{color:#2A7308}@media(max-width:600px){.viewaiModal{padding:20px}.viewaiInstructionsList{font-size:14px;gap:12px}}
+
+/* AI viewer: reuse the exact shared Sidebar/Header without rendering a second wrapper. */
+.viewaiApp{--viewai-sidebar-width:240px;display:grid;grid-template-columns:var(--viewai-sidebar-width) minmax(0,1fr);height:100dvh;width:100%;min-width:0;overflow:hidden;background:#DFE6E9}
+.viewaiApp .viewaiSidebar{grid-column:1;min-width:0;height:100dvh;overflow:visible;position:relative;z-index:3}
+.viewaiApp .viewaiViewerContent{grid-column:2;min-width:0;height:100dvh;overflow:hidden}
+.viewaiApp .viewaiPage{height:100dvh;min-height:0;overflow:hidden}
+.viewaiApp .viewaiShell{height:100dvh;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.viewaiApp .viewaiHeader{flex:0 0 80px;height:80px;min-height:80px;border:0;box-shadow:none;background:transparent;z-index:2}
+.viewaiApp .viewaiScrollable{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable}
+.viewaiApp .viewaiScrollable::-webkit-scrollbar{width:9px}
+.viewaiApp .viewaiScrollable::-webkit-scrollbar-thumb{border-radius:20px;background:#bbc4ca;border:2px solid #DFE6E9}
+.viewaiCameraError{max-width:100%;margin:0;padding:9px 12px;border:1px solid #B32738;border-radius:8px;color:#B32738;background:#DFE6E9;font-size:12px;line-height:18px;overflow-wrap:anywhere;text-align:left}
+.viewaiApp .viewaiCameraPanel:has(.viewaiCameraError){gap:12px}
+@media(max-width:768px){.viewaiApp{display:block;height:100dvh}.viewaiApp .viewaiSidebar{display:none}.viewaiApp .viewaiViewerContent{width:100%;height:100dvh}.viewaiApp .viewaiHeader{height:70px;min-height:70px;flex-basis:70px}.viewaiApp .viewaiScrollable{padding-left:12px;padding-right:12px}}
+/* Keep the preview element in layout while starting muted autoplay; display:none can defer camera playback in some browsers. */
+.viewaiApp .viewaiHiddenVideo{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none}
+
+/* Camera device picker and diagnostic feedback — scoped to AI Interview only. */
+.viewaiApp .viewaiCameraControls{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;width:100%;max-width:390px}
+.viewaiApp .viewaiCameraControls label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:#374151;min-width:0;max-width:100%;flex:1 1 175px}
+.viewaiApp .viewaiCameraControls select{min-width:0;width:100%;height:38px;padding:0 10px;border:1px solid #C4C4C4;border-radius:8px;background:#DFE6E9;color:#374151;font:400 13px/20px 'Segoe UI',sans-serif;box-shadow:inset -2px -2px 3px #FFF,inset 2px 2px 3px #C4C4C4}
+.viewaiApp .viewaiDetectCamera{border:0;background:#DFE6E9;color:#2D4CC8;border-radius:20px;padding:9px 12px;box-shadow:-2px -2px 3px #FFF,2px 2px 4px #C4C4C4;font:600 12px/18px 'Segoe UI',sans-serif;white-space:nowrap}
+.viewaiApp .viewaiCameraDiagnostics{margin:0;color:#374151;font-size:12px;line-height:18px;overflow-wrap:anywhere;text-align:left;width:100%;max-width:390px}
+@media(max-width:600px){.viewaiApp .viewaiCameraControls{gap:8px}.viewaiApp .viewaiCameraControls label{flex-basis:100%}}

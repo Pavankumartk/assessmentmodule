@@ -25,6 +25,12 @@ const SETTINGS = [
   { key: "scratchpad", label: "Scratchpad", icon: "sticky-note.svg", enabled: true },
 ] as const;
 const CONTENT_KEYS: Record<string, string[]> = {
+  "ai-assessment": ["aiContentDraft"],
+  "ai-interviews-and-quizes": ["aiContentDraft"],
+  "ai-interviews-quizzes": ["aiContentDraft"],
+  "ai-interviews": ["aiContentDraft"],
+  "ai-interview": ["aiContentDraft"],
+  "ai-interviews-and-quizzes": ["aiContentDraft"],
   "assignment": ["assignmentContentDraft"],
   "short-answer": ["shortAnswerContentDraft"],
   "one-word": ["oneWordContentDraft"],
@@ -37,6 +43,12 @@ const CONTENT_KEYS: Record<string, string[]> = {
   "image-based": ["imageBasedContentDraft"],
 };
 const DETAIL_KEYS: Record<string, string[]> = {
+  "ai-assessment": ["mcqAssessmentDraft"],
+  "ai-interviews-and-quizes": ["mcqAssessmentDraft"],
+  "ai-interviews-quizzes": ["mcqAssessmentDraft"],
+  "ai-interviews": ["mcqAssessmentDraft"],
+  "ai-interview": ["mcqAssessmentDraft"],
+  "ai-interviews-and-quizzes": ["mcqAssessmentDraft"],
   "assignment": ["mcqAssessmentDraft"],
   "short-answer": ["shortAnswerAssessmentDraft"],
   "one-word": ["oneWordAssessmentDraft"],

@@ -1,4 +1,5 @@
 "use client";
+import AIInterviewContent from "../type-specific/ai-interviews-and-quizzes/Content";
 import ProblemSolvingContent from "../type-specific/problem-solving/Content";
 import AssignmentEvaluationStep from "../type-specific/assignment/Evaluation";
 import AssignmentContentStep from "../type-specific/assignment/Content";
@@ -52,6 +53,12 @@ const STEPS = {
   review: ReviewStep,
 };
 const TYPE_STEPS = {
+  "ai-assessment": {details:STEPS.details,content:AIInterviewContent,evaluation:STEPS.evaluation,review:STEPS.review},
+  "ai-interviews-and-quizes": {details:STEPS.details,content:AIInterviewContent,evaluation:STEPS.evaluation,review:STEPS.review},
+  "ai-interviews-quizzes": {details:STEPS.details,content:AIInterviewContent,evaluation:STEPS.evaluation,review:STEPS.review},
+  "ai-interviews": {details:STEPS.details,content:AIInterviewContent,evaluation:STEPS.evaluation,review:STEPS.review},
+  "ai-interview": {details:STEPS.details,content:AIInterviewContent,evaluation:STEPS.evaluation,review:STEPS.review},
+  "ai-interviews-and-quizzes": {details:STEPS.details,content:AIInterviewContent,evaluation:STEPS.evaluation,review:STEPS.review},
   "problem-solving-challenge": {details:STEPS.details,content:ProblemSolvingContent,evaluation:STEPS.evaluation,review:STEPS.review},
   "problem-solving": {details:STEPS.details,content:ProblemSolvingContent,evaluation:STEPS.evaluation,review:STEPS.review},
   "assignment": {details:STEPS.details,content:AssignmentContentStep,evaluation:AssignmentEvaluationStep,review:ReviewStep},

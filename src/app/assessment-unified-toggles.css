@@ -1,0 +1,102 @@
+/* Shared 72 x 36 px neumorphic ON/OFF switch appearance.
+   This stylesheet changes only presentation. Existing onClick/keyboard handlers
+   and state in each assessment component remain untouched. */
+:where(
+  button[role="switch"][aria-checked],
+  button.asgn-toggle,
+  button.asgn-content-switch,
+  button.aieSwitch,
+  button.viewaiToggle
+){
+  box-sizing:border-box!important;
+  position:relative!important;
+  display:inline-block!important;
+  flex:0 0 72px!important;
+  width:72px!important;
+  min-width:72px!important;
+  max-width:72px!important;
+  height:36px!important;
+  min-height:36px!important;
+  max-height:36px!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:32px!important;
+  background:#DFE6E9!important;
+  box-shadow:-4px -4px 4px rgba(255,255,255,.5),4px 4px 4px #C4C4C4!important;
+  cursor:pointer;
+  transform:none!important;
+  overflow:visible!important;
+  vertical-align:middle;
+  font-size:0!important;
+  line-height:0!important;
+}
+/* Existing switch text and knobs are redrawn consistently below. */
+:where(button[role="switch"][aria-checked],button.asgn-toggle,button.asgn-content-switch,button.aieSwitch,button.viewaiToggle) > *{
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+:where(button[role="switch"][aria-checked],button.asgn-toggle,button.asgn-content-switch,button.aieSwitch,button.viewaiToggle)::before{
+  content:"OFF"!important;
+  box-sizing:border-box!important;
+  position:absolute!important;
+  z-index:1!important;
+  display:block!important;
+  top:4px!important;
+  left:5px!important;
+  right:5px!important;
+  bottom:4px!important;
+  width:62px!important;
+  height:28px!important;
+  border:0!important;
+  border-radius:32px!important;
+  background:#DFE6E9!important;
+  box-shadow:inset -2px -2px 2px #FFFFFF,inset 2px 2px 2px #C4C4C4!important;
+  padding:4px 8px 4px 4px!important;
+  color:#374151!important;
+  text-align:right!important;
+  text-transform:uppercase!important;
+  font:600 12px/20px "Segoe UI",Arial,sans-serif!important;
+  letter-spacing:.03em!important;
+  white-space:nowrap!important;
+  transform:none!important;
+  opacity:1!important;
+}
+:where(button[role="switch"][aria-checked="true"],button.asgn-toggle.is-on,button.asgn-content-switch.is-on,button.aieSwitch.aieSwitchOn,button.viewaiToggle.viewaiToggleOn)::before{
+  content:"ON"!important;
+  background:linear-gradient(113.36deg,#2D4CC8 30.17%,#E01E5A 65.23%)!important;
+  box-shadow:none!important;
+  padding:4px 4px 4px 7px!important;
+  color:#FFFFFF!important;
+  text-align:left!important;
+}
+:where(button[role="switch"][aria-checked],button.asgn-toggle,button.asgn-content-switch,button.aieSwitch,button.viewaiToggle)::after{
+  content:""!important;
+  box-sizing:border-box!important;
+  position:absolute!important;
+  z-index:2!important;
+  display:block!important;
+  top:4px!important;
+  left:4px!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:28px!important;
+  height:28px!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:#DFE6E9!important;
+  box-shadow:0 -2px 4px rgba(0,0,0,.1),0 4px 4px rgba(0,0,0,.25)!important;
+  transform:none!important;
+  transition:left .17s ease!important;
+  opacity:1!important;
+}
+:where(button[role="switch"][aria-checked="true"],button.asgn-toggle.is-on,button.asgn-content-switch.is-on,button.aieSwitch.aieSwitchOn,button.viewaiToggle.viewaiToggleOn)::after{
+  left:40px!important;
+}
+:where(button[role="switch"][aria-checked],button.asgn-toggle,button.asgn-content-switch,button.aieSwitch,button.viewaiToggle):focus-visible{
+  outline:2px solid #2D4CC8!important;
+  outline-offset:3px!important;
+}
+@media(prefers-reduced-motion:reduce){
+  :where(button[role="switch"][aria-checked],button.asgn-toggle,button.asgn-content-switch,button.aieSwitch,button.viewaiToggle)::after{transition:none!important}
+}

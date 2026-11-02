@@ -1,7 +1,9 @@
+import AssessmentTextToolbarEnhancer from "./AssessmentTextToolbarEnhancer";
 
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import "./assessment-unified-toggles.css";
 import "./assessment-mobile-fixes.css";
 
 export const metadata: Metadata = {
@@ -16,7 +18,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AssessmentTextToolbarEnhancer />{children}</body>
     </html>
   );
 }

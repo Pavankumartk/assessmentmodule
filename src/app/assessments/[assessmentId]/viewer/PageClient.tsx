@@ -1,5 +1,6 @@
 "use client";
 
+import AIInterviewViewer from "@/modules/assessments/components/type-specific/ai-interviews-and-quizzes/Viewer";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
@@ -130,7 +131,7 @@ export default function PageClient() {
     : null;
 
   const Viewer =
-     (type === "problem-solving-challenge" || type === "problem-solving") ? ProblemSolvingViewer : type === "assignment" ? AssignmentViewer : type === "clickable-hotspot"
+     (type === "ai-interviews-and-quizzes" || type === "ai-interview" || type === "ai-interviews" || type === "ai-interviews-quizzes" || type === "ai-interviews-and-quizes" || type === "ai-assessment") ? AIInterviewViewer : (type === "problem-solving-challenge" || type === "problem-solving") ? ProblemSolvingViewer : type === "assignment" ? AssignmentViewer : type === "clickable-hotspot"
       ? ClickableHotspotViewer
       : type === "image-based"
       ? ImageBasedViewer
