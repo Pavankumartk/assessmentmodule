@@ -1,5 +1,7 @@
 "use client";
 
+import ImageLabelingViewer from "@/modules/assessments/components/type-specific/image-based/ImageLabelingViewer";
+
 import AIInterviewViewer from "@/modules/assessments/components/type-specific/ai-interviews-and-quizzes/Viewer";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -194,6 +196,17 @@ export default function PageClient() {
         setHotspotInstructionsNeeded(false);
       }}/>
     </div>;
+  }
+
+  /* IMAGE_LABELING_VIEWER_REGISTRATION */
+  // Detect only the Image Labeling subtype, leaving other image-based assessments untouched.
+  const imageLabelingRecord = getAssessment(assessmentId) as unknown as Record<string, unknown> | null;
+  const labelData = imageLabelingRecord ?? {};
+  const labelContent = (labelData.content && typeof labelData.content === "object" ? labelData.content : {}) as Record<string, unknown>;
+  const labelDetails = (labelData.details && typeof labelData.details === "object" ? labelData.details : {}) as Record<string, unknown>;
+  const labelTypeInfo = [labelData.typeCode, labelData.subtype, labelData.subType, labelData.variant, labelData.typeName, labelData.assessmentType, labelData.title, labelContent.subtype, labelContent.type, labelDetails.subtype].filter(Boolean).join(" ");
+  if ((type === "image-based" || type === "image-labeling" || type === "image-labelling") && /(?:image[\s_-]*)?labell?ing/i.test(labelTypeInfo)) {
+    return <div className="assessment-variant assessment-variant--image-based"><ImageLabelingViewer /></div>;
   }
 
   return (

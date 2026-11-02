@@ -1,25 +1,41 @@
-IMAGE LABELING — UPDATED FILES ONLY
+IMAGE LABELING VIEWER — Figma-style learner screen
 
-Adds "Image Labeling" to the Image-Based Assessment subtype dropdown.
-The existing route handles collapsed/expanded creation, and the existing
-/assessments/create/image-based-preview route renders the labeling preview.
+Updated files only:
+  src/modules/assessments/components/type-specific/image-based/ImageLabelingViewer.tsx
+  src/modules/assessments/components/type-specific/image-based/image-labeling-viewer.css
+  scripts/install-image-labeling-viewer.cjs
 
-Only five Image-Based files are replaced. Other assessment types, shared
-registrations, global CSS, routes, and learner viewer are unchanged.
+INSTALL FROM YOUR Mac ASSESSMENT PROJECT:
+  cd ~/Desktop/assessments/web
+  unzip -o ~/Downloads/Image_Labeling_Viewer_Figma_Integration.zip -d .
+  node scripts/install-image-labeling-viewer.cjs
+  npm run build
+  npm run dev
 
-Download ZIP to ~/Downloads, then from your Mac:
+The installer adds only an import and one subtype-specific branch to your CURRENT
+src/app/assessments/[assessmentId]/viewer/PageClient.tsx, preserving all other branches.
+It refuses to run if that route has an unexpected layout, instead of replacing it.
+Run the installer once. Repeated runs are harmless.
 
-cd ~/Desktop/assessments/web
-unzip -o ~/Downloads/Image_Labeling_Subtype_Creator_Preview_Updated_Files_Only.zip -d .
-npm run build
-npm run dev
+STYLE:
+  #DFE6E9 background, Segoe UI, raised/inset cards, timer, image and numbered
+  labels, choice dropdowns, Hint, Bloom level, flag, previous/next, navigator,
+  tools, confirmation popup, submission popup, results and retry, responsive.
+  No unrelated global CSS or creator changes.
 
-Select Image-Based > Create Questions > Sub type > Image Labeling.
-Upload a PNG/JPG/WebP image, click it to create 2–6 pins, enter a unique
-label for every pin and optionally add extra unused labels. Open Preview
-Questions to test the labels. Back to Question returns to the editor.
+DATA:
+  Supports image-based records with image-labeling subtype and questions
+  containing an image URL and labels/points/markers array.
+  Each marker supports id, x/y (percentage or 0..1), label/correctLabel and
+  options. If your creator saves another schema, map that schema to the
+  normalizer in ImageLabelingViewer.tsx before using this in production.
+  Figma export is a layout reference, not assessment question data.
 
-NOTE: Uploaded project snapshot has existing unrelated TypeScript errors.
-This patch does not add production learner labeling submission/scoring.
-Figma export styling was applied to scoped Image Labeling classes; visual
-pixel-by-pixel verification against your running Mac app is still needed.
+NOTES:
+  - Existing Image Matching, Image Sorting, Image Sequence and other
+    assessment viewer components are not modified.
+  - The generic image-based instruction screen remains in PageClient.tsx.
+  - Submission and results are client/session-based in this component. Align
+    with your production backend persistence/grading before release.
+  - The image file and label coordinates come from saved creator questions;
+    they are not invented by this patch.

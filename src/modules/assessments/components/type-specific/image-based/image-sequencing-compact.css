@@ -1,0 +1,13 @@
+/* Scoped to Image Sequencing only; leaves the app's left Sidebar unchanged. */
+.image-sequencing-compact-view { display: contents; }
+.image-sequencing-compact-view [data-image-sequence-hide="true"] { display: none !important; }
+/* Expand the existing question area after the right question navigator is hidden. */
+.image-sequencing-compact-view [data-image-sequence-wide="true"] {
+  grid-template-columns: minmax(0, 1fr) !important;
+  min-width: 0 !important;
+}
+.image-sequencing-compact-view [data-image-sequence-wide="true"] > :not([data-image-sequence-hide="true"]) {
+  min-width: 0 !important;
+  max-width: none !important;
+  flex: 1 1 100% !important;
+}

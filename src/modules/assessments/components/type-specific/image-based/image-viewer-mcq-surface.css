@@ -1,0 +1,55 @@
+/* Applies ONLY inside the image-based learner viewer; not the left main Sidebar. */
+.image-viewer-mcq-surface { display: contents; }
+.image-viewer-mcq-surface [data-image-mcq-hide-check-answer="true"] { display: none !important; }
+
+/* Reference: MCQ right column / Image Sorting Figma — retain navigator AND tools. */
+.image-viewer-mcq-surface [data-image-mcq-tools-panel="true"],
+.image-viewer-mcq-surface [data-image-mcq-question-panel="true"] {
+  min-width: 0;
+  background: #DFE6E9;
+  border-radius: 8px;
+  color: #2F3547;
+}
+.image-viewer-mcq-surface [data-image-mcq-question-panel="true"] h2,
+.image-viewer-mcq-surface [data-image-mcq-question-panel="true"] h3,
+.image-viewer-mcq-surface [data-image-mcq-tools-panel="true"] h2,
+.image-viewer-mcq-surface [data-image-mcq-tools-panel="true"] h3 {
+  font: 700 18px/28px 'Segoe UI', sans-serif;
+  color: #2D4CC8;
+  margin: 0 0 16px;
+}
+.image-viewer-mcq-surface [data-image-mcq-tools-panel="true"] a,
+.image-viewer-mcq-surface [data-image-mcq-tools-panel="true"] button {
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Image Sorting: match the uploaded reference's 740 + 328 column proportion.
+   Only size the EXISTING layout; never replace sorting/drag/drop handlers. */
+@media (min-width: 1100px) {
+ .image-viewer-mcq-surface--sorting [data-image-mcq-main-grid="true"] {
+   display: grid !important;
+   grid-template-columns: minmax(0, 740px) minmax(280px, 328px) !important;
+   gap: 24px !important;
+   align-items: start !important;
+ }
+ .image-viewer-mcq-surface--sorting [data-image-mcq-main-grid="true"] > * {
+   min-width: 0 !important;
+ }
+}
+/* Match the existing form controls to the reference's inset neumorphic fields. */
+.image-viewer-mcq-surface--sorting select {
+  min-height: 40px;
+  max-width: 100%;
+  background: #DFE6E9;
+  border: 0;
+  border-radius: 8px;
+  color: #2F3547;
+  box-shadow: inset -3px -3px 4px #fff, inset 3px 3px 5px #C4C4C4;
+  font-family: 'Segoe UI', sans-serif;
+}
+/* Responsive: do not change the functional controls or force horizontal overflow. */
+@media (max-width: 1099px) {
+ .image-viewer-mcq-surface--sorting [data-image-mcq-main-grid="true"] {
+   grid-template-columns: minmax(0,1fr) !important;
+ }
+}
