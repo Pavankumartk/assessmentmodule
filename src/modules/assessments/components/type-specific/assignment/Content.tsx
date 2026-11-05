@@ -104,8 +104,8 @@ function QuestionDocument({
 
 export default function AssignmentContentStep() {
   const router = useRouter();
-  const figmaDefaults: AssignmentContent = { ...defaultContent, offlineWorksheet:true, inlineComment:true, groupSubmission:true, groupMembersSubmit:true, acceptedTypes:"Images" };
-  const [data, setData] = useState<AssignmentContent>(figmaDefaults);
+  const emptyContentDefaults: AssignmentContent = { ...defaultContent, wordLimit:0, maxFiles:0, maxFileSize:0, acceptedTypes:"" };
+  const [data, setData] = useState<AssignmentContent>(emptyContentDefaults);
   const [ready, setReady] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [message, setMessage] = useState("");
@@ -115,7 +115,7 @@ export default function AssignmentContentStep() {
   useEffect(() => () => { if (continueTimer.current) window.clearTimeout(continueTimer.current); }, []);
 
   useEffect(() => {
-    setData(readAssignment(CONTENT_KEY, figmaDefaults));
+    setData(readAssignment(CONTENT_KEY, emptyContentDefaults));
     setReady(true);
   }, []);
 
@@ -181,7 +181,7 @@ export default function AssignmentContentStep() {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    if (save()) { setMessage(""); setContinuing(true); continueTimer.current = window.setTimeout(() => { setContinuing(false); router.push("/assessments/create/evaluation"); }, 3000); }
+    if (save()) { setMessage(""); setContinuing(true); router.push("/assessments/create/evaluation"); }
   };
 
   return (
@@ -213,18 +213,20 @@ export default function AssignmentContentStep() {
           {(data.onlineText || data.fileSubmissions) && (
             <div className="asgn-content-fields">
               <Field label="Word limit">
-                <input type="number" min={1} step={1} disabled={!data.onlineText} value={data.wordLimit} onChange={(event) => update("wordLimit", Number(event.target.value))} />
+                <input type="number" min={1} step={1} disabled={!data.onlineText} placeholder="Enter word limit" value={data.wordLimit || ""} onChange={(event) => update("wordLimit", Number(event.target.value))} />
               </Field>
               <Field label="Maximum number of uploaded files">
-                <input type="number" min={1} step={1} disabled={!data.fileSubmissions} value={data.maxFiles} onChange={(event) => update("maxFiles", Number(event.target.value))} />
+                <input type="number" min={1} step={1} disabled={!data.fileSubmissions} placeholder="Enter maximum files" value={data.maxFiles || ""} onChange={(event) => update("maxFiles", Number(event.target.value))} />
               </Field>
               <Field label="Maximum submission size">
-                <select disabled={!data.fileSubmissions} value={data.maxFileSize} onChange={(event) => update("maxFileSize", Number(event.target.value))}>
+                <select disabled={!data.fileSubmissions} value={data.maxFileSize || ""} onChange={(event) => update("maxFileSize", Number(event.target.value))}>
+                  <option value="" disabled>Select maximum submission size</option>
                   {[2,5,10,20,50].map(size => <option key={size} value={size}>{size} MB</option>)}
                 </select>
               </Field>
               <Field label="Accepted file types">
                 <select disabled={!data.fileSubmissions} value={data.acceptedTypes === "PDF, DOC, DOCX, JPG, PNG" ? "Images" : data.acceptedTypes} onChange={(event) => update("acceptedTypes", event.target.value)}>
+                  <option value="" disabled>Select accepted file types</option>
                   {["Images","Documents","Images and documents","All supported files"].map(kind => <option key={kind} value={kind}>{kind}</option>)}
                 </select>
               </Field>
@@ -273,8 +275,8 @@ export default function AssignmentContentStep() {
         <div className="asgn-footer asgn-content-figma-footer">
           <button type="button" className="asgn-button" onClick={() => router.push("/assessments/create/details")}>Back</button>
           <div className="asgn-footer-right">
-            <button type="button" className="asgn-button" onClick={save}>Save</button>
-            {continuing && <span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}<button type="button" className="asgn-button asgn-button-primary" disabled={continuing} onClick={continueToEvaluation}>Continue</button>
+            <button type="button" className="asgn-button" disabled={continuing} onClick={() => { if (save()) router.push("/assessments/create/assignment-preview"); }}>Preview</button>
+            <button type="button" className="asgn-button asgn-button-primary" disabled={continuing} onClick={continueToEvaluation}>{continuing ? "Saving..." : "Save & Continue"}</button>
           </div>
         </div>
       </div>

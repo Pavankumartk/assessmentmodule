@@ -1,4 +1,6 @@
 "use client";
+import AssessmentRichToolbar from "@/modules/assessments/components/common/AssessmentRichToolbar";
+import { applyAssessmentFont } from "@/modules/assessments/components/common/assessment-editor-font";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useMemo } from "react";
@@ -120,7 +122,7 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
   };
   const command = (name: string, valueArg?: string) => {
     restore();
-    document.execCommand(name, false, name === "fontSize" ? "7" : valueArg);
+    if (name === "fontName" && valueArg) applyAssessmentFont(editor.current, valueArg); else document.execCommand(name, false, name === "fontSize" ? "7" : valueArg);
     if (name === "fontSize" && valueArg && editor.current) {
       editor.current.querySelectorAll('font[size="7"]').forEach(node => {
         node.removeAttribute("size");
@@ -156,20 +158,7 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
   const button = (name: string, title: string, action: () => void) =>
     <button type="button" title={title} aria-label={title} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={action}><Icon name={name} size={18}/></button>;
   return <div className="mcqcRichEditorRoot">
-    <div className="mcqcRichToolbar mcqcOptionToolbar" role="toolbar" aria-label={`${placeholder} formatting`}>
-      {button("undo.svg", "Undo", () => command("undo"))}
-      {button("redo.svg", "Redo", () => command("redo"))}
-      <div className="mcqcRichMenuRoot"><button type="button" className="mcqcToolbarSelect mcqcToolbarFont" aria-expanded={menu === "font"} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={e => openFormatMenu("font", e.currentTarget)}>{font}<Icon name="arrow-down-01.svg" size={15}/></button>
-        </div>
-      <div className="mcqcRichMenuRoot"><button type="button" className="mcqcToolbarSelect mcqcToolbarSize" aria-expanded={menu === "size"} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={e => openFormatMenu("size", e.currentTarget)}>{size}<Icon name="arrow-down-01.svg" size={15}/></button>
-        </div>
-      {button("bold.svg", "Bold", () => command("bold"))}
-      {button("italic.svg", "Italic", () => command("italic"))}
-      {button("underline.svg", "Underline", () => command("underline"))}
-      {button("text-centerline-center-top.svg", "Bulleted list", () => command("insertUnorderedList"))}
-      {button("image.svg", "Insert image", () => { setFileKind("image"); if (fileInput.current) { fileInput.current.accept="image/*"; fileInput.current.value=""; fileInput.current.click(); } })}
-      {button("attachment.svg", "Attach file", () => { setFileKind("attachment"); if (fileInput.current) { fileInput.current.accept=""; fileInput.current.value=""; fileInput.current.click(); } })}
-    </div>
+    <AssessmentRichToolbar label={placeholder} onRemember={remember} onCommand={command} onError={onError} onChooseFile={kind => { setFileKind(kind); if (fileInput.current) { fileInput.current.accept = kind === "image" ? "image/*" : ""; fileInput.current.value = ""; fileInput.current.click(); } }} />
     {menu && typeof document !== "undefined" && createPortal(
       <div ref={floatingMenu} className={`mcqcFloatingFormatMenu ${menu === "symbols" ? "mcqcFloatingSymbols" : ""}`}
         role={menu === "symbols" ? "group" : "listbox"}
@@ -189,8 +178,8 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
     <input ref={fileInput} type="file" hidden onChange={e => { const f=e.target.files?.[0]; if (f) void addFile(f); }}/>
     <div ref={editor} id={editorId} role="textbox" aria-label={placeholder} aria-multiline="true" contentEditable suppressContentEditableWarning data-placeholder={placeholder}
       className="mcqcRichEditable" onInput={notify} onBeforeInput={e => { const input = e.nativeEvent as InputEvent; if (input.data && allowedText(input.data) !== input.data) e.preventDefault(); }} onKeyUp={remember} onMouseUp={remember} onFocus={remember} onPaste={e => { e.preventDefault(); const text=allowedText(e.clipboardData.getData("text/plain")); if (text) document.execCommand("insertText", false, text); notify(); }}/>
-    {maxChars !== undefined && <small className="assessmentEditorCounter" aria-live="polite">{Array.from(value).length}/{maxChars}</small>}
-  </div>;
+    
+  {maxChars !== undefined && <small className="assessmentRichCounter" aria-live="polite">{(value || "").replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/^\r?\n$/, "").length}/{maxChars}</small>}</div>;
 }
 
 const ASSESSMENT_TYPE_GROUPS = [
@@ -585,7 +574,7 @@ function QuestionBuilder({questions,setQuestions,mcqValues,onPassingScoreChange,
           <DragPanel title="Matching Pairs" icon="adjust-position.svg" subtitle="Each row is one correct match" open={sections.pairs} onToggle={()=>toggle("pairs")}>
             <div className="mcqcMatchPairs">{question.pairs.map((p,i)=><div className="mcqcMatchPairRow" key={p.id}><span className="mcqcDDLetter">{choiceLabel(i)}</span><input aria-label={`Term ${choiceLabel(i)}`} placeholder={`Term ${choiceLabel(i)}`} maxLength={250} value={p.term} onChange={e=>updatePair(p.id,{term:e.target.value})}/><input aria-label={`Matching description ${choiceLabel(i)}`} placeholder="Description" maxLength={250} value={p.description} onChange={e=>updatePair(p.id,{description:e.target.value})}/><button type="button" className="mcqcIconButton mcqcDDRemoveDrag" aria-label={`Remove matching pair ${choiceLabel(i)}`} onClick={()=>removePair(p.id)} disabled={question.pairs.length<=2}><Icon name="cancel-circle.svg" size={16}/></button></div>)}</div>
             <div className="mcqcMatchPairActions"><button type="button" className="mcqcBuilderAction mcqcDDAddSmall" onClick={addPair}><Icon name="plus.svg" size={16}/><span>Add Pairs</span></button><small>{question.pairs.length} Pairs</small></div>
-            <div className="mcqcMatchExtras"><div className="mcqcDDToggleRow"><span>Extra Answers (Distractors) Optional</span><Switch checked={question.extraEnabled} onChange={v=>update({extraEnabled:v})} label="Extra answers enabled"/></div>{question.extraEnabled&&<><div className="mcqcMatchExtraEditor"><div className="mcqcEditorSurface">{richEditor(`mcqc-match-extra-${active}-${question.extras.length}`,extraDraft,v=>{setExtraDraft(v);setExtraError("");},"Write an extra answer...",{maxChars:250})}<div className="mcqcMatchExtraSaveRow"><button type="button" className="mcqcMatchExtraSave" onClick={saveExtraAnswer}>Save</button></div></div></div>{extraError&&<p className="mcqcValidationError" role="alert">{extraError}</p>}<div className="mcqcMatchExtraActions"><button type="button" className="mcqcBuilderAction mcqcDDAddSmall" onClick={()=>{if(extraDraft.trim())saveExtraAnswer();else document.getElementById(`mcqc-match-extra-${active}-${question.extras.length}`)?.focus();}}><Icon name="plus.svg" size={16}/><span>Add Extra Answer</span></button></div></>}
+            <div className="mcqcMatchExtras"><div className="mcqcDDToggleRow"><span>Extra Answers (Distractors) Optional</span><Switch checked={question.extraEnabled} onChange={v=>update({extraEnabled:v})} label="Extra answers enabled"/></div>{question.extraEnabled&&<><div className="mcqcMatchExtraEditor"><div className="mcqcEditorSurface">{richEditor(`mcqc-match-extra-${active}-${question.extras.length}`,extraDraft,v=>{setExtraDraft(v);setExtraError("");},"Write an extra answer...",{maxChars:250})}</div></div><div className="mcqcMatchExtraSaveRow"><button type="button" className="mcqcMatchExtraSave" onClick={saveExtraAnswer}>Save</button></div>{extraError&&<p className="mcqcValidationError" role="alert">{extraError}</p>}<div className="mcqcMatchExtraActions"><button type="button" className="mcqcBuilderAction mcqcDDAddSmall" onClick={()=>{if(extraDraft.trim())saveExtraAnswer();else document.getElementById(`mcqc-match-extra-${active}-${question.extras.length}`)?.focus();}}><Icon name="plus.svg" size={16}/><span>Add Extra Answer</span></button></div></>}
             </div>
           </DragPanel>
           <DragPanel title="Grading Method" icon="quiz.svg" open={sections.grading} onToggle={()=>toggle("grading")}>

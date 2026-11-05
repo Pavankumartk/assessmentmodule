@@ -461,14 +461,14 @@ export default function DragDropViewerPage() {
         <div className="institutionScrollArea dragvScroll">
           <div className="pageContent institutionPageContent dragvContent">
             {!started ? <>
-              <nav className="dragvBreadcrumb" aria-label="Breadcrumb"><Link href={demoDashboardPath()}>Dashboard</Link><Icon name="arrow-right-double.svg" size={20}/><Link href="/assessments">Assessment</Link><Icon name="arrow-right-double.svg" size={20}/><strong>{draft.title}</strong></nav>
+              <nav className="dragvBreadcrumb" aria-label="Breadcrumb"><Link href={demoDashboardPath()}>Dashboard</Link><Icon name="arrow-right-double.svg" size={20}/><Link href="/assessments/list">Assessment</Link><Icon name="arrow-right-double.svg" size={20}/><strong>{draft.title}</strong></nav>
               <div className="dragvPageHeading"><h1>{draft.title}</h1><p>Drag &amp; Drop</p></div>
               <ViewerInstructions details={{totalQuestions:String(total),totalMarks:String(questions.reduce((sum,q)=>sum+q.points,0)),totalTime:`${Math.round(draft.durationSeconds/60)} Minutes`,passingScore:draft.passingScore,negativeMarking:draft.negativeMarking,instructions:draft.instructions}} accepted={accepted} onAcceptedChange={setAccepted} onStart={()=>{setStarted(true);setCurrent(0);setExpiresAt(previous=>previous || Date.now()+draft.durationSeconds*1000);setNow(Date.now());}} canStart={questions.length>0} unavailableMessage="No saved Drag & Drop questions are available for this assessment."/>
             </> : <>
             <div className="dragvExamTop">
               <nav className="dragvBreadcrumb" aria-label="Breadcrumb">
                 <Link href={demoDashboardPath()}>Dashboard</Link><Icon name="arrow-right-double.svg" size={20} />
-                <Link href="/assessments">Assessment</Link><Icon name="arrow-right-double.svg" size={20} />
+                <Link href="/assessments/list">Assessment</Link><Icon name="arrow-right-double.svg" size={20} />
                 <strong>{draft.title}</strong>
               </nav>
               <Stopwatch seconds={secondsLeft} />

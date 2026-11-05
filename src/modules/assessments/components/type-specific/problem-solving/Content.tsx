@@ -1,4 +1,6 @@
 "use client";
+import AssessmentRichToolbar from "@/modules/assessments/components/common/AssessmentRichToolbar";
+import { applyAssessmentFont } from "@/modules/assessments/components/common/assessment-editor-font";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useMemo, type FormEvent, type ClipboardEvent } from "react";
@@ -144,7 +146,7 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
   };
   const command = (name: string, valueArg?: string) => {
     restore();
-    document.execCommand(name, false, name === "fontSize" ? "7" : valueArg);
+    if (name === "fontName" && valueArg) applyAssessmentFont(editor.current, valueArg); else document.execCommand(name, false, name === "fontSize" ? "7" : valueArg);
     if (name === "fontSize" && valueArg && editor.current) {
       editor.current.querySelectorAll('font[size="7"]').forEach(node => {
         node.removeAttribute("size");
@@ -225,30 +227,7 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
       {icon ? <Icon name={icon} size={18}/> : <span className="psInlineToolGlyph" aria-hidden="true">{glyph}</span>}
     </button>;
   return <div className="mcqcRichEditorRoot">
-    {toolbarReady ? <div className="mcqcRichToolbar mcqcOptionToolbar" role="toolbar" aria-label={`${placeholder} formatting`}>
-      {button("undo.svg", "Undo", () => command("undo"))}
-      {button("redo.svg", "Redo", () => command("redo"))}
-      <div className="mcqcRichMenuRoot"><button type="button" className="mcqcToolbarSelect mcqcToolbarFont" aria-expanded={menu === "font"} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={e => openFormatMenu("font", e.currentTarget)}>{font}<Icon name="arrow-down-01.svg" size={15}/></button></div>
-      <div className="mcqcRichMenuRoot"><button type="button" className="mcqcToolbarSelect mcqcToolbarSize" aria-expanded={menu === "size"} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={e => openFormatMenu("size", e.currentTarget)}>{size}<Icon name="arrow-down-01.svg" size={15}/></button></div>
-      {button("bold.svg", "Bold", () => command("bold"))}
-      {button("italic.svg", "Italic", () => command("italic"))}
-      {button("underline.svg", "Underline", () => command("underline"))}
-      {optionTool("Text colour", "A", "textColors")}
-      {optionTool("Highlight colour", "", "highlightColors", "highlighter.svg")}
-      {button("text-centerline-center-top.svg", "Bulleted list", () => command("insertUnorderedList"))}
-      {actionTool("Numbered list", "1.", "insertOrderedList")}
-      {actionTool("Indent", "⇥", "indent")}
-      {actionTool("Outdent", "⇤", "outdent")}
-      {optionTool("Text alignment", "≡", "alignments")}
-      {optionTool("Headings", "H", "headings")}
-      {actionTool("Paragraph", "¶", "paragraph")}
-      {actionTool("Insert link", "🔗", "link")}
-      {actionTool("Insert image", "", "image", "image.svg")}
-      {actionTool("Blockquote", "❝", "blockquote")}
-      {actionTool("Code block", "‹/›", "code")}
-      {actionTool("Superscript", "x²", "superscript")}
-      {actionTool("Subscript", "x₂", "subscript")}
-    </div> : <div className="mcqcRichToolbar mcqcOptionToolbar" role="toolbar" aria-label={`${placeholder} formatting`} />}
+    <AssessmentRichToolbar label={placeholder} onRemember={remember} onCommand={command} onError={onError} onChooseFile={kind => { setFileKind(kind); if (fileInput.current) { fileInput.current.accept = kind === "image" ? "image/*" : ""; fileInput.current.value = ""; fileInput.current.click(); } }} />
     {toolbarReady && menu && typeof document !== "undefined" && createPortal(
       <div ref={floatingMenu}
         className={`mcqcFloatingFormatMenu ${["textColors","highlightColors","alignments","headings"].includes(menu) ? "psFormatOptionMenu" : ""}`}
@@ -267,7 +246,7 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
     <div ref={editor} id={editorId} role="textbox" aria-label={placeholder} aria-multiline="true" contentEditable suppressContentEditableWarning data-placeholder={placeholder}
       className="mcqcRichEditable" onBeforeInput={beforeInput} onInput={notify} onKeyUp={remember} onMouseUp={remember} onFocus={remember} onPaste={pasteText}/>
     {maxChars !== undefined && <small className="assessmentEditorCounter" aria-live="polite">{Array.from(value).length}/{maxChars}</small>}
-  </div>;
+  {maxChars !== undefined && <small className="assessmentRichCounter" aria-live="polite">{Array.from((value || "").replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/^\r?\n$/, "")).length}/{maxChars}</small>}</div>;
 }
 
 const ASSESSMENT_TYPE_GROUPS = [

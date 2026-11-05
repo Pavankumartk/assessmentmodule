@@ -1,0 +1,71 @@
+/* Image-Based creator fixes only. Preserves the existing MCQ-style right panel.
+   Prevents chevrons from overlapping labels and nested input controls. */
+.ibqApp .ibqAccordionToggle,
+.ibqApp .ibqInnerAccordion > button {
+  display:flex;align-items:center;min-width:0;gap:10px;
+}
+.ibqApp .ibqAccordionToggle > b,
+.ibqApp .ibqInnerAccordion > button > b {
+  flex:1 1 auto;min-width:0;overflow-wrap:anywhere;
+}
+.ibqApp .ibqAccordionToggle > svg:last-child,
+.ibqApp .ibqAccordionToggle > .ibqAssetIcon:last-child,
+.ibqApp .ibqInnerAccordion > button > svg:last-child,
+.ibqApp .ibqInnerAccordion > button > .ibqAssetIcon:last-child {
+  position:static!important;inset:auto!important;
+  display:block;flex:0 0 22px!important;width:22px!important;height:22px!important;
+  margin:0 0 0 auto!important;object-fit:contain;pointer-events:none;
+  transform:none;transition:transform .18s ease;
+}
+.ibqApp .ibqAccordionToggle[aria-expanded="true"] > svg:last-child,
+.ibqApp .ibqAccordionToggle[aria-expanded="true"] > .ibqAssetIcon:last-child,
+.ibqApp .ibqInnerAccordion > button[aria-expanded="true"] > svg:last-child,
+.ibqApp .ibqInnerAccordion > button[aria-expanded="true"] > .ibqAssetIcon:last-child {
+  transform:rotate(180deg)!important;
+}
+/* Fixed, inset select arrows: no absolute chevron sitting over the chosen value. */
+.ibqApp .ibqStaticSelect{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-right:16px;min-width:0}
+.ibqApp .ibqStaticSelect > svg,
+.ibqApp .ibqStaticSelect > .ibqAssetIcon{display:block;flex:0 0 20px;margin-left:auto;position:static!important;object-fit:contain}
+.ibqApp .ibqSubtypeTrigger{display:flex;align-items:center;gap:10px;min-width:0;padding-right:14px!important}
+.ibqApp .ibqSubtypeTrigger > span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ibqApp .ibqSubtypeTrigger > .ibqAssetIcon{position:static!important;inset:auto!important;display:block;flex:0 0 20px;width:20px;height:20px;margin:0 0 0 auto!important;transform:none!important;pointer-events:none}
+.ibqApp .ibqSubtypeTrigger > .ibqAssetIcon.ibqRotated{transform:rotate(180deg)!important}
+.ibqApp .ibqAsidePickTrigger{display:flex;align-items:center;gap:10px;min-width:0;padding-right:12px}
+.ibqApp .ibqAsidePickTrigger>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ibqApp .ibqAsidePickTrigger>.ibqAssetIcon{position:static!important;inset:auto!important;flex:0 0 20px;max-width:20px;margin-left:auto;transform:none}
+.ibqApp .ibqAsidePickTrigger>.ibqAssetIcon.ibqRotated{transform:rotate(180deg)}
+.ibqApp .ibqSortingGroupTrigger{display:flex;align-items:center;gap:10px;min-width:0}
+.ibqApp .ibqSortingGroupTrigger>.ibqAssetIcon{position:static!important;flex:0 0 24px;margin-left:auto}
+/* Question number chevrons always keep a separate column instead of covering question cards. */
+.ibqApp .ibqNumberLine{display:grid;grid-template-columns:36px minmax(0,1fr) 36px;align-items:center;gap:12px;min-width:0;max-width:100%}
+.ibqApp .ibqNumberLine>.ibqCircle{width:36px;height:36px;min-width:36px;position:static;flex:none;z-index:1}
+.ibqApp .ibqNumberLine>.ibqNumberScroll{box-sizing:border-box;min-width:0;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden}
+.ibqApp .ibqWithinActions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ibqApp .ibqWithinActions>div{display:flex;align-items:center;gap:12px;flex:none}
+/* Up/down sequencing arrows stay inside their own buttons at all breakpoints. */
+.ibqApp--sequencing .ibqSequenceOrder{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;max-width:100%;box-sizing:border-box}
+.ibqApp--sequencing .ibqSequenceOrder>button{display:grid;place-items:center;min-width:0;max-width:100%;overflow:hidden}
+.ibqApp--sequencing .ibqSequenceOrder>button>.ibqAssetIcon{display:block;position:static!important;max-width:28px;max-height:28px;object-fit:contain}
+/* MCQ-style right panel: preserve fields, toggles and summary; fix overflow/overlay layering. */
+.ibqApp .ibqAside.ibqMcqAside{box-sizing:border-box;width:100%;min-width:0;overflow:visible;align-items:stretch;z-index:2}
+.ibqApp .ibqMcqAsideSection{box-sizing:border-box;min-width:0;width:100%;overflow:visible}
+.ibqApp .ibqMcqField{min-width:0;width:100%}
+.ibqApp .ibqMcqAside .ibqAsidePick{position:relative;min-width:0;width:100%}
+.ibqApp .ibqMcqAside .ibqAsidePick.is-open{z-index:80}
+.ibqApp .ibqMcqAside .ibqAsidePickMenu{position:absolute;top:100%;left:0;z-index:85;width:100%;box-sizing:border-box;margin-top:5px;max-height:min(240px,45dvh);overflow:auto}
+.ibqApp .ibqMcqAside .ibqMcqPointsControl{position:relative;overflow:visible}
+.ibqApp .ibqMcqAside .ibqMcqPointsControl>input#ibqPoints{box-sizing:border-box;padding-right:52px!important;min-width:0}
+.ibqApp .ibqMcqAside .ibqMcqPointSteppers{right:9px;width:24px;min-width:24px;z-index:2}
+.ibqApp .ibqMcqAside .ibqMcqPointSteppers>button{display:grid;place-items:center;width:100%;min-width:0;padding:0}
+.ibqApp .ibqMcqAside .ibqMcqPointSteppers .ibqAssetIcon{display:block;position:static!important;width:14px;height:14px;max-width:14px;max-height:14px;object-fit:contain}
+.ibqApp .ibqMcqAside .ibqMcqSummaryProgress{max-width:100%}
+.ibqApp .ibqGradingGrid select{box-sizing:border-box;max-width:100%;padding-right:28px}
+@media(max-width:700px){
+  .ibqApp .ibqNumberLine{grid-template-columns:32px minmax(0,1fr) 32px;gap:6px}
+  .ibqApp .ibqNumberLine>.ibqCircle{width:32px;height:32px;min-width:32px}
+  .ibqApp .ibqAccordionToggle > svg:last-child,
+  .ibqApp .ibqAccordionToggle > .ibqAssetIcon:last-child,
+  .ibqApp .ibqInnerAccordion > button > svg:last-child,
+  .ibqApp .ibqInnerAccordion > button > .ibqAssetIcon:last-child{flex-basis:20px!important;width:20px!important;height:20px!important}
+}

@@ -367,7 +367,7 @@ export default function MemoryGameViewer({ questions: incoming, assessmentTitle,
               <>
                 <nav className="viewerBreadcrumb mgvBreadcrumb" aria-label="Breadcrumb">
                   <Link href={demoDashboardPath()}>Dashboard</Link>{icon("arrow-right-double.svg", 18)}
-                  <Link href="/learner">Assessment</Link>{icon("arrow-right-double.svg", 18)}<strong>{title}</strong>
+                  <Link href="/assessments/list">Assessment</Link>{icon("arrow-right-double.svg", 18)}<strong>{title}</strong>
                 </nav>
                 <h1 className="mgvEmptyTitle">{title}</h1>
                 <section className="mgvNoQuestions">No Memory Game questions were found in this assessment. Save questions on the Memory Game Content page before opening the viewer.</section>
@@ -376,7 +376,7 @@ export default function MemoryGameViewer({ questions: incoming, assessmentTitle,
               <>
                 <nav className="viewerBreadcrumb mgvBreadcrumb" aria-label="Breadcrumb">
                   <Link href={demoDashboardPath()}>Dashboard</Link>{icon("arrow-right-double.svg", 18)}
-                  <Link href="/learner">Assessment</Link>{icon("arrow-right-double.svg", 18)}<strong>{title}</strong>
+                  <Link href="/assessments/list">Assessment</Link>{icon("arrow-right-double.svg", 18)}<strong>{title}</strong>
                 </nav>
                 <div className="viewerPageHeading mgvInstructionHeading">
                   <h1>{title}</h1>
@@ -413,7 +413,7 @@ export default function MemoryGameViewer({ questions: incoming, assessmentTitle,
                   <div>
                     <nav className="viewerBreadcrumb mgvBreadcrumb" aria-label="Breadcrumb">
                       <Link href={demoDashboardPath()}>Dashboard</Link>{icon("arrow-right-double.svg", 18)}
-                      <Link href="/learner">Assessment</Link>{icon("arrow-right-double.svg", 18)}<strong>{title}</strong>
+                      <Link href="/assessments/list">Assessment</Link>{icon("arrow-right-double.svg", 18)}<strong>{title}</strong>
                     </nav>
                     <h1>{title}</h1>
                   </div>
@@ -470,7 +470,7 @@ export default function MemoryGameViewer({ questions: incoming, assessmentTitle,
                     </div>
                     <div className="mgvActions">
                       {current > 0 && <button type="button" onClick={() => navigate(current - 1)} disabled={current === 0}>{icon("arrowleft.svg", 20)} Previous</button>}
-                      <button type="button" onClick={checkAnswer} disabled={!game.started || game.locked || Boolean(game.result)}>Check Answer</button>
+                      <></>
                       <button type="button" className="mgvNext" onClick={() => isLast ? setSubmitOpen(true) : navigate(current + 1)}>
                         {isLast ? "Submit" : "Next"}{icon("arrowright.svg", 20)}
                       </button>

@@ -109,7 +109,7 @@ export default function AssignmentEvaluationStep() {
       document.querySelector<HTMLElement>(".asgn-evaluation-shell .asgn-main")?.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    if (persist()) { setMessage(""); setSaving(true); saveTimer.current = window.setTimeout(() => { setSaving(false); router.push("/assessments/create/review"); }, 3000); }
+    if (persist()) { setMessage(""); setSaving(true); router.push("/assessments/create/review"); }
   };
   const passPercentage = data.maxGrade > 0 ? (data.passGrade / data.maxGrade) * 100 : 0;
 
@@ -228,8 +228,8 @@ export default function AssignmentEvaluationStep() {
         <div className="asgn-eval-footer">
           <button type="button" className="asgn-eval-footer-button" onClick={() => router.push("/assessments/create/content")}>Back</button>
           <div className="asgn-eval-footer-actions">
-            <button type="button" className="asgn-eval-footer-button" onClick={persist}>Save</button>
-            {saving && <span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}<button type="button" className="asgn-eval-footer-button is-continue" disabled={saving} onClick={continueToReview}>Continue</button>
+            
+            <button type="button" className="asgn-eval-footer-button is-continue" disabled={saving} onClick={continueToReview}>{saving ? "Saving..." : "Save & Continue"}</button>
           </div>
         </div>
       </div>

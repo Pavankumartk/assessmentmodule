@@ -50,7 +50,7 @@ export default function ClickableHotspotInstructions({assessmentId,onStart}:{ass
   },[assessmentId]);
   return <div className="viewerAppShell superAdminPage institutionAdminPage"><div className="viewerLayout"><Sidebar/><div className="viewerMain"><div className="viewerSharedHeader"><Header/></div>
     <main className="viewerScroll institutionScrollArea"><div className="viewerContent">
-      <nav className="viewerBreadcrumb" aria-label="Breadcrumb"><Link href="/learner">Dashboard</Link><Icon name="arrow-right-double.svg"/><Link href="/learner">Assessment</Link><Icon name="arrow-right-double.svg"/><strong>{info.title}</strong></nav>
+      <nav className="viewerBreadcrumb" aria-label="Breadcrumb"><Link href="/learner">Dashboard</Link><Icon name="arrow-right-double.svg"/><Link href="/assessments/list">Assessment</Link><Icon name="arrow-right-double.svg"/><strong>{info.title}</strong></nav>
       <div className="viewerPageHeading"><h1>{info.title}</h1><p>Clickable Hotspot</p></div>
       <div className="viewerColumns"><aside className="viewerSummary" aria-label="Assessment summary">
         <Summary label="Total Questions" value={info.count} icon="list.svg" tone="blue"/><Summary label="Total Marks" value={info.marks} icon="star-award.svg" tone="orange"/>

@@ -1,4 +1,5 @@
 "use client";
+import { applyAssessmentFont } from "@/modules/assessments/components/common/assessment-editor-font";
 
 import { useEffect } from "react";
 import "./assessment-text-tools.css";
@@ -35,7 +36,7 @@ export default function AssessmentTextToolbarEnhancer() {
     };
     const command = (editor: HTMLElement, name: string, value?: string) => {
       restore(editor);
-      document.execCommand(name, false, name === "fontSize" ? "7" : value);
+      if (name === "fontName" && value) applyAssessmentFont(editor, value); else document.execCommand(name, false, name === "fontSize" ? "7" : value);
       if (name === "fontSize" && value) {
         editor.querySelectorAll('font[size="7"]').forEach(node => { node.removeAttribute("size"); (node as HTMLElement).style.fontSize = `${value}px`; });
       }

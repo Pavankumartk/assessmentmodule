@@ -1439,3 +1439,6 @@
 .mcqcBuilder .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}
 .mcqcBuilder .mcqcNumberStatus.is-pending{background:#2D4CC8!important;border:0!important;color:#fff!important}
 .assessment-variant--one-word .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}
+
+/* one-word-editor-counter */
+.mcqcOneWordBuilder .oneWordSharedEditor{position:relative;min-width:0}.mcqcOneWordBuilder .oneWordSharedCount{display:block;padding:0 5px 4px;text-align:right;color:#374151;font:400 12px/18px Segoe UI,Arial,sans-serif}.mcqcOneWordBuilder .mcqcWriteField .mcqcFormHeading span,.mcqcOneWordBuilder .mcqcOWMaximum>small,.mcqcOneWordBuilder .mcqcOWHeadRight>small{display:none}

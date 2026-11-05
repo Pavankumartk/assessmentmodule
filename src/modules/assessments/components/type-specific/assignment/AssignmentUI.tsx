@@ -1,4 +1,6 @@
 "use client";
+import AssessmentRichToolbar from "@/modules/assessments/components/common/AssessmentRichToolbar";
+import { applyAssessmentFont } from "@/modules/assessments/components/common/assessment-editor-font";
 import { AssessmentEditorDropdown } from "@/modules/assessments/components/common/steps/DetailsStep/DetailsStep";
 import {useEffect,useRef,useState,type ReactNode,type ChangeEvent} from "react";
 import Link from "next/link";
@@ -114,6 +116,10 @@ function safeRichHtml(html:string){
      if (/^[1-7]$/.test(size)) el.setAttribute("size",size);
    }
    if (node instanceof HTMLElement && /^\d{1,2}px$/.test(node.style.fontSize)) el.style.fontSize=node.style.fontSize;
+   if (node instanceof HTMLElement) {
+     const family=node.style.fontFamily.replace(/^["']|["']$/g, "");
+     if (["Arial","Segoe UI","Georgia","Times New Roman","Verdana"].includes(family)) el.style.fontFamily=family;
+   }
    for(const child of children)el.appendChild(child);
    return [el];
  };
@@ -125,20 +131,10 @@ export function RichTextField({label,value,html,onChange,onHtmlChange,placeholde
  useEffect(()=>{const el=editor.current;if(el&&document.activeElement!==el&&el.textContent!==value){if(html)el.innerHTML=safeRichHtml(html);else el.textContent=value;}},[value,html]);
  const selection=useRef<Range | null>(null);
  const remember=()=>{const selected=window.getSelection();if(selected?.rangeCount&&editor.current?.contains(selected.anchorNode))selection.current=selected.getRangeAt(0).cloneRange();};
- const command=(cmd:string,arg?:string)=>{editor.current?.focus();if(selection.current&&editor.current?.contains(selection.current.commonAncestorContainer)){const selected=window.getSelection();selected?.removeAllRanges();selected?.addRange(selection.current);}document.execCommand(cmd,false,cmd==="fontSize"?"7":arg);if(cmd==="fontSize"&&arg)editor.current?.querySelectorAll('font[size="7"]').forEach(node=>{node.removeAttribute("size");(node as HTMLElement).style.fontSize=`${arg}px`;});remember();update();};
+ const command=(cmd:string,arg?:string)=>{editor.current?.focus();if(selection.current&&editor.current?.contains(selection.current.commonAncestorContainer)){const selected=window.getSelection();selected?.removeAllRanges();selected?.addRange(selection.current);}if(cmd==="fontName"&&arg)applyAssessmentFont(editor.current,arg);else document.execCommand(cmd,false,cmd==="fontSize"?"7":arg);if(cmd==="fontSize"&&arg)editor.current?.querySelectorAll('font[size="7"]').forEach(node=>{node.removeAttribute("size");(node as HTMLElement).style.fontSize=`${arg}px`;});remember();update();};
  const update=()=>{if(!editor.current)return;onChange(editor.current.textContent||"");onHtmlChange?.(safeRichHtml(editor.current.innerHTML));};
  return <div className="asgn-rich-field"><span className="asgn-label">{label}</span><div className="asgn-rich-box">
-  <div className="asgn-toolbar" role="toolbar" aria-label={`${label} formatting`}>
-   <button type="button" aria-label="Undo" onMouseDown={e=>e.preventDefault()} onClick={()=>command("undo")}><AssetIcon name="undo-02.svg" size={16}/></button>
-   <button type="button" aria-label="Redo" onMouseDown={e=>e.preventDefault()} onClick={()=>command("redo")}><AssetIcon name="redo.svg" size={16}/></button>
-   <AssessmentEditorDropdown className="mcqEditorFont" label="Font" value={font} options={["Arial", "Segoe UI", "Georgia", "Times New Roman", "Verdana"]} onOpen={remember} onChange={v=>{setFont(v);command("fontName",v);}} />
-   <AssessmentEditorDropdown className="mcqEditorSize" label="Font size" value={size} options={["12", "14", "16", "18", "24"]} onOpen={remember} onChange={v=>{setSize(v);command("fontSize",v);}} />
-   <button type="button" aria-label="Bold" onMouseDown={e=>e.preventDefault()} onClick={()=>command("bold")}><b>B</b></button>
-   <button type="button" aria-label="Italic" onMouseDown={e=>e.preventDefault()} onClick={()=>command("italic")}><i>I</i></button>
-   <button type="button" aria-label="Underline" onMouseDown={e=>e.preventDefault()} onClick={()=>command("underline")}><u>U</u></button>
-   <button type="button" aria-label="Bulleted list" onMouseDown={e=>e.preventDefault()} onClick={()=>command("insertUnorderedList")}><AssetIcon name="dot.svg" size={17}/></button>
-   <button type="button" aria-label="Align center" onMouseDown={e=>e.preventDefault()} onClick={()=>command("justifyCenter")}><AssetIcon name="text-centerline-center-top.svg" size={17}/></button>
-  </div><div ref={editor} className="asgn-rich-editable" contentEditable role="textbox" aria-label={label} aria-multiline="true" data-placeholder={placeholder||"Type here..."} suppressContentEditableWarning onKeyUp={remember} onMouseUp={remember} onInput={update} onBlur={()=>{remember();update();}} onPaste={e=>{e.preventDefault();document.execCommand("insertText",false,e.clipboardData.getData("text/plain"));update();}}/>
+  <AssessmentRichToolbar label={label} onRemember={remember} onCommand={command} /><div ref={editor} className="asgn-rich-editable" contentEditable role="textbox" aria-label={label} aria-multiline="true" data-placeholder={placeholder||"Type here..."} suppressContentEditableWarning onKeyUp={remember} onMouseUp={remember} onInput={update} onBlur={()=>{remember();update();}} onPaste={e=>{e.preventDefault();document.execCommand("insertText",false,e.clipboardData.getData("text/plain"));update();}}/>
  </div></div>;
 }
 

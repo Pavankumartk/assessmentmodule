@@ -2849,3 +2849,21 @@
 .mcqcBuilder .mcqcNumberStatus.is-pending{background:#2D4CC8!important;border:0!important;color:#fff!important}
 
 .mcqcMatchBuilder .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}.mcqcMatchBuilder .mcqcQuestionNumber:not(.is-complete) i{background:#2D4CC8!important;border:0}
+
+/* assessment-match-counter-and-save-fix */
+.mcqcAppShell .mcqcMatchBuilder .mcqcMatchExtras > .mcqcMatchExtraSaveRow { display:flex; justify-content:flex-end; align-items:center; margin:8px 0 10px; padding:0; background:transparent; border:0; box-shadow:none; }
+.mcqcAppShell .mcqcMatchBuilder .mcqcMatchExtras > .mcqcMatchExtraSaveRow .mcqcMatchExtraSave { min-width:76px; min-height:34px; padding:6px 16px; border:0; border-radius:24px; background:#DFE6E9; color:#374151; box-shadow:-3px -3px 4px #fff,3px 3px 4px #c4c4c4; font:600 13px/20px 'Segoe UI',Arial,sans-serif; }
+.mcqcAppShell .mcqcMatchBuilder .mcqcMatchExtraEditor .mcqcMatchExtraCounter { align-self:flex-end; text-align:right; padding:0 5px 4px; }
+
+/* match-single-editor-counter-fix */
+.mcqcMatchBuilder .mcqcRichEditorRoot > .assessmentRichCounter {
+  display: block !important;
+  padding: 0 5px 4px;
+  color: #374151;
+  font: 400 12px/18px 'Segoe UI', Arial, sans-serif;
+  text-align: right !important;
+}
+.mcqcMatchBuilder .mcqcRichEditorRoot:has(> .assessmentRichCounter) > :is(.mcqcCharacterCount, .mcqcCharacterCounter, .mcqcEditorCounter, .mcqcRichCounter, .assessmentEditorCounter, .characterCount, .characterCounter, .editorCounter, .charCount, .charCounter):not(.assessmentRichCounter),
+.mcqcMatchBuilder .mcqcMatchExtraEditor:has(.assessmentRichCounter) :is(.mcqcMatchExtraCounter, .mcqcMatchExtraTopCounter, .assessmentEditorCounter) {
+  display: none !important;
+}

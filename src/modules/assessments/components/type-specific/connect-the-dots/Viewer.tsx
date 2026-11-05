@@ -774,7 +774,7 @@ export default function MatchFollowingViewerPage() {
             <div className="viewerExamTop">
               <nav className="viewerBreadcrumb" aria-label="Breadcrumb">
                 <Link href="/learner">Dashboard</Link><Icon name="arrow-right-double.svg" size={20} />
-                <Link href="/learner">Assessment</Link><Icon name="arrow-right-double.svg" size={20} />
+                <Link href="/assessments/list">Assessment</Link><Icon name="arrow-right-double.svg" size={20} />
                 <strong>{draft.title}</strong>
               </nav>
               <Stopwatch seconds={secondsLeft} />

@@ -134,6 +134,28 @@ function dataCount(value: unknown, fallback: number): number {
   return typeof value === "number" && Number.isFinite(value) ? Math.max(0, value) : fallback;
 }
 
+type RetryEligibility = { canStart: boolean; attemptsUsed: number; maxAttempts: number | null; retryAttemptsUsed: number; retryAttemptsAllowed: number | null };
+function retryCount(value: unknown, fallback: number): number {
+  const count = typeof value === "number" || typeof value === "string" && value.trim() ? Number(value) : Number.NaN;
+  return Number.isFinite(count) && count >= 0 ? Math.floor(count) : fallback;
+}
+function readRetryEligibility(): RetryEligibility | null {
+  const id = getActiveAssessmentId();
+  const record = id ? getAssessment(id) : undefined;
+  if (!record) return null;
+  const assessment = learnerAssessmentData(record);
+  const result = readAssessmentResult() as SavedResult | null;
+  const allowed = retryCount(result?.retryAttemptsAllowed, -1);
+  return { canStart: assessment.canStart, attemptsUsed: assessment.attemptsUsed, maxAttempts: assessment.maxAttempts,
+    retryAttemptsUsed: retryCount(result?.retryAttemptsUsed, 1), retryAttemptsAllowed: allowed < 0 ? null : allowed };
+}
+function retryAvailable(eligibility: RetryEligibility | null, used = 0): boolean {
+  if (!eligibility?.canStart) return false;
+  const retriesUsed = Math.max(used, eligibility.retryAttemptsUsed);
+  return (eligibility.maxAttempts === null || Math.max(eligibility.attemptsUsed, retriesUsed) < eligibility.maxAttempts) &&
+    (eligibility.retryAttemptsAllowed === null || retriesUsed < eligibility.retryAttemptsAllowed);
+}
+
 export default function ViewResultPage() {
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -152,6 +174,14 @@ export default function ViewResultPage() {
   const [revisionSort, setRevisionSort] = useState<RevisionSort>("question-asc");
   const [isRetry, setIsRetry] = useState(false);
   const [retryNotice, setRetryNotice] = useState("");
+  const [retryEligibility, setRetryEligibility] = useState<RetryEligibility | null>(null);
+  useEffect(() => {
+    const refresh = () => setRetryEligibility(readRetryEligibility());
+    refresh();
+    window.addEventListener("storage", refresh);
+    window.addEventListener("neurolxp-assessments-changed", refresh);
+    return () => { window.removeEventListener("storage", refresh); window.removeEventListener("neurolxp-assessments-changed", refresh); };
+  }, []);
 
   useEffect(() => {
     try { const parsed = readAssessmentResult(); if (parsed) setSaved(parsed as SavedResult); } catch { /* Show no submission rather than an invented result. */ }
@@ -190,8 +220,9 @@ export default function ViewResultPage() {
   const totalWrong = saved ? wrongQuestions.length : 9;
   const assessmentRecord = activeId ? getAssessment(activeId) : undefined;
   const assessmentLimits = assessmentRecord ? learnerAssessmentData(assessmentRecord) : null;
-  const retryUsed = assessmentLimits?.attemptsUsed ?? saved?.retryAttemptsUsed ?? 1;
-  const retryAllowed = assessmentLimits?.maxAttempts ?? Number.POSITIVE_INFINITY;
+  const retryUsed = Math.max(retryCount(saved?.retryAttemptsUsed, 1), retryEligibility?.retryAttemptsUsed ?? 0);
+  const retryAllowed = retryEligibility?.retryAttemptsAllowed ?? retryEligibility?.maxAttempts ?? null;
+  const canRetry = retryAvailable(retryEligibility, retryUsed);
   const retryDuration = saved?.retryDurationMinutes ?? 15;
   const retryInstructions = [
     "Only Your incorrect questions are included",
@@ -278,12 +309,15 @@ export default function ViewResultPage() {
   const pagedRevisions = visibleRevisions.slice(effectiveRevisionPage * REVISION_PAGE_SIZE,(effectiveRevisionPage + 1) * REVISION_PAGE_SIZE);
 
   const startRetry = () => {
-    if (!wrongQuestions.length) {
-      setRetryNotice("No graded incorrect questions were found for retry.");
+    const latest = readRetryEligibility();
+    const used = Math.max(retryUsed, latest?.retryAttemptsUsed ?? 0);
+    if (!retryAvailable(latest, used)) {
+      setRetryNotice("The allowed retry attempts have been used or this assessment is closed.");
+      setRetryEligibility(latest);
       return;
     }
-    if (assessmentRecord && !learnerAssessmentData(assessmentRecord).canStart) {
-      setRetryNotice("The allowed retry attempts have been used.");
+    if (!wrongQuestions.length) {
+      setRetryNotice("No graded incorrect questions were found for retry.");
       return;
     }
     try {
@@ -295,7 +329,7 @@ export default function ViewResultPage() {
       if (activeType === "match-the-following") assessmentStorage.setItem("matchFollowingRetryIndexes", JSON.stringify(sourceIndexes));
       if (activeType === "memory-game") assessmentStorage.setItem("memoryGameRetryIndexes", JSON.stringify(sourceIndexes));
       assessmentStorage.setItem("viewerRetryDurationMinutes", String(retryDuration));
-      assessmentStorage.setItem("viewerAssessmentResult", JSON.stringify({ ...saved, retryAttemptsUsed: retryUsed + 1 }));
+      assessmentStorage.setItem("viewerAssessmentResult", JSON.stringify({ ...saved, retryAttemptsUsed: used + 1 }));
       router.push(`${viewerPath()}?retry=wrong`);
     } catch {
       setRetryNotice("Unable to start the retry. Please allow browser storage and try again.");
@@ -325,7 +359,7 @@ export default function ViewResultPage() {
                 <div className="vrDetailedPage">
                   <nav className="vrBreadcrumb vrDetailBreadcrumb" aria-label="Breadcrumb">
                     <Link href={demoDashboardPath()}>Dashboard</Link><img src="/assets/viewericons/arrow-right-double.svg" width={20} height={20} alt="" aria-hidden="true" />
-                    <Link href={demoDashboardPath()}>Assessment</Link><img src="/assets/viewericons/arrow-right-double.svg" width={20} height={20} alt="" aria-hidden="true" />
+                    <Link href="/assessments/list">Assessment</Link><img src="/assets/viewericons/arrow-right-double.svg" width={20} height={20} alt="" aria-hidden="true" />
                     <button type="button" className="vrCrumbReturn" onClick={backFromDetail}>{title}</button><img src="/assets/viewericons/arrow-right-double.svg" width={20} height={20} alt="" aria-hidden="true" />
                     <strong>Detailed Question Review</strong><span className="vrDetailTotal">{reviewQuestions.length} Questions</span>
                   </nav>
@@ -385,7 +419,7 @@ export default function ViewResultPage() {
                 <div className="vrRevisionPage">
                   <nav className="vrBreadcrumb vrRevisionBreadcrumb" aria-label="Breadcrumb">
                     <Link href={demoDashboardPath()}>Dashboard</Link><ResultIcon name="arrow-right-double.svg" size={20}/>
-                    <Link href={demoDashboardPath()}>Assessment</Link><ResultIcon name="arrow-right-double.svg" size={20}/>
+                    <Link href="/assessments/list">Assessment</Link><ResultIcon name="arrow-right-double.svg" size={20}/>
                     <button type="button" className="vrCrumbReturn" onClick={() => { setIsRevisionFolder(false); scrollRef.current?.scrollTo(0, 0); }}>{title}</button><ResultIcon name="arrow-right-double.svg" size={20}/>
                     <strong>Revision Folder</strong>
                   </nav>
@@ -409,7 +443,7 @@ export default function ViewResultPage() {
                 <div className="vrRetryPage">
               <nav className="vrBreadcrumb" aria-label="Breadcrumb">
                 <Link href={demoDashboardPath()}>Dashboard</Link><ResultIcon name="arrow-right-double.svg" size={20}/>
-                <Link href={demoDashboardPath()}>Assessment</Link><ResultIcon name="arrow-right-double.svg" size={20}/>
+                <Link href="/assessments/list">Assessment</Link><ResultIcon name="arrow-right-double.svg" size={20}/>
                 <button className="vrCrumbReturn" type="button" onClick={() => setIsRetry(false)}>{title}</button><ResultIcon name="arrow-right-double.svg" size={20}/>
                 <strong>Reattempt Wrong Questions</strong>
               </nav>
@@ -434,7 +468,7 @@ export default function ViewResultPage() {
                 {retryNotice && <p className="vrRetryNotice" role="alert">{retryNotice}</p>}
                 <div className="vrRetryActions">
                   <button type="button" className="vrRetryCancel" onClick={() => { setRetryNotice(""); setIsRetry(false); }}>Cancel</button>
-                  <button type="button" className="vrRetryStart" onClick={startRetry}>Start Retry<ResultIcon name="arrowrightg.svg" size={23}/></button>
+                  <button type="button" className="vrRetryStart" disabled={!canRetry} onClick={startRetry}>Start Retry<ResultIcon name="arrowrightg.svg" size={23}/></button>
                 </div>
               </section>
                 </div>
@@ -442,7 +476,7 @@ export default function ViewResultPage() {
                 <>
               <nav className="vrBreadcrumb" aria-label="Breadcrumb">
                 <Link href={demoDashboardPath()}>Dashboard</Link><ResultIcon name="arrow-right-double.svg" size={20} />
-                <Link href={demoDashboardPath()}>Assessment</Link><ResultIcon name="arrow-right-double.svg" size={20} />
+                <Link href="/assessments/list">Assessment</Link><ResultIcon name="arrow-right-double.svg" size={20} />
                 <strong>{title}</strong>
               </nav>
 
@@ -509,7 +543,7 @@ export default function ViewResultPage() {
               </div>
 
               {!answersHidden && <div className="vrRetryFooter">
-                <button type="button" className="vrPrimaryPill" onClick={() => { setRetryNotice(""); setIsRetry(true); }}>
+                <button type="button" className="vrPrimaryPill" disabled={!canRetry} title={!canRetry ? "No retry attempts remain or this assessment is closed." : undefined} onClick={() => { const latest = readRetryEligibility(); if (!retryAvailable(latest, retryUsed)) { setRetryEligibility(latest); return; } setRetryNotice(""); setIsRetry(true); }}>
                   <span>Re- Attempt Wrongs Answers</span><ResultIcon name="arrowrightg.svg" size={24}/>
                 </button>
               </div>}

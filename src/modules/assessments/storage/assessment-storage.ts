@@ -120,9 +120,9 @@ export function resultPath(id = getActiveAssessmentId()): string {
 }
 
 /** Publish an assessment using its type-specific draft, without a backend. */
-export function publishAssessment(typeCode: "short-answer" | "one-word") {
- const detailKey = typeCode === "one-word" ? "oneWordAssessmentDraft" : "shortAnswerAssessmentDraft";
- const contentKey = typeCode === "one-word" ? "oneWordContentDraft" : "shortAnswerContentDraft";
+export function publishAssessment(typeCode: "short-answer" | "one-word" | "long-answer") {
+ const detailKey = typeCode === "one-word" ? "oneWordAssessmentDraft" : typeCode === "long-answer" ? "longAnswerAssessmentDraft" : "shortAnswerAssessmentDraft";
+ const contentKey = typeCode === "one-word" ? "oneWordContentDraft" : typeCode === "long-answer" ? "longAnswerContentDraft" : "shortAnswerContentDraft";
  const detail = JSON.parse(assessmentStorage.getItem(detailKey) || "{}");
  const content = JSON.parse(assessmentStorage.getItem(contentKey) || "{}");
  const questions = Array.isArray(content.questions) ? content.questions : [];

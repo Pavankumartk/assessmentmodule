@@ -727,3 +727,10 @@
 
 .mcqcBuilder .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}
 .mcqcBuilder .mcqcNumberStatus.is-pending{background:#2D4CC8!important;border:0!important;color:#fff!important}
+
+/* MCQ editor counter and checkbox corrections. */
+.mcqcBuilder--mcq .mcqcRichEditorRoot input[type="file"][hidden]{display:none!important}
+.mcqcBuilder--mcq .mcqcRichEditorRoot .mcqcRichEditable{box-sizing:border-box;padding-bottom:32px}
+.mcqcBuilder--mcq .mcqcRichEditorRoot .mcqcCharacterCount{position:absolute;right:8px;bottom:5px;color:#374151;font:400 12px/18px "Segoe UI",Arial,sans-serif;pointer-events:none}
+.mcqcBuilder--mcq .mcqcCorrectOption input[type="checkbox"],.mcqcBuilder--mcq .mcqcHintChecks input[type="checkbox"]{appearance:auto!important;-webkit-appearance:checkbox!important;accent-color:#2D4CC8!important;display:inline-block!important;flex:0 0 18px!important;width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;margin:3px!important;padding:0!important;background:transparent!important;box-shadow:0 0 0 3px #DFE6E9,-3px -3px 4px #fff,3px 3px 4px #C4C4C4!important}
+.mcqcBuilder--mcq .mcqcCorrectOption input[type="checkbox"]::before,.mcqcBuilder--mcq .mcqcCorrectOption input[type="checkbox"]::after,.mcqcBuilder--mcq .mcqcHintChecks input[type="checkbox"]::before,.mcqcBuilder--mcq .mcqcHintChecks input[type="checkbox"]::after{content:none!important;display:none!important}

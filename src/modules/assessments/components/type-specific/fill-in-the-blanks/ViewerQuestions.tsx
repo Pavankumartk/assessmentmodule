@@ -290,7 +290,7 @@ export default function ViewFillBlanksPage() {
             <div className="fillViewerExamTop">
               <nav className="fillViewerBreadcrumb" aria-label="Breadcrumb">
                 <Link href="/dashboard">Dashboard</Link><Icon name="arrow-right-double.svg" size={20} />
-                <Link href="/assessments">Assessment</Link><Icon name="arrow-right-double.svg" size={20} />
+                <Link href="/assessments/list">Assessment</Link><Icon name="arrow-right-double.svg" size={20} />
                 <strong>{draft.title}</strong>
               </nav>
               <Stopwatch seconds={secondsLeft} />

@@ -1,0 +1,14 @@
+/* Assignment-only preview; no shared assessment styles are modified. */
+.asgn-content-preview-heading{margin:0 0 24px}
+.asgn-content-preview-heading h2{font:700 24px/32px "Segoe UI",Inter,Arial,sans-serif;color:#374151;margin:0 0 8px}
+.asgn-content-preview-heading p{font:400 15px/23px "Segoe UI",Inter,Arial,sans-serif;color:#647080;margin:0}
+.asgn-content-preview .asgn-preview-document{display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-width:0}
+.asgn-content-preview .asgn-preview-document p{margin:0;overflow-wrap:anywhere}
+.asgn-content-preview .asgn-preview-list{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px}
+.asgn-content-preview .asgn-preview-list>div{min-width:0;display:flex;justify-content:space-between;gap:16px;align-items:center;min-height:52px;padding:12px 16px;background:#DFE6E9;box-shadow:inset -3px -3px 3px #FFF,inset 3px 3px 4px #C4C4C4;border-radius:9px}
+.asgn-content-preview .asgn-preview-list dt{color:#374151;font-weight:500;overflow-wrap:anywhere}
+.asgn-content-preview .asgn-preview-list dd{margin:0;font-weight:600;text-align:right;overflow-wrap:anywhere;color:#374151}
+.asgn-content-preview .asgn-preview-image{display:block;max-width:100%;max-height:500px;width:auto;height:auto;object-fit:contain;border-radius:8px}
+.asgn-content-preview .asgn-preview-pdf{width:100%;height:500px;max-height:65dvh;border-radius:8px}
+.asgn-content-preview .asgn-preview-footer{justify-content:flex-end}
+@media(max-width:750px){.asgn-content-preview .asgn-preview-list{grid-template-columns:1fr}.asgn-content-preview .asgn-preview-list>div{align-items:flex-start}.asgn-content-preview-heading h2{font-size:21px}}

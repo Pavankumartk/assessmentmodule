@@ -1,4 +1,6 @@
 "use client";
+import AssessmentRichToolbar from "@/modules/assessments/components/common/AssessmentRichToolbar";
+import { applyAssessmentFont } from "@/modules/assessments/components/common/assessment-editor-font";
 import WizardStepLink from "@/modules/assessments/components/common/WizardStepLink";
 import {validateMcqQuestions} from "@/modules/assessments/validation/mcq-validation";
 import { assessmentStorage, updateAssessment } from "@/modules/assessments/storage/assessment-storage";
@@ -34,9 +36,16 @@ function Icon({ name, size = 20, className = "" }: { name: string; size?: number
 const MCQC_FONTS = ["Arial", "Segoe UI", "Georgia", "Times New Roman", "Verdana"];
 const MCQC_SIZES = ["12", "14", "16", "18", "24"];
 const MCQC_SYMBOLS = ["©", "®", "™", "°", "±", "×", "÷", "≠", "≤", "≥", "∞", "π", "√", "∑", "α", "β", "γ", "Δ", "€", "£", "₹", "→", "←", "•", "✓", "★", "¼", "½", "¾", "§", "¶", "…", "—", "“", "”", "’"];
-export function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placeholder, onError, maxLength, extendedToolbar = false }: {
+// An empty contenteditable may report only a browser-created line break.
+function mcqCountedText(value: string, html?: string): string {
+  const text = value.replace(/\u00a0/g, " ");
+  if (!/^[\r\n\u200b\ufeff]+$/i.test(text)) return text;
+  const content = (html ?? "").replace(/<[^>]*>/g, "").replace(/(?:&#8203;|&#x200b;|&ZeroWidthSpace;|[\r\n\u200b\ufeff])/gi, "");
+  return content ? text : "";
+}
+export function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placeholder, onError, maxLength, extendedToolbar = false, showCharacterCount = false }: {
   editorId: string; value: string; html?: string; onChange: (text: string) => void;
-  onHtmlChange: (html: string) => void; placeholder: string; onError: (message: string) => void; maxLength?: number; extendedToolbar?: boolean;
+  onHtmlChange: (html: string) => void; placeholder: string; onError: (message: string) => void; maxLength?: number; extendedToolbar?: boolean; showCharacterCount?: boolean;
 }) {
   const editor = useRef<HTMLDivElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -81,13 +90,15 @@ export function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, p
     if (!el || charLimit === undefined) return text;
     const selection = window.getSelection();
     const selected = selection?.anchorNode && selection.focusNode && el.contains(selection.anchorNode) && el.contains(selection.focusNode) ? selection.toString().length : 0;
-    const current = (el.innerText || el.textContent || "").replace(/\u00a0/g, " ").length;
+    const raw = (el.innerText || el.textContent || "").replace(/\u00a0/g, " ");
+    const current = (showCharacterCount ? mcqCountedText(raw, el.innerHTML) : raw).length;
     return text.slice(0, Math.max(0, charLimit - current + selected));
   };
   const notify = () => {
     const el = editor.current;
     if (!el) return;
-    const plain = (el.innerText || el.textContent || "").replace(/\u00a0/g, " ");
+    const raw = (el.innerText || el.textContent || "").replace(/\u00a0/g, " ");
+    const plain = showCharacterCount ? mcqCountedText(raw, el.innerHTML) : raw;
     if (charLimit !== undefined && plain.length > charLimit && plain.length > value.length) {
       el.innerHTML = lastHtml.current ?? "";
       const range = document.createRange(); range.selectNodeContents(el); range.collapse(false);
@@ -97,7 +108,7 @@ export function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, p
     }
     lastHtml.current = el.innerHTML;
     onHtmlChange(el.innerHTML);
-    onChange((el.innerText || el.textContent || "").replace(/\u00a0/g, " "));
+    onChange(plain);
   };
   const remember = () => {
     const sel = window.getSelection();
@@ -112,7 +123,7 @@ export function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, p
   };
   const command = (name: string, valueArg?: string) => {
     restore();
-    document.execCommand(name, false, name === "fontSize" ? "7" : valueArg);
+    if (name === "fontName" && valueArg) applyAssessmentFont(editor.current, valueArg); else document.execCommand(name, false, name === "fontSize" ? "7" : valueArg);
     if (name === "fontSize" && valueArg && editor.current) {
       editor.current.querySelectorAll('font[size="7"]').forEach(node => {
         node.removeAttribute("size");
@@ -148,21 +159,7 @@ export function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, p
   const button = (name: string, title: string, action: () => void) =>
     <button type="button" title={title} aria-label={title} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={action}><Icon name={name} size={18}/></button>;
   return <div className="mcqcRichEditorRoot">
-    <div className="mcqcRichToolbar mcqcOptionToolbar" role="toolbar" aria-label={`${placeholder} formatting`}>
-      {button("undo.svg", "Undo", () => command("undo"))}
-      {button("redo.svg", "Redo", () => command("redo"))}
-      <div className="mcqcRichMenuRoot"><button type="button" className="mcqcToolbarSelect mcqcToolbarFont" aria-expanded={menu === "font"} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={e => openFormatMenu("font", e.currentTarget)}>{font}<Icon name="arrow-down-01.svg" size={15}/></button>
-        </div>
-      <div className="mcqcRichMenuRoot"><button type="button" className="mcqcToolbarSelect mcqcToolbarSize" aria-expanded={menu === "size"} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={e => openFormatMenu("size", e.currentTarget)}>{size}<Icon name="arrow-down-01.svg" size={15}/></button>
-        </div>
-      {button("bold.svg", "Bold", () => command("bold"))}
-      {button("italic.svg", "Italic", () => command("italic"))}
-      {button("underline.svg", "Underline", () => command("underline"))}
-      {extendedToolbar && <><button type="button" className="mcqcColorTrigger" title="Text color" aria-label="Text color" onMouseDown={e=>{e.preventDefault();remember();}} onClick={()=>textColorInput.current?.click()}>A</button>{button("pen-line.svg", "Text color pen", () => textColorInput.current?.click())}{button("highlighter.svg", "Highlight color", () => highlightColorInput.current?.click())}</>}
-      {button("text-centerline-center-top.svg", "Bulleted list", () => command("insertUnorderedList"))}
-      {button("image.svg", "Insert image", () => { setFileKind("image"); if (fileInput.current) { fileInput.current.accept="image/*"; fileInput.current.value=""; fileInput.current.click(); } })}
-      {button("attachment.svg", "Attach file", () => { setFileKind("attachment"); if (fileInput.current) { fileInput.current.accept=""; fileInput.current.value=""; fileInput.current.click(); } })}
-    </div>
+    <AssessmentRichToolbar label={placeholder} onRemember={remember} onCommand={command} onError={onError} onChooseFile={kind => { setFileKind(kind); if (fileInput.current) { fileInput.current.accept = kind === "image" ? "image/*" : ""; fileInput.current.value = ""; fileInput.current.click(); } }} />
     {menu && typeof document !== "undefined" && createPortal(
       <div className={`mcqcFloatingFormatMenu ${menu === "symbols" ? "mcqcFloatingSymbols" : ""}`}
         role={menu === "symbols" ? "group" : "listbox"}
@@ -183,8 +180,9 @@ export function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, p
     <input ref={fileInput} type="file" hidden onChange={e => { const f=e.target.files?.[0]; if (f) void addFile(f); }}/>
     <div ref={editor} id={editorId} role="textbox" aria-label={placeholder} aria-multiline="true" contentEditable suppressContentEditableWarning data-placeholder={placeholder}
       className="mcqcRichEditable" onInput={notify} onBeforeInput={e => { const input = e.nativeEvent as InputEvent; if (input.data && allowedText(input.data) !== input.data) e.preventDefault(); }} onKeyUp={remember} onMouseUp={remember} onFocus={remember} onPaste={e => { e.preventDefault(); const text=allowedText(e.clipboardData.getData("text/plain")); if (text) document.execCommand("insertText", false, text); notify(); }}/>
-    {(charLimit !== undefined || editorId.startsWith("mcqc-")) && <small className="assessmentEditorCounter" aria-live="polite">{value.length}/{charLimit ?? 250}</small>}
-  </div>;
+    {(charLimit !== undefined || editorId.startsWith("mcqc-")) && <></>}
+  {showCharacterCount && <small className="mcqcCharacterCount" aria-label={`${mcqCountedText(value, html).length} of ${charLimit} characters`}>{mcqCountedText(value, html).length}/{charLimit}</small>}
+  {(charLimit ?? (/^mcqc-(?:question|opt)/i.test(editorId) ? 250 : undefined)) !== undefined && <small className="assessmentRichCounter" aria-live="polite">{Array.from((value || "").replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/^\r?\n$/, "")).length}/{(charLimit ?? (/^mcqc-(?:question|opt)/i.test(editorId) ? 250 : undefined))}</small>}</div>;
 }
 
 type Question = { type: string; typeSelected?: boolean; text: string; options: string[]; correct: number; points: string; difficulty: string; category: string; bloom: string; mandatory: boolean };
@@ -373,14 +371,14 @@ function QuestionBuilder({ questions, setQuestions, onExit, mcqValues, setMcqVal
   const richEditor = (fieldId: string, value: string, onChange: (next: string) => void, placeholder: string) =>
     <MCQRichEditor key={fieldId} editorId={fieldId} value={value} html={richHtml[fieldId]}
       onChange={onChange} onHtmlChange={(html) => setRichHtml(previous => ({ ...previous, [fieldId]: html }))}
-      placeholder={placeholder} onError={setNotice} />;
+      placeholder={placeholder} onError={setNotice}  maxLength={250} showCharacterCount/>;
   const detailEditor = (index: number, field: "feedback" | "explanation" | "hint") => {
     const id = `mcqc-${field}-${active}-${index}`;
     return <div className="mcqcOptionEditor">{richEditor(id, getDetail(index)[field], text => setDetail(index, { [field]: text }), `Write ${field} here...`)}</div>;
   };
 
   if (previewing) return <QuestionsPreview questions={questions} details={optionDetails} tags={tags} mcqValues={mcqValues} saving={isSaving} onContinue={saveAndContinue} onBack={()=>setPreviewing(false)} onEdit={(index)=>{setActive(index);setPreviewing(false);setExpandedOptions([0]);}}/>;
-  return <div className="mcqcBuilder">
+  return <div className="mcqcBuilder mcqcBuilder--mcq">
     <div className="mcqcBuilderTop"><nav className="mcqcBuilderCrumb" aria-label="Question breadcrumb"><Link href="/assessments">Assessment</Link><Icon name="arrowrightdouble.svg" /><button type="button" onClick={onExit}>Create Assessment</button><Icon name="arrowrightdouble.svg" /><strong>Create Questions</strong></nav><div className="mcqcBuilderWelcome"><Icon name="ai-sparkles.svg" size={30} /><div><h2>Let's Get Started! Antony?</h2><p>Let's Build A Great Question.</p></div></div></div>
     <div className="mcqcBuilderGrid"><section className="mcqcBuilderMain">
       <div className="mcqcQuestionsHeading"><div><h2>Question {active + 1} of {mcqValues.questionCount}</h2><p>{mcqValues.questionCount} Questions | {mcqValues.totalMarks} Marks</p></div><div className="mcqcAddMenu" onPointerLeave={event => { if (event.pointerType !== "mouse") return; const element = event.currentTarget; window.setTimeout(() => { if (!element.matches(":hover")) setAddOpen(false); }, 300); }}><button type="button" className="mcqcTopAdd" onClick={() => setAddOpen(v => !v)} aria-expanded={addOpen}><Icon name="plus.svg" size={20} />Add</button>{addOpen && <div className="mcqcAddMenuList" role="radiogroup">{["Create Manually"].map((option,index) => <button type="button" key={option} role="radio" aria-checked={index === 0} onClick={() => chooseAdd(option)}><span className={`mcqcOptionRadio ${index === 0 ? "mcqcOptionSelected" : ""}`} />{option}</button>)}</div>}</div></div>

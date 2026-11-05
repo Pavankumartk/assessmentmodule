@@ -1,4 +1,6 @@
 "use client";
+import AssessmentRichToolbar from "@/modules/assessments/components/common/AssessmentRichToolbar";
+import { applyAssessmentFont } from "@/modules/assessments/components/common/assessment-editor-font";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -285,7 +287,7 @@ function AIToolbarEditor({ value, onChange, questionNumber, onError }: {
   const notify = () => { if (editable.current) onChange(safeHtml(editable.current.innerHTML)); };
   const apply = (command: string, argument?: string) => {
     restore();
-    document.execCommand(command, false, command === "fontSize" ? "7" : argument);
+    if (command === "fontName" && argument) applyAssessmentFont(editable.current, argument); else document.execCommand(command, false, command === "fontSize" ? "7" : argument);
     if (command === "fontSize" && argument && editable.current) {
       editable.current.querySelectorAll('font[size="7"]').forEach(node => {
         const span = document.createElement("span");
@@ -359,40 +361,7 @@ function AIToolbarEditor({ value, onChange, questionNumber, onError }: {
     </button>;
   return <div className="aiEditor" ref={root}>
     {/* One horizontally scrollable toolbar, without duplicate tools or a 'More' button. */}
-    <div className="aiToolbarScroll" role="toolbar" aria-label="Question formatting tools" tabIndex={0}>
-      {tool("Undo", "undo.svg", "↶", () => apply("undo"))}
-      {tool("Redo", "redo.svg", "↷", () => apply("redo"))}
-      {picker("font", family)}
-      {picker("size", size)}
-      {tool("Bold", "bold.svg", "B", () => apply("bold"))}
-      {tool("Italic", "italic.svg", "I", () => apply("italic"))}
-      {tool("Underline", "underline.svg", "U̲", () => apply("underline"))}
-      {tool("Strikethrough", "strikethrough.svg", "S̶", () => apply("strikeThrough"))}
-      <button ref={extraToolsButton} type="button" className="aiColorTool aiHighlightTool" title="Highlight colour" aria-label="Choose highlight colour" aria-haspopup="dialog" aria-expanded={extraToolsOpen}
-        onMouseDown={event => { event.preventDefault(); remember(); }}
-        onClick={event => openExtraTools(event.currentTarget)}>
-        <span className="aiHighlightSwatch" aria-hidden="true" style={{ backgroundColor: highlightColor }} />
-      </button>
-      {tool("Bulleted list", "text-centerline-center-top.svg", "•≡", () => apply("insertUnorderedList"))}
-      {tool("Numbered list", "list-numbered.svg", "1≡", () => apply("insertOrderedList"))}
-      {tool("Decrease indent", "outdent.svg", "⇤", () => apply("outdent"))}
-      {tool("Increase indent", "indent.svg", "⇥", () => apply("indent"))}
-      <span className="aiToolbarGroup aiAlignGroup" role="group" aria-label="Text alignment">
-        {tool("Align left", "align-left.svg", "align:left", () => apply("justifyLeft"))}
-        {tool("Align centre", "align-center.svg", "align:center", () => apply("justifyCenter"))}
-        {tool("Align right", "align-right.svg", "align:right", () => apply("justifyRight"))}
-        {tool("Justify", "align-justify.svg", "align:justify", () => apply("justifyFull"))}
-      </span>
-      {picker("heading", heading ? `Heading ${heading.slice(1)}` : "Headings")}
-      {tool("Paragraph", "paragraph.svg", "¶", () => { setHeading(""); apply("formatBlock", "p"); })}
-      {tool("Insert link", "link.svg", "🔗", insertLink)}
-      {tool("Insert image", "image.svg", "▧", () => { if (pictureInput.current) { pictureInput.current.value = ""; pictureInput.current.click(); } })}
-      {tool("Insert table", "table.svg", "▦", insertTable)}
-      {tool("Blockquote", "quote-left.svg", "❝", () => apply("formatBlock", "blockquote"))}
-      {tool("Code block", "code.svg", "</>", () => apply("formatBlock", "pre"))}
-      {tool("Superscript", "superscript.svg", "x²", () => apply("superscript"))}
-      {tool("Subscript", "subscript.svg", "x₂", () => apply("subscript"))}
-    </div>
+    <AssessmentRichToolbar label="Question" onRemember={remember} onCommand={apply} onError={onError} allowAttachment={false} onChooseFile={() => { if (pictureInput.current) { pictureInput.current.value = ""; pictureInput.current.click(); } }} />
     {extraToolsOpen && typeof document !== "undefined" && createPortal(<div ref={extraToolsMenu} className="aiExtraToolsMenu" role="group" aria-label="Highlight colours" style={{ top: extraMenuPosition.top, left: extraMenuPosition.left, width: extraMenuPosition.width }}>
       {HIGHLIGHT_PALETTE.map(color => <button key={color} type="button" className="aiPaletteSwatch" title={color} aria-label={`Highlight with ${color}`} aria-pressed={highlightColor.toUpperCase() === color.toUpperCase()}
         style={{ backgroundColor: color }} onMouseDown={event => event.preventDefault()}

@@ -62,10 +62,10 @@ const shortAnswerControlKeys: Record<string, string> = {
 };
 const shortAnswerSwitches = new Set(["resultAfter", "showScore", "passFail", "correctAnswers", "answerFeedback", "explanation", "answerSwitching", "reviewWrong", "weaknessMap", "secureBrowser", "copyPaste", "printing", "webcam", "screenMonitoring", "fullScreen", "identity", "tabSwitching", "multipleScreens", "browserExit", "recordViolations"]);
 
-export default function EvaluationPage({ shortAnswer = false, typeLabel }: { shortAnswer?: boolean; typeLabel?: string } = {}) {
+export default function EvaluationPage({ shortAnswer = false, typeLabel, detailsKey: detailsKeyOverride, evaluationKey: evaluationKeyOverride }: { shortAnswer?: boolean; typeLabel?: string; detailsKey?: string; evaluationKey?: string } = {}) {
   const router = useRouter();
-  const detailsKey = shortAnswer ? "shortAnswerAssessmentDraft" : "mcqAssessmentDraft";
-  const evaluationKey = shortAnswer ? "shortAnswerEvaluationDraft" : "mcqAssessmentEvaluationDraft";
+  const detailsKey = detailsKeyOverride ?? (shortAnswer ? "shortAnswerAssessmentDraft" : "mcqAssessmentDraft");
+  const evaluationKey = evaluationKeyOverride ?? (shortAnswer ? "shortAnswerEvaluationDraft" : "mcqAssessmentEvaluationDraft");
   const savedDraftRef = useRef<Record<string, unknown>>({});
   const redirectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [openPanels, setOpenPanels] = useState<PanelId[]>([]);

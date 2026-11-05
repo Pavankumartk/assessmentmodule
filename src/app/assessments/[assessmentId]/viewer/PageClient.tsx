@@ -9,7 +9,7 @@ import { useParams, useRouter } from "next/navigation";
 import ImageBasedViewer from "@/modules/assessments/components/type-specific/image-based/Viewer";
 import ImageAssessmentInstructions from "@/modules/assessments/components/type-specific/image-based/ImageAssessmentInstructions";
 import ConnectDotsAssessmentInstructions from "@/modules/assessments/components/type-specific/connect-the-dots/Instructions";
-import MatchViewer from "@/modules/assessments/components/type-specific/match-the-following/Viewer";
+import MatchViewer, { MatchFollowingInstructions } from "@/modules/assessments/components/type-specific/match-the-following/Viewer";
 import ClickableHotspotViewer from "@/modules/assessments/components/type-specific/clickable-hotspot/Viewer";
 import ClickableHotspotInstructions from "@/modules/assessments/components/type-specific/clickable-hotspot/Instructions";
 import ConnectDotsViewer from "@/modules/assessments/components/type-specific/connect-the-dots/Viewer";
@@ -41,6 +41,7 @@ export default function PageClient() {
   const router = useRouter();
   const [hotspotInstructionsNeeded, setHotspotInstructionsNeeded] = useState(false);
   const [ready, setReady] = useState(false);
+  const [matchInstructionsNeeded, setMatchInstructionsNeeded] = useState(false);
   const [imageInstructionsNeeded, setImageInstructionsNeeded] = useState(false);
   const [connectDotsInstructionsNeeded, setConnectDotsInstructionsNeeded] = useState(false);
 
@@ -123,6 +124,13 @@ export default function PageClient() {
     } else {
       setHotspotInstructionsNeeded(false);
     }
+    if (record.typeCode === "match-the-following" && !isPreview) {
+      const params = new URLSearchParams(window.location.search);
+      let accepted = false;
+      try { accepted = sessionStorage.getItem(`neurolxp.matchFollowingViewer.instructions.${assessmentId}`) === "accepted"; }
+      catch { /* Show instructions when session storage is unavailable. */ }
+      setMatchInstructionsNeeded(params.get("instructions") === "1" || params.get("retry") === "wrong" || !accepted);
+    } else { setMatchInstructionsNeeded(false); }
     setReady(true);
   }, [assessmentId, isPreview, router]);
 
@@ -158,6 +166,18 @@ export default function PageClient() {
   if (!ready || !type) {
     return null;
   }
+  if (type === "match-the-following" && matchInstructionsNeeded) {
+    return <div className="assessment-variant assessment-variant--match-the-following">
+      <MatchFollowingInstructions assessmentId={assessmentId} onStart={() => {
+        try { sessionStorage.setItem(`neurolxp.matchFollowingViewer.instructions.${assessmentId}`, "accepted"); } catch { /* Continue in this tab. */ }
+        const url = new URL(window.location.href);
+        url.searchParams.delete("instructions");
+        window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+        setMatchInstructionsNeeded(false);
+      }} />
+    </div>;
+  }
+
 
   if (type === "image-based" && imageInstructionsNeeded) {
     return <div className="assessment-variant assessment-variant--image-based">

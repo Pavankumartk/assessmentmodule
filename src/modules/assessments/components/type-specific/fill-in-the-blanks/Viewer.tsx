@@ -62,7 +62,7 @@ export default function FillViewer(){
   const marks=val(details,["totalMarks"],String(questionMarks||record?.marks||0));
   const negative=val(details,["negativeMarkingValue"],"None");
   return <main className="superAdminPage institutionAdminPage viewerAppShell"><div className="dashboardLayout viewerLayout"><Sidebar/><section className="mainContent viewerMain"><div className="viewerSharedHeader"><Header/></div><div className="institutionScrollArea viewerScroll"><div className="pageContent institutionPageContent viewerContent">
-    <nav className="viewerBreadcrumb" aria-label="Breadcrumb"><Link href={demoDashboardPath()}>Dashboard</Link><Icon name="arrow-right-double.svg" size={20}/><Link href="/assessments">Assessment</Link><Icon name="arrow-right-double.svg" size={20}/><strong>{title}</strong></nav>
+    <nav className="viewerBreadcrumb" aria-label="Breadcrumb"><Link href={demoDashboardPath()}>Dashboard</Link><Icon name="arrow-right-double.svg" size={20}/><Link href="/assessments/list">Assessment</Link><Icon name="arrow-right-double.svg" size={20}/><strong>{title}</strong></nav>
     <div className="viewerPageHeading"><h1>{title}</h1><p>Fill in the Blanks</p></div>
     <ViewerInstructions
       details={{totalQuestions:String(count),totalMarks:marks,totalTime:/minute|hour/i.test(duration)?duration:`${duration} Minutes`,passingScore:passing,negativeMarking:negative,instructions}}

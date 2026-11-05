@@ -1,4 +1,5 @@
 "use client";
+import ViewerInstructions from "@/modules/assessments/components/viewer/ViewerInstructions";
 import {maySubmitCurrentAttempt} from "@/modules/assessments/components/learner/learner-assessment-data";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -351,6 +352,75 @@ function MatchSelect({ question, termIndex, selected, answers, disabled, onSelec
       </div>, document.body)}
   </div>;
 }
+export function MatchFollowingInstructions({ assessmentId, onStart }: { assessmentId: string; onStart: () => void }) {
+  const [accepted, setAccepted] = useState(false);
+  const info = useMemo(() => {
+    const draft = loadViewerDraft();
+    const details = readStorage(DETAILS_KEYS) ?? {};
+    const content = readStorage(CONTENT_KEYS) ?? {};
+    const record = getAssessment(assessmentId);
+    let questions = draft.questions;
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("retry") === "wrong") {
+      try {
+        const indexes: unknown = JSON.parse(assessmentStorage.getItem("matchFollowingRetryIndexes") || "[]");
+        questions = Array.isArray(indexes) ? questions.filter((_, index) => indexes.includes(index)) : [];
+      } catch { questions = []; }
+    }
+    const instructions = [details.instructions, details.descriptionInstructions, content.instructions].reduce<string[]>((found, value) => {
+      if (found.length) return found;
+      const parts = Array.isArray(value) ? value : [value];
+      return parts.flatMap(part => {
+        if (typeof part !== "string") return [];
+        let text = part.replace(/<br\s*\/?\s*>/gi, "\n").replace(/<\/(?:p|div|li|h[1-6])\s*>/gi, "\n").replace(/<\/?[a-z][^>]*>/gi, " ");
+        if (typeof document !== "undefined") { const element = document.createElement("textarea"); element.innerHTML = text; text = element.value; }
+        else text = text.replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/&lt;/gi, "<").replace(/&gt;/gi, ">");
+        return text.split(/\r?\n/).map(line => line.replace(/\s+/g, " ").trim()).filter(Boolean);
+      });
+    }, []);
+    const passing = toText(details.passingScore ?? details.passingMarks ?? content.passingScore);
+    const negative = details.negativeMarkingValue ?? details.negativeMarking;
+    return {
+      title: record?.title || draft.title,
+      details: {
+        totalQuestions: String(questions.length),
+        totalMarks: String(questions.reduce((sum, question) => sum + question.points, 0)),
+        totalTime: `${Math.round(draft.durationSeconds / 60)} Minutes`,
+        passingScore: passing ? (/^\d+(?:\.\d+)?$/.test(passing) ? `${passing}%` : passing) : "Not specified",
+        negativeMarking: negative === false ? "No" : toText(negative) || "Not specified",
+        instructions: instructions.length ? instructions : [
+          "Match each item with the correct answer.",
+          "Each question carries the marks shown on the screen.",
+          "The timer starts when you begin the assessment.",
+          "You can flag questions and change your answers before submitting.",
+          "The assessment is submitted automatically when time runs out.",
+        ],
+      },
+      canStart: questions.length > 0,
+    };
+  }, [assessmentId]);
+
+  return <main className="superAdminPage institutionAdminPage viewerAppShell">
+    <div className="dashboardLayout viewerLayout">
+      <Sidebar />
+      <section className="mainContent viewerMain">
+        <div className="viewerSharedHeader"><Header /></div>
+        <div className="institutionScrollArea viewerScroll">
+          <div className="pageContent institutionPageContent viewerContent">
+            <nav className="viewerBreadcrumb" aria-label="Breadcrumb">
+              <Link href="/learner">Dashboard</Link><Icon name="arrow-right-double.svg" size={20} />
+              <Link href="/learner">Assessment</Link><Icon name="arrow-right-double.svg" size={20} />
+              <strong>{info.title}</strong>
+            </nav>
+            <div className="viewerPageHeading"><h1>{info.title}</h1><p>Match the Following</p></div>
+            <ViewerInstructions details={info.details} accepted={accepted} onAcceptedChange={setAccepted}
+              onStart={onStart} canStart={info.canStart} unavailableMessage="No saved matching questions are available for this assessment." />
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>;
+}
+
 export default function MatchFollowingViewerPage() {
   const router = useRouter();
   const isRetry = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("retry") === "wrong";
@@ -384,7 +454,7 @@ export default function MatchFollowingViewerPage() {
     let state: Partial<ViewerState> = {};
     try { state = JSON.parse(assessmentStorage.getItem(sessionKey) || "{}"); }
     catch { /* Start a fresh attempt. */ }
-    if (state.signature === stamp && !state.submitted && Number(state.expiresAt) > time) {
+    if (state.signature === stamp && !state.submitted && Number(state.expiresAt) > 0) {
       setCurrent(Math.min(Math.max(Number(state.current) || 0, 0), loaded.questions.length - 1));
       setAnswers(state.answers ?? {});
       setFlagged(Array.isArray(state.flagged) ? state.flagged : []);
@@ -511,7 +581,7 @@ export default function MatchFollowingViewerPage() {
             <div className="viewerExamTop">
               <nav className="viewerBreadcrumb" aria-label="Breadcrumb">
                 <Link href="/super_admin">Dashboard</Link><Icon name="arrow-right-double.svg" size={20} />
-                <Link href="/assessments">Assessment</Link><Icon name="arrow-right-double.svg" size={20} />
+                <Link href="/assessments/list">Assessment</Link><Icon name="arrow-right-double.svg" size={20} />
                 <strong>{draft.title}</strong>
               </nav>
               <Stopwatch seconds={secondsLeft} />

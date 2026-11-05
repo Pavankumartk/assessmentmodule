@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Header from "@/modules/assessments/components/common/header/Header";
 import Sidebar from "@/modules/assessments/components/common/sidebar/page";
 import ViewerSubmitConfirm from "@/modules/assessments/components/viewer/ViewerSubmitConfirm";
+import TextSubmitSuccess from "@/modules/assessments/components/viewer/TextSubmitSuccess";
 import { assessmentStorage, getActiveAssessmentId, getAssessment, updateAssessment } from "@/modules/assessments/storage/assessment-storage";
 import { learnerAssessmentData } from "@/modules/assessments/components/learner/learner-assessment-data";
 import "@/modules/assessments/components/viewer/AssessmentViewer/viewer.css";
@@ -214,6 +216,7 @@ function Clock({ seconds }: { seconds: number }) {
 }
 
 export default function AIInterviewPreparationPage() {
+  const router = useRouter();
   const [info, setInfo] = useState<InterviewInfo>(DEFAULT_INFO);
   const [checks, setChecks] = useState<CheckMap>({ microphone: "Pending", camera: "Pending", noise: "Pending" });
   const [cameraOn, setCameraOn] = useState(false);
@@ -431,6 +434,7 @@ export default function AIInterviewPreparationPage() {
     if (submissionRecorded.current) return;
     if (!maySubmitCurrentAttempt()) { setNotice("The allowed attempts have been used."); return; }
     submissionRecorded.current = true;
+    setShowSubmitConfirm(false);
     const finalAnswers = latestAnswers ?? answers;
     setAnswers(finalAnswers);
     setFinished(true);
@@ -797,9 +801,9 @@ export default function AIInterviewPreparationPage() {
     <div className="viewaiScrollable">
       <div className="viewaiTopRow">
         <nav className="viewaiBreadcrumb" aria-label="Breadcrumb"><Link href="/dashboard">Dashboard</Link><Asset name="arrow-right-double.svg" size={20}/><Link href="/assessments/list">Assessment</Link><Asset name="arrow-right-double.svg" size={20}/><strong>{info.title}</strong></nav>
-        {screen === "interview" && <div className="viewaiTopStats"><span className="viewaiTabCounter"><Asset name="alert-01.svg" size={24}/>Tab Switches :{tabSwitches}</span>{info.duration > 0 && <Clock seconds={secondsRemaining}/>}</div>}
+        {(screen === "interview" || screen === "success") && <div className="viewaiTopStats"><span className="viewaiTabCounter"><Asset name="alert-01.svg" size={24}/>Tab Switches :{tabSwitches}</span>{info.duration > 0 && <Clock seconds={secondsRemaining}/>}</div>}
       </div>
-      {screen === "success" ? <section className="viewaiResults viewaiSuccess" aria-label="Submission complete"><Link href="/assessments/list" className="viewaiBackToAssessments"><img src="/assets/viewericons/arrowleft.svg" alt="" width={20} height={20}/>Back to Assessments</Link><div className="viewaiResultsIntro"><h1>Assessment Submitted Successfully</h1><p>Your answers have been saved. This assessment is awaiting evaluation.</p><button type="button" className="viewaiResultRestart" onClick={() => setScreen("result")}>View Results</button></div></section> : screen === "result" ? <section className="viewaiResults" aria-label="Interview results">
+      {screen === "result" ? <section className="viewaiResults" aria-label="Interview results">
         <Link href="/assessments/list" className="viewaiBackToAssessments"><img src="/assets/viewericons/arrowleft.svg" alt="" width={20} height={20}/>Back to Assessments</Link>
         <div className="viewaiResultsIntro">
           <h1>Session Complete</h1>
@@ -866,7 +870,7 @@ export default function AIInterviewPreparationPage() {
           {notice && <p className="viewaiNotice" role="status">{notice}</p>}
         </section> : <section className="viewaiInterview" aria-label="AI interview session">
           <div className="viewaiProgress"><strong>{Math.min(current + 1, info.questionCount)}/{String(info.questionCount).padStart(2, "0")}</strong><div className="viewaiProgressLine"><span style={{width:`${Math.max(.5,progress)}%`}}/></div><strong className="viewaiPercent">{progress}%</strong></div>
-          {!finished && <>
+          {(!finished || screen === "success") && <>
             <div className="viewaiListening"><div className="viewaiHeadsetRing"><div className="viewaiHeadsetInner"><Asset name="headphones.svg" size={24}/></div></div><Waveform active={listening} level={listening ? 72 : 23} phase={phase} large/><p>{listening ? "Listening - Answer Out Loud" : speechAvailable ? "Microphone paused - Answer Out Loud" : "Type Your Answer Below"}</p></div>
             <div className="viewaiQuestion">{current + 1}. {info.questions[current]}</div>
             <div className="viewaiTranscript"><label htmlFor="viewaiTranscript">Live Transcript</label><textarea id="viewaiTranscript" value={transcript} onChange={event => { setTranscript(event.target.value); transcriptRef.current = event.target.value; }} placeholder="Your spoken words will appear here. You can also type or correct the text." rows={3}/></div>
@@ -878,6 +882,12 @@ export default function AIInterviewPreparationPage() {
         </section>}
       </div>}
     </div>
-    {showSubmitConfirm && <div className="viewerAppShell"><ViewerSubmitConfirm answered={answered} remaining={Math.max(0, info.questionCount - answered)} flagged={0} onBack={() => setShowSubmitConfirm(false)} onSubmit={() => { setShowSubmitConfirm(false); finishInterview({...answers, [current]: transcript.trim()}); }}/></div>}
+    {/* aiSubmissionPopupHost */}
+    {(showSubmitConfirm || screen === "success") && <div className="viewerAppShell" style={{display:"contents"}}>
+      {showSubmitConfirm && <ViewerSubmitConfirm answered={answered} remaining={Math.max(0, info.questionCount - answered)} flagged={0} onBack={() => setShowSubmitConfirm(false)} onSubmit={() => { setShowSubmitConfirm(false); finishInterview({...answers, [current]: transcript.trim()}); }}/>}
+      {screen === "success" && <TextSubmitSuccess title={info.title} scorePercent={null} pendingCount={Math.max(1, answered)} passingScore={String(minimumScore)}
+        release={{mode:"immediate",releaseDateLabel:"",showScore:false,showPassFail:false,showCorrectAnswers:false,showExplanation:false,message:"Your assessment has been submitted. Your answers are awaiting grading."}}
+        onClose={() => setScreen("result")} onBack={() => router.push("/assessments/list")} backLabel="Back to Assessments" onViewResult={() => setScreen("result")}/>}
+    </div>}
   </div></main></div></div>;
 }

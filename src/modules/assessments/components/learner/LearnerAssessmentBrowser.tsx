@@ -72,7 +72,7 @@ export default function LearnerAssessmentBrowser(){
     for (const key of ["viewerAttemptDraft", "fillBlanksViewerState", "dragDropViewerState", "matchFollowingViewerState", "connectDotsViewerState", "viewClickHotspotViewerState"]) {
       try { const saved=JSON.parse(assessmentStorage.getItem(key) || "null"); if(saved && (saved.submitted || saved.finished)) assessmentStorage.removeItem(key); } catch { /* Keep malformed or unfinished work untouched. */ }
     }
-    const resumeProblem = /^problem-solving/.test(selected.record.typeCode) && selected.attemptsUsed > 0 && !selected.hasActiveAttempt;
+    const resumeProblem = /^problem-solving/.test(selected.record.typeCode) && selected.attemptsUsed > 0 && !("hasActiveAttempt" in selected && Boolean(selected.hasActiveAttempt));
     router.push(`${viewerPath(selected.record.id)}?instructions=1${resumeProblem ? "&retry=1" : ""}`);
   };
   if(!ready)return null;
@@ -102,7 +102,7 @@ export default function LearnerAssessmentBrowser(){
               <div><span>Duration</span><strong>{selected.duration?`${selected.duration} min`:"Untimed"}</strong></div>
               <div><span>Passing score</span><strong>{selected.passingScore}</strong></div>
               <div><span>Negative marking</span><strong>{selected.negativeMarking}</strong></div>
-              <div><span>Attempts used</span><strong>{selected.attemptsUsed + (selected.hasActiveAttempt ? 1 : 0)} / {selected.attemptLimitLabel}</strong></div>
+              <div><span>Attempts used</span><strong>{selected.attemptsUsed + (("hasActiveAttempt" in selected && Boolean(selected.hasActiveAttempt)) ? 1 : 0)} / {selected.attemptLimitLabel}</strong></div>
             </div>
           </section>
           <section className="learnerDetailCard"><h3>Schedule</h3><div className="learnerScheduleGrid"><div><span>Available window</span><strong>{selected.schedule}</strong></div><div><span>Mode</span><strong>{selected.mode}</strong></div></div></section>
@@ -114,10 +114,10 @@ export default function LearnerAssessmentBrowser(){
             const threshold=Number.parseFloat(selected.passingScore);
             const grade=policy.showPassFail && score!==null && Number.isFinite(threshold) ? (score>=threshold?"Passed":"Not passed") : "—";
             return <tr key={attempt.attemptId||index}><td>{index+1}</td><td>{dateText(attempt.submittedAt)}</td><td>{waiting ? (policy.mode==="scheduled"?"Scheduled":"Not released") : pending ? "Awaiting grading" : policy.showScore && score!==null ? String(score) + "%" : "—"}</td><td>{waiting ? (policy.mode==="scheduled"?"Scheduled: " + policy.releaseDateLabel:"Not released") : pending ? "Pending review" : "Available"}</td><td>{waiting ? (policy.mode==="scheduled"?"Scheduled":"Not released") : pending ? "Awaiting grading" : grade}</td></tr>;
-          }):<tr className="learnerEmptyHistoryRow"><td colSpan={5}><span className="learnerNoAttempts">{selected.hasActiveAttempt?"Attempt in progress":"No attempt yet"}</span></td></tr>}</tbody></table></div>
+          }):<tr className="learnerEmptyHistoryRow"><td colSpan={5}><span className="learnerNoAttempts">{("hasActiveAttempt" in selected && Boolean(selected.hasActiveAttempt))?"Attempt in progress":"No attempt yet"}</span></td></tr>}</tbody></table></div>
             {selected.attempts.length>0 && release?.mode !== "never" && <div className="learnerReadyActions"><button type="button" disabled={release?.mode!=="immediate"} onClick={()=>{setActiveAssessmentId(selected.record.id);router.push(resultPath(selected.record.id));}}>View Result</button></div>}
           </section>
-          <section className="learnerDetailCard learnerReadyCard"><h3>Ready to Begin</h3><div className="learnerReadyChecks"><p className={selected.canStart?"is-positive":"is-muted"}>{selected.canStart?"Assessment open now":selected.status==="Upcoming"?"Assessment is not open yet":"Assessment is closed or completed"}</p><p className="is-positive">{selected.maxAttempts===null?"Attempts are available":`${Math.max(0,selected.maxAttempts-selected.attemptsUsed-(selected.hasActiveAttempt?1:0))} attempt(s) remaining`}</p><p className="learnerReadyNeutral">Stable internet connection</p><p className="learnerReadyNeutral">Quiet place{selected.duration?`, ${selected.duration} minutes free`:""}</p></div>
+          <section className="learnerDetailCard learnerReadyCard"><h3>Ready to Begin</h3><div className="learnerReadyChecks"><p className={selected.canStart?"is-positive":"is-muted"}>{selected.canStart?"Assessment open now":selected.status==="Upcoming"?"Assessment is not open yet":"Assessment is closed or completed"}</p><p className="is-positive">{selected.maxAttempts===null?"Attempts are available":`${Math.max(0,selected.maxAttempts-selected.attemptsUsed-(("hasActiveAttempt" in selected && Boolean(selected.hasActiveAttempt))?1:0))} attempt(s) remaining`}</p><p className="learnerReadyNeutral">Stable internet connection</p><p className="learnerReadyNeutral">Quiet place{selected.duration?`, ${selected.duration} minutes free`:""}</p></div>
             <div className="learnerReadyActions"><button type="button" disabled={!selected.canStart} onClick={proceed}>Proceed to instructions <span aria-hidden="true">→</span></button></div>
             {!selected.canStart&&<p className="learnerUnavailableNote">{selected.status==="Upcoming"?`Available when the assessment opens${selected.startAt?` on ${dateText(selected.startAt.toISOString())}`:""}.`:"This assessment is no longer available to start."}</p>}
           </section>

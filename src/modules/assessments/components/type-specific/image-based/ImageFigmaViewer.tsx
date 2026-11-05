@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -16,6 +17,7 @@ import {
 import "./image-figma-viewer.css";
 import "./image-dropdown-viewer.css";
 import "./image-viewer-scroll-fix.css";
+import "./image-figma-mcq-parity.css";
 import ImageViewerSubmitPopups from "./ImageViewerSubmitPopups";
 import { applyImageViewerRetry, isImageViewerRetry, saveImageViewerSubmission } from "./image-viewer-submission";
 
@@ -246,7 +248,7 @@ export default function ImageFigmaViewer({ mode = "image-labeling" }: { mode?: "
     <div className="ifv-workspace">
       <Header />
       <main className="ifv-main">
-        <div className="ifv-breadcrumb"><span>Assessment</span>{icon("arrow-right-double", 18)}<span>{preview ? "Learner Preview" : "Start Assessment"}</span>{icon("arrow-right-double", 18)}<b>Questions</b></div>
+        <div className="ifv-breadcrumb"><Link href={preview ? "/assessments" : "/assessments/list"} style={{color:"inherit",textDecoration:"none"}}>Assessment</Link>{icon("arrow-right-double", 18)}<span>{preview ? "Learner Preview" : "Start Assessment"}</span>{icon("arrow-right-double", 18)}<b>Questions</b></div>
         <div className="ifv-heading"><h1>{getAssessment(getActiveAssessmentId() || "")?.title || "Image-Based Assessment"}</h1><div className="ifv-timer" aria-label={`Time remaining ${timer}`}>{timer.split(":").map((group, i) => <span key={i} className="ifv-clock-group">{[...group].map((digit, k) => <span className="ifv-clock-digit" key={k}>{digit}</span>)}{i < 2 && <b>:</b>}</span>)}</div></div>
         <div className="ifv-progress-row"><strong>{current + 1}/{questions.length}</strong><div className="ifv-progress-track"><span style={{ width: `${progress}%` }} /></div><span>{progress}%</span></div>
         <div className="ifv-layout">
@@ -302,10 +304,10 @@ export default function ImageFigmaViewer({ mode = "image-labeling" }: { mode?: "
               })}</div>
             </div>}
 
-            <div className="ifv-question-meta"><div className="ifv-hint"><div className="ifv-meta-title"><span className="ifv-meta-bubble">{icon("idea-01", 16)}</span><strong>Hint</strong></div>{question.hint ? <button type="button" className="ifv-hint-button" onClick={() => setHintOpen(v => !v)}>{hintOpen ? "Hide" : "Show"}</button> : <span>Not available</span>}{hintOpen && question.hint && <p className="ifv-hint-text">{stripped(question.hint)}</p>}</div><div className="ifv-bloom"><span>Bloom’s Taxonomy</span><b>{question.bloom || "Analyse"}</b></div></div>
-            <button className="ifv-flag-button" type="button" onClick={() => setFlagged(prev => prev.includes(question.id) ? prev.filter(id => id !== question.id) : [...prev, question.id])}>{icon("flag", 20)} {flagged.includes(question.id) ? "Remove Flag" : "Flag for review"}</button>
+            <div className="ifv-hint-row"><div className="ifv-hint"><div className="ifv-meta-title"><span className="ifv-meta-bubble">{icon("idea-01", 16)}</span><strong>Hint</strong></div>{question.hint ? <button type="button" className="ifv-hint-button" onClick={() => setHintOpen(v => !v)}>{hintOpen ? "Hide" : "Show"}</button> : <span>Not available</span>}{hintOpen && question.hint && <p className="ifv-hint-text">{stripped(question.hint)}</p>}</div></div>
+            <div className="ifv-info-row"><div className="ifv-bloom"><span>Bloom’s Taxonomy</span><b>{question.bloom || "Analyse"}</b></div><button className="ifv-flag-button" type="button" onClick={() => setFlagged(prev => prev.includes(question.id) ? prev.filter(id => id !== question.id) : [...prev, question.id])}>{icon("flag", 20)} {flagged.includes(question.id) ? "Remove Flag" : "Flag for review"}</button></div>
             {isChecked && <div className={`ifv-check-feedback ${correctOnCheck ? "is-correct" : "is-incorrect"}`} role="status">{correctOnCheck ? "Correct answer" : !hasResponse(question, currentAnswer) ? "Please answer the question first." : "Answer checked. You can change your selection."}</div>}
-            <div className="ifv-actions">{current > 0 && <button type="button" disabled={current === 0} onClick={() => moveTo(current - 1)}>{icon("arrowleft", 22)}Previous</button>}<button type="button" onClick={() => setChecked(prev => prev.includes(question.id) ? prev : [...prev, question.id])}>Check Answer</button><button type="button" onClick={() => current < questions.length - 1 ? moveTo(current + 1) : setConfirm(true)}>{current === questions.length - 1 ? "Submit" : "Next"}{icon("arrowright", 22)}</button></div>
+            <div className="ifv-actions">{current > 0 && <button type="button" disabled={current === 0} onClick={() => moveTo(current - 1)}>{icon("arrowleft", 22)}Previous</button>}<></><button type="button" onClick={() => current < questions.length - 1 ? moveTo(current + 1) : setConfirm(true)}>{current === questions.length - 1 ? "Submit" : "Next"}{icon("arrowright", 22)}</button></div>
           </section>
           <aside className="ifv-side-panel" aria-label="Question navigator and tools">
             <h2>Question Navigator</h2>
@@ -317,7 +319,7 @@ export default function ImageFigmaViewer({ mode = "image-labeling" }: { mode?: "
             })}</div>
             <div className="ifv-nav-status"><div>{icon("checkmark-circle-02", 20)}<span>Answered</span><b>{answered}</b></div><div><span className="ifv-remaining-dot"/><span>Remaining</span><b>{remaining}</b></div><div>{icon("flag", 19)}<span>Flagged</span><b>{flagged.length}</b></div></div>
             <div className="ifv-tools"><h3>Tools</h3>{[{ label: "Scratch pad", icon: "sticky-note", route: "scratch" }, { label: "Calculator", icon: "calculator", route: "calculator" }, { label: "Formula sheet", icon: "sigma", route: "formulasheet" }].map(tool => <button type="button" key={tool.route} onClick={() => router.push(`${viewerPath()}/${tool.route}`)}><span className="ifv-tool-icon">{icon(tool.icon, 24)}</span>{tool.label}{icon("arrowupright", 20)}</button>)}</div>
-            <button type="button" className="ifv-submit" onClick={() => setConfirm(true)}>{preview ? "Finish Preview" : "Submit Assessment"}</button>
+            
           </aside>
         </div>
         {error && <p role="alert" className="ifv-error">{error}</p>}

@@ -697,7 +697,7 @@ export default function ViewProblemPage() {
         <div className="institutionScrollArea viewerScroll"><div className="pageContent institutionPageContent viewerContent">
           <nav className="viewerBreadcrumb" aria-label="Breadcrumb">
             <Link href="/learner">Dashboard</Link><Icon name="arrow-right-double.svg" size={24}/>
-            <Link href="/learner">Assessment</Link><Icon name="arrow-right-double.svg" size={24}/>
+            <Link href="/assessments/list">Assessment</Link><Icon name="arrow-right-double.svg" size={24}/>
             <strong>{draft.title}</strong>
           </nav>
           <div className="viewerPageHeading"><h1>{draft.title}</h1><p>Problem-Solving Challenge</p></div>
@@ -798,7 +798,7 @@ export default function ViewProblemPage() {
               <div className="viewerExamTop">
                 <nav className="viewerBreadcrumb" aria-label="Breadcrumb">
                   <Link href="/super_admin">Dashboard</Link><Icon name="arrow-right-double.svg" size={20} />
-                  <Link href="/learner">Assessment</Link><Icon name="arrow-right-double.svg" size={20} />
+                  <Link href="/assessments/list">Assessment</Link><Icon name="arrow-right-double.svg" size={20} />
                   <strong>{draft.title}</strong>
                 </nav>
                 <Stopwatch seconds={secondsLeft} />

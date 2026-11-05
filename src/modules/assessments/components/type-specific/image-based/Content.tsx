@@ -1,15 +1,17 @@
 "use client";
-import { AssessmentEditorDropdown } from "@/modules/assessments/components/common/steps/DetailsStep/DetailsStep";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ChangeEvent, type MouseEvent } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight, Plus, X, Image as ImageIcon, Settings2, ClipboardList, MessageCircleMore, Check, Sparkles, Undo2, Redo2, Bold, Italic, Underline, Grid2X2, Upload } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Plus, X, Image as ImageIcon, Settings2, ClipboardList, MessageCircleMore, Check, Sparkles, Grid2X2, Upload } from "lucide-react";
 import Sidebar from "../../common/sidebar/page";
 import Header from "../../common/header/Header";
-import { assessmentStorage, updateAssessment } from "@/modules/assessments/storage/assessment-storage";
+import { assessmentStorage, updateAssessment, getActiveAssessmentId } from "@/modules/assessments/storage/assessment-storage";
 import { imageDetails, imageCorrectIndices, imageQuestionStarted, imageQuestionValid, newImageQuestion, IMAGE_CONTENT_KEY, type ImageDraft, type ImageQuestion, type ImageMatchPair, type ImageSubtype, type ImageLabelPin, type ImageDropdownSpot, type ImageDropdownChoice, newImageMatchPair, newLabelPin, newDropdownSpot, newDropdownChoice, newSequenceStep, type ImageSequenceStep, newSortingItem, type ImageSortingItem } from "./image-based-data";
 import "./image-based.css";
+import ImageBasedRichEditor from "./ImageBasedRichEditor";
+import "./image-based-editor-parity.css";
+import "./image-based-mcq-sidebar-repair.css";
 
 type Section = "Question and Image" | "Answer Options" | "Question" | "Picture and matching text" | "Image Labelling" | "Labels" | "Dropdowns on the Picture" | "Drag Items" | "Groups and Items" | "Grading Method" | "Feedback" | "Model Answer and Grader Information";
 const SECTIONS: Section[] = ["Question and Image", "Answer Options", "Grading Method", "Feedback"];
@@ -28,49 +30,92 @@ const iconMap = { "Question and Image": Grid2X2, "Answer Options": ClipboardList
 const cap = (value: string, maximum = 250) => value.slice(0, maximum);
 const label = (n: number) => String.fromCharCode(65 + n);
 
-function UploadImage({ value, onChange, title, compact=false, fallback="", matching=false, sequencing=false, sequenceIndex=0, galleryMode=false }: { value: string; onChange: (data: string) => void; title: string; compact?: boolean; fallback?: string; matching?: boolean; sequencing?: boolean; sequenceIndex?: number; galleryMode?: boolean }) {
+/* BEGIN: Image-Based creator-selected image size limit (scoped) */
+const IMAGE_UPLOAD_LIMIT_KB_KEY = "imageBasedUploadLimitKB";
+
+const imageUploadLimitLabel = (kb: number) => kb >= 1024 ? `${Number((kb / 1024).toFixed(2))} MB` : `${kb} KB`;
+function imageUploadLimitFromValue(value: unknown): number | null {
+  if (typeof value !== "number" && typeof value !== "string") return null;
+  const match = String(value).trim().match(/^(\d+(?:\.\d+)?)\s*(kb|kib|mb|mib)?$/i);
+  if (!match) return null;
+  const number = Number(match[1]);
+  const limit = /^(mb|mib)$/i.test(match[2] || "") ? number * 1024 : number;
+  return Number.isFinite(limit) && limit >= 1 && limit <= 8192 ? Math.round(limit) : null;
+}
+function readImageUploadLimitKB(): number {
+  try {
+    const saved = imageUploadLimitFromValue(assessmentStorage.getItem(IMAGE_UPLOAD_LIMIT_KB_KEY));
+    if (saved !== null) return saved;
+  } catch { /* Fall back to Details when browser storage is unavailable. */ }
+  try {
+    const raw = JSON.parse(assessmentStorage.getItem("mcqAssessmentDraft") || "{}");
+    const criteria = raw?.imageUploadCriteria ?? raw?.uploadCriteria ?? {};
+    const detailsLimit = [raw?.maxImageSizeKB, raw?.maxImageSizeKb, raw?.imageUploadLimitKB, raw?.imageSizeLimit, raw?.maxImageSize, criteria?.maxImageSizeKB, criteria?.maxImageSizeKb].map(imageUploadLimitFromValue).find((v): v is number => v !== null);
+    if (detailsLimit !== undefined) return detailsLimit;
+  } catch { /* Invalid details should not break image upload. */ }
+  return 8192;
+}
+/* END: Image-Based creator-selected image size limit (scoped) */
+function UploadImage({ value, onChange, title, compact=false, fallback="", matching=false, sequencing=false, sequenceIndex=0, galleryMode=false, maxImageKB=8192 }: { value: string; onChange: (data: string) => void; title: string; compact?: boolean; fallback?: string; matching?: boolean; sequencing?: boolean; sequenceIndex?: number; galleryMode?: boolean; maxImageKB?: number }) {
   const input = useRef<HTMLInputElement>(null);
   const [error,setError] = useState("");
+  const commitImageSelection = (image: string) => {
+    try {
+      onChange(image); // The parent saves the actual updated draft before updating the UI.
+      setError("");
+    } catch (error) {
+      const details = error as { name?: string; message?: string } | null;
+      if (details?.name === "QuotaExceededError" || details?.name === "NS_ERROR_DOM_QUOTA_REACHED") {
+        setError("Browser storage is full. The previous saved draft has not been changed.");
+      } else if (details?.message === "No active assessment selected" || details?.message === "Assessment changed while the image was being processed.") {
+        setError("The assessment is no longer active. Reopen it and try again.");
+      } else {
+        setError("Could not save this image. The previous saved draft has not been changed.");
+      }
+    }
+  };
+  /* IMAGE_BASED_UPLOAD_ACCEPTANCE_FIXED */
   const change = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    event.target.value = "";
-    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
-      setError("Please choose a PNG, JPG or WebP image.");
-      return;
+    const file=event.currentTarget.files?.[0];
+    if(!file)return;
+    event.currentTarget.value="";
+    const limitKB=Number.isFinite(maxImageKB)&&maxImageKB>=1?maxImageKB:8192;
+    if(!["image/png","image/jpeg","image/webp"].includes(file.type) && !(file.type==="" && /\.(png|jpg|jpeg|webp)$/i.test(file.name))){
+      setError("Please select a PNG, JPG, or WebP image.");return;
     }
-    if (file.size > 8_000_000) {
-      setError("Choose an image smaller than 8 MB.");
-      return;
+    if(file.size>limitKB*1024){
+      setError("The file is " + Math.ceil(file.size/1024) + " KB; the selected limit is " + imageUploadLimitLabel(limitKB) + ".");return;
     }
-    const reader = new FileReader();
-    reader.onerror = () => setError("Unable to read this image.");
-    reader.onload = () => {
-      if (typeof reader.result !== "string") return;
-      const img = new window.Image();
-      img.onerror = () => setError("Unable to process this image.");
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const maxSide = Math.max(img.naturalWidth, img.naturalHeight);
-        let scale = Math.min(1, 1000 / Math.max(1, maxSide));
-        let result = "";
-        for (let attempt = 0; attempt < 4; attempt += 1) {
-          canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
-          canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
-          const context = canvas.getContext("2d");
-          if (!context) { setError("Image processing is unavailable."); return; }
-          context.fillStyle = "#FFFFFF";
-          context.fillRect(0, 0, canvas.width, canvas.height);
-          context.drawImage(img, 0, 0, canvas.width, canvas.height);
-          result = canvas.toDataURL("image/jpeg", 0.70);
-          if (result.length <= 180_000) break;
-          scale *= 0.72;
+    const reader=new FileReader();
+    reader.onerror=()=>setError("Could not read this image. Please try again.");
+    reader.onload=()=>{
+      const raw=reader.result;
+      if(typeof raw!=="string" || !raw.startsWith("data:image/")){setError("This image cannot be decoded.");return;}
+      const commit=(result:string)=>commitImageSelection(result);
+      // Original small PNG/JPG/WebP images are saved unchanged. This includes 50 KB files.
+      if(raw.length<=120000){commit(raw);return;}
+      const img=new window.Image();
+      img.onerror=()=>setError("Unable to process this image.");
+      img.onload=()=>{
+        const canvas=document.createElement("canvas");
+        let scale=Math.min(1,1200/Math.max(img.naturalWidth,img.naturalHeight,1));
+        let output="";
+        for(let attempt=0;attempt<16;attempt+=1){
+          canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));
+          canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+          const context=canvas.getContext("2d");
+          if(!context){setError("Image processing is unavailable in this browser.");return;}
+          context.fillStyle="#FFFFFF";
+          context.fillRect(0,0,canvas.width,canvas.height);
+          context.drawImage(img,0,0,canvas.width,canvas.height);
+          output=canvas.toDataURL("image/jpeg",Math.max(.4,.82-attempt*.035));
+          if(output.length<=120000)break;
+          scale*=.78;
         }
-        if (result.length > 180_000) {setError("The image is too large to store in the assessment draft.");return;}
-        onChange(result);
-        setError("");
+        if(output.length>120000){setError("Could not optimize the image for browser draft storage. Please try a smaller image.");return;}
+        commit(output);
       };
-      img.src = reader.result;
+      img.src=raw;
     };
     reader.readAsDataURL(file);
   };
@@ -85,7 +130,7 @@ function UploadImage({ value, onChange, title, compact=false, fallback="", match
         {value ? <img src={value} alt={title}/> : fallback ? <><ImageIcon size={28}/><img className="ibqMatchAsset" src={fallback} alt="" onError={event=>{event.currentTarget.style.display="none"}}/></> : <ImageIcon size={28}/>}
       </button>
       <button type="button" className="ibqMatchUploadIcon" aria-label={`Upload ${title}`} onClick={()=>input.current?.click()}><Upload size={22}/></button>
-    </div> : value && !galleryMode ? <div className="ibqImagePreview"><img src={value} alt={title}/><button type="button" aria-label={`Remove ${title}`} onClick={()=>onChange("")}><X size={18}/></button></div> : <button className="ibqUpload" type="button" title={`Upload ${title}`} onClick={()=>input.current?.click()}>{fallback&&compact?<><ImageIcon size={compact?18:22}/><img src={fallback} alt="" onError={event=>{event.currentTarget.style.display="none"}}/></>:<ImageIcon size={compact?18:22}/>}<span>{compact?"Choose image":<><Upload size={20}/> Upload Image</>}</span>{!compact&&<small>PNG, JPG or WebP · Max 8 MB</small>}</button>}
+    </div> : value && !galleryMode ? <div className="ibqImagePreview"><img src={value} alt={title}/><button type="button" aria-label={`Remove ${title}`} onClick={()=>commitImageSelection("")}><X size={18}/></button></div> : <button className="ibqUpload" type="button" title={`Upload ${title}`} onClick={()=>input.current?.click()}>{fallback&&compact?<><ImageIcon size={compact?18:22}/><img src={fallback} alt="" onError={event=>{event.currentTarget.style.display="none"}}/></>:<ImageIcon size={compact?18:22}/>}<span>{compact?"Choose image":<><Upload size={20}/> Upload Image</>}</span>{!compact&&<small>PNG, JPG or WebP · Max {imageUploadLimitLabel(maxImageKB)}</small>}</button>}
     <input type="file" ref={input} hidden accept="image/*" onChange={change} />
     {error && <span className="ibqError" role="alert">{error}</span>}
   </div>;
@@ -123,7 +168,7 @@ function AsideNeumorphicSelect({id,value,options,onChange,title}:{id:string;valu
     <button type="button" id={id} className="ibqAsidePickTrigger"
       aria-label={title} aria-haspopup="listbox" aria-expanded={expanded}
       aria-controls={`${id}-menu`} onClick={()=>setExpanded(v=>!v)}>
-      <span>{value}</span><LabelAsset file="arrow-down-01.svg" size={20} className={expanded?"ibqRotated":""}/>
+      <span data-ibq-value-label="true" style={{color:"#374151"}}>{typeof value === "string" && value.trim() ? value : title === "Bloom’s Taxonomy" ? "Select Bloom’s Level" : `Select ${title}`}</span><LabelAsset file="arrow-down-01.svg" size={20} className={expanded?"ibqRotated":""}/>
     </button>
     {expanded&&<div id={`${id}-menu`} className="ibqAsidePickMenu" role="listbox" aria-label={title}>
       {options.map(option=><button key={option} type="button" role="option" aria-selected={option===value}
@@ -134,58 +179,7 @@ function AsideNeumorphicSelect({id,value,options,onChange,title}:{id:string;valu
 }
 
 /** Small rich-text control. The stored value stays plain text for the existing viewer and result screens. */
-function RichEditor({ value, onChange, label: ariaLabel, rows=3, placeholder="", tone="" }: {
-  value: string; onChange:(value:string)=>void; label:string; rows?:number; placeholder?:string; tone?:string;
-}) {
-  const ref=useRef<HTMLDivElement>(null);
-  const history=useRef<string[]>([value]);
-  const position=useRef(0);
-  const [family,setFamily]=useState("Arial");
-  const [size,setSize]=useState("16");
-  const [more,setMore]=useState(false);
-  useEffect(()=>{
-    if(ref.current && ref.current.innerText !== value){ref.current.innerText=value;history.current=[value];position.current=0;}
-  },[value]);
-  const setText=(next:string)=>{
-    const trimmed=cap(next,250);
-    if(trimmed!==history.current[position.current]){
-      history.current=history.current.slice(0,position.current+1);
-      history.current.push(trimmed);position.current=history.current.length-1;
-    }
-    onChange(trimmed);
-    if(next.length>250 && ref.current) ref.current.innerText=trimmed;
-  };
-  const undo=(delta:number)=>{
-    position.current=Math.min(Math.max(0,position.current+delta),history.current.length-1);
-    const next=history.current[position.current];
-    if(ref.current)ref.current.innerText=next;
-    onChange(next);
-  };
-  const command=(name:string,arg?:string)=>{
-    ref.current?.focus();
-    document.execCommand(name,false,arg);
-    setText(ref.current?.innerText || "");
-  };
-  return <div className={`ibqRich ${tone}`}>
-    <div className="ibqRichToolbar" aria-label={`${ariaLabel} formatting tools`}>
-      <button type="button" onClick={()=>undo(-1)} title="Undo" aria-label="Undo"><Undo2 size={16}/></button>
-      <button type="button" onClick={()=>undo(1)} title="Redo" aria-label="Redo"><Redo2 size={16}/></button>
-      <AssessmentEditorDropdown className="mcqEditorFont" label="Font" value={family} options={["Arial", "Segoe UI", "Inter"]} onChange={setFamily} />
-      <AssessmentEditorDropdown className="mcqEditorSize" label="Font size" value={size} options={["12", "14", "16", "18", "20"]} onChange={setSize} />
-      <button type="button" onClick={()=>command("bold")} title="Bold" aria-label="Bold"><Bold size={16}/></button>
-      <button type="button" onClick={()=>command("italic")} title="Italic" aria-label="Italic"><Italic size={16}/></button>
-      <button type="button" onClick={()=>command("underline")} title="Underline" aria-label="Underline"><Underline size={16}/></button>
-      <button type="button" onClick={()=>command("foreColor","#2D4CC8")} title="Blue text" aria-label="Blue text"><span className="ibqLetterColor">A</span></button>
-      <button type="button" onClick={()=>command("insertUnorderedList")} title="Bulleted list" aria-label="Bulleted list"><ClipboardList size={16}/></button>
-      <button className="ibqMoreToolbar" type="button" onClick={()=>setMore(x=>!x)} title="More tools" aria-label="More tools">•••</button>
-      {more&&<button type="button" onClick={()=>command("removeFormat")} title="Clear formatting">Clear</button>}
-    </div>
-    <div ref={ref} contentEditable suppressContentEditableWarning role="textbox" aria-label={ariaLabel} aria-multiline="true"
-      data-placeholder={placeholder} className="ibqRichInput" style={{minHeight:rows*24+29,fontFamily:family,fontSize:`${size}px`}}
-      onInput={e=>setText(e.currentTarget.innerText)} />
-    <small className="assessmentEditorCounter" aria-live="polite">{value.length}/250</small>
-  </div>;
-}
+const RichEditor = ImageBasedRichEditor;
 
 function Toggle({value,onChange,title}:{value:boolean;onChange:(v:boolean)=>void;title:string}){
   return <button type="button" title={title} aria-label={title} role="switch" aria-checked={value} onClick={()=>onChange(!value)}
@@ -199,6 +193,33 @@ function GalleryThumb({src,selected,onSelect,index}:{src:string;selected:boolean
     aria-label={src?`Select uploaded image ${index+1}`:`Empty image slot ${index+1}`}>
     {src&&!failed?<img alt={`Uploaded image ${index+1}`} src={src} onError={()=>setFailed(true)}/>:<><ImageIcon size={27}/><small>Image {index+1}</small></>}
   </button>;
+}
+
+
+// Save the complete updated draft in one storage write; a failed write retains the old draft.
+function saveImageQuestionDraft(
+  questions: ImageQuestion[], active: number, requestedIndex: number,
+  requestedQuestion: ImageQuestion, assessmentId: string | null,
+  applyImage: (question: ImageQuestion) => ImageQuestion
+): ImageQuestion[] {
+  if (!assessmentId || getActiveAssessmentId() !== assessmentId) {
+    throw new Error("Assessment changed while the image was being processed.");
+  }
+  const next = questions.slice();
+  let index = next.findIndex(item => item.id === requestedQuestion.id);
+  if (index < 0 && active === requestedIndex && requestedIndex >= next.length) {
+    while (next.length < requestedIndex) next.push(newImageQuestion());
+    index = requestedIndex;
+    next.push(requestedQuestion);
+  }
+  if (index < 0) throw new Error("The question changed while the image was being processed.");
+  const current = next[index];
+  if ((current.subtype || "multiple-choice") !== (requestedQuestion.subtype || "multiple-choice")) {
+    throw new Error("The question changed while the image was being processed.");
+  }
+  next[index] = applyImage(current);
+  assessmentStorage.setItem(IMAGE_CONTENT_KEY, JSON.stringify({questions:next, active, savedAt:new Date().toISOString()}));
+  return next;
 }
 
 export default function ImageBasedContent() {
@@ -216,6 +237,7 @@ export default function ImageBasedContent() {
   const [newTag,setNewTag]=useState("");
   const [message,setMessage]=useState("");
   const [saving,setSaving]=useState(false);
+  const [imageUploadLimitKB,setImageUploadLimitKB]=useState(8192);
   const continueTimer=useRef<number|null>(null);
   useEffect(()=>()=>{if(continueTimer.current!==null)window.clearTimeout(continueTimer.current);},[]);
   useEffect(()=>{if(message!=="Successfully saved"||saving)return;const timer=window.setTimeout(()=>setMessage(""),3000);return()=>window.clearTimeout(timer);},[message,saving]);
@@ -224,6 +246,7 @@ export default function ImageBasedContent() {
   useEffect(()=>{
     try {
       const details=imageDetails();setCount(details.count);setTotalMarks(details.totalMarks);
+       setImageUploadLimitKB(readImageUploadLimitKB());
       try {const evalSettings=JSON.parse(assessmentStorage.getItem("mcqAssessmentEvaluationDraft")||"{}");setPassingScore(String(evalSettings.passingScore||details.passingScore));}catch{setPassingScore(String(details.passingScore));}
       const draft=assessmentStorage.getItem(IMAGE_CONTENT_KEY);
       if(draft){const value=JSON.parse(draft) as ImageDraft; if(Array.isArray(value.questions) && value.questions.length){setQuestions(value.questions);setActive(Math.max(0,Math.min(value.active||0,details.count-1))); const restored=value.questions[Math.max(0,Math.min(value.active||0,details.count-1))]; if(restored?.subtype === "image-labeling") setOpen(["Question and Image","Labels","Grading Method","Model Answer and Grader Information"]);
@@ -252,6 +275,19 @@ export default function ImageBasedContent() {
     try {assessmentStorage.setItem(IMAGE_CONTENT_KEY,JSON.stringify({questions,active,savedAt:new Date().toISOString()}));} catch {setMessage("Draft could not be saved. Please use smaller images.");}
   },[questions,active,ready]);
   const question=questions[active] || newImageQuestion();
+  const latestImageDraft = useRef({questions, active});
+  latestImageDraft.current = {questions, active};
+  const imageAssessmentId = getActiveAssessmentId();
+  const imageCreatorMounted = useRef(true);
+  useEffect(() => { imageCreatorMounted.current = true; return () => { imageCreatorMounted.current = false; }; }, []);
+  const commitImageChange = (applyImage: (current: ImageQuestion) => ImageQuestion) => {
+    if (!imageCreatorMounted.current) throw new Error("The question is no longer open.");
+    const latest = latestImageDraft.current;
+    const next = saveImageQuestionDraft(latest.questions, latest.active, active, question, imageAssessmentId, applyImage);
+    latestImageDraft.current = {...latest, questions:next};
+    setQuestions(next);
+    setMessage("");
+  };
   const isMatching=question.subtype === "image-matching";
   const isLabeling=question.subtype === "image-labeling";
   const isDropdown=question.subtype === "image-dropdown";
@@ -262,14 +298,6 @@ export default function ImageBasedContent() {
   const galleryImages: string[] = Array.isArray(question.galleryImages) && question.galleryImages.length
     ? question.galleryImages.slice(0,4)
     : question.image ? [question.image] : [];
-  const uploadGalleryImage=(image:string)=>{
-    const next=[...galleryImages];
-    const empty=Array.from({length:4},(_,i)=>i).find(i=>!next[i]);
-    // If all 4 are filled, replace the currently selected picture.
-    const slot=empty??Math.max(0,next.indexOf(question.image));
-    next[slot]=image;
-    update({galleryImages:next,image});
-  };
   const sections: Section[] = isSorting ? ["Question and Image", "Groups and Items", "Grading Method", "Model Answer and Grader Information"] : isSequencing ? ["Question and Image", "Drag Items", "Grading Method", "Feedback"] : isDropdown ? ["Question and Image", "Dropdowns on the Picture", "Grading Method", "Feedback"] : isLabeling ? ["Question and Image", "Labels", "Grading Method", "Model Answer and Grader Information"] : isMatching ? ["Question", "Picture and matching text", "Grading Method", "Feedback"] : SECTIONS;
   const pairs: ImageMatchPair[] = question.matchPairs || Array.from({length:4},newImageMatchPair);
   const update=(patch:Partial<ImageQuestion>)=>setQuestions(old=>{const copy=[...old];while(copy.length<=active) copy.push(newImageQuestion());copy[active]={...copy[active],...patch};return copy;});
@@ -285,7 +313,7 @@ export default function ImageBasedContent() {
       assessmentStorage.setItem(IMAGE_CONTENT_KEY,JSON.stringify({questions,active,savedAt:new Date().toISOString()}));
       const valid=questions.filter(imageQuestionValid);updateAssessment({questions:valid.length,marks:valid.reduce((sum,q)=>sum+(Number(q.points)||0),0)});
       setMessage("Successfully saved");
-      if(continueToEvaluation){setSaving(true);continueTimer.current=window.setTimeout(()=>{setMessage("");setSaving(false);router.push("/assessments/create/image-based-preview");},3000);}
+      if(continueToEvaluation){setSaving(true);continueTimer.current=window.setTimeout(()=>{setMessage("");setSaving(false);router.push("/assessments/create/evaluation");},3000);}
     } catch {setMessage("Unable to save. Please reduce image sizes.");}
   };
   const toggle=(name:Section)=>setOpen(old=>old.includes(name)?old.filter(x=>x!==name):[...old,name]);
@@ -377,14 +405,18 @@ export default function ImageBasedContent() {
           {sections.map(name=>{const Icon=iconMap[name];const opened=open.includes(name);return <div className="ibqAccordion" data-section={name} key={name}><button type="button" className="ibqAccordionToggle" aria-expanded={opened} onClick={()=>toggle(name)}><span className="ibqSectionIcon">{isSorting&&name==="Question and Image"?<LabelAsset file="grid-view.svg" size={16}/>:((isLabeling||isDropdown||isSequencing||isSorting)&&LABEL_SECTION_ASSETS[name]?<LabelAsset file={LABEL_SECTION_ASSETS[name]!} size={18}/>:<Icon size={18}/>)}</span><b>{name}</b>{(isLabeling||isSequencing||isSorting)?<LabelAsset file="arrow-down-01.svg" size={20} className={opened?"ibqRotated":""}/>:<ChevronDown className={opened?"ibqRotated":""} size={20}/>}</button>{opened&&<div className="ibqAccordionBody">
           {name==="Question"&&<>
             <label>Write your Question </label>
-            <RichEditor label="Write your matching question" rows={3} value={question.text} onChange={text=>update({text})} placeholder="Match each picture with its topic."/>
+            <RichEditor editorKey={`${question.id}:field-0`} label="Write your matching question" rows={3} value={question.text} onChange={text=>update({text})} placeholder="Match each picture with its topic."/>
           </>}
           {name==="Picture and matching text"&&<>
             <p className="ibqMatchHelper">Each row is one correct match</p>
             <div className="ibqMatchColumns"><b>Match Text</b><b>Image</b></div>
             <div className="ibqMatchList">{pairs.map((pair,i)=> <div className="ibqMatchRow" key={i}>
               <input aria-label={`Matching text ${i+1}`} type="text" maxLength={250} value={pair.text} placeholder={["Neural Network","Security","Cloud","Data Analysis"][i]||`Matching text ${i+1}`} onChange={e=>matchPair(i,{text:cap(e.target.value)})}/>
-              <div className="ibqMatchImageField"><UploadImage compact matching title={`Matching picture ${i+1}`} value={pair.image} fallback={["/assets/assessmenticons/image-matching-neural-network.svg","/assets/assessmenticons/image-matching-security.svg","/assets/assessmenticons/image-matching-cloud.svg","/assets/assessmenticons/image-matching-database.svg"][i]||""} onChange={image=>matchPair(i,{image})}/></div>
+              <div className="ibqMatchImageField"><UploadImage maxImageKB={imageUploadLimitKB} compact matching title={`Matching picture ${i+1}`} value={pair.image} fallback={["/assets/assessmenticons/image-matching-neural-network.svg","/assets/assessmenticons/image-matching-security.svg","/assets/assessmenticons/image-matching-cloud.svg","/assets/assessmenticons/image-matching-database.svg"][i]||""} onChange={image=>commitImageChange(current=>{
+                const currentPairs=current.matchPairs || Array.from({length:4},newImageMatchPair);
+                if(!currentPairs[i])throw new Error("The matching row is no longer available.");
+                return {...current,matchPairs:currentPairs.map((item,index)=>index===i?{...item,image}:item)};
+              })}/></div>
               <button className="ibqMatchRemove" type="button" aria-label={`Remove matching pair ${i+1}`} onClick={()=>update({matchPairs:pairs.filter((_,n)=>n!==i)})}><X size={18}/></button>
             </div>)}</div>
             <div className="ibqMatchAdd"><button className="ibqMatchAddButton" type="button" disabled={pairs.length>=6} onClick={()=>update({matchPairs:[...pairs,newImageMatchPair()]})}><Plus size={20}/><span>Add Pairs</span></button><small>2 to 6 options</small></div>
@@ -401,7 +433,11 @@ export default function ImageBasedContent() {
             </div>
             <div className="ibqSortingHead"><b>Image</b><b>Match Text</b><b>Group</b></div>
             <div className="ibqSortingList">{sortingItems.map((item,i)=><div className="ibqSortingRow" key={item.id}>
-              <div className="ibqSortingPicture"><UploadImage compact sequencing sequenceIndex={i} value={item.image} title={`Sorting item ${i+1} image`} onChange={image=>sortingItem(item.id,{image})}/></div>
+              <div className="ibqSortingPicture"><UploadImage maxImageKB={imageUploadLimitKB} compact sequencing sequenceIndex={i} value={item.image} title={`Sorting item ${i+1} image`} onChange={image=>commitImageChange(current=>{
+                const items=current.sortingItems||[];
+                if(!items.some(entry=>entry.id===item.id))throw new Error("The sorting item is no longer available.");
+                return {...current,sortingItems:items.map(entry=>entry.id===item.id?{...entry,image}:entry)};
+              })}/></div>
               <input className="ibqSortingText" type="text" value={item.text} aria-label={`Sorting item ${i+1} text`} maxLength={250} placeholder={['Monitor','Keyboard','Web Browser','Text editor','Database'][i]||`Item ${i+1}`} onChange={event=>sortingItem(item.id,{text:cap(event.target.value)})}/>
               <SortingGroupPicker title={`Correct group for item ${i+1}`} value={item.group} groups={sortingGroups} onChange={group=>sortingItem(item.id,{group})}/>
               <button className="ibqSortingRemove" type="button" title={`Remove item ${i+1}`} aria-label={`Remove item ${i+1}`} onClick={()=>update({sortingItems:sortingItems.filter(v=>v.id!==item.id)})}><span className="ibqSortingRemoveCircle"><LabelAsset file="cancel-circle-sequencing.svg" size={22}/></span></button>
@@ -414,7 +450,11 @@ export default function ImageBasedContent() {
             <div className="ibqSequenceHead"><b>Image</b><b>Match Text</b><b>Order</b></div>
             <div className="ibqSequenceList">
               {sequenceSteps.map((step,i)=><div className="ibqSequenceRow" key={step.id}>
-                <div className="ibqSequencePicture"><UploadImage compact sequencing sequenceIndex={i} value={step.image} title={`Step ${i+1} image`} onChange={image=>sequenceStep(step.id,{image})}/></div>
+                <div className="ibqSequencePicture"><UploadImage maxImageKB={imageUploadLimitKB} compact sequencing sequenceIndex={i} value={step.image} title={`Step ${i+1} image`} onChange={image=>commitImageChange(current=>{
+                  const steps=current.sequenceSteps||[];
+                  if(!steps.some(entry=>entry.id===step.id))throw new Error("The sequence step is no longer available.");
+                  return {...current,sequenceSteps:steps.map(entry=>entry.id===step.id?{...entry,image}:entry)};
+                })}/></div>
                 <input className="ibqSequenceText" type="text" value={step.text} maxLength={250} placeholder={['Collect Data','Clean Data','Train the Model','Evaluate','Deploy'][i]||`Step ${i+1}`} aria-label={`Step ${i+1} text`} onChange={event=>sequenceStep(step.id,{text:cap(event.target.value)})}/>
                 <div className="ibqSequenceOrder"><button aria-label={`Move step ${i+1} up`} type="button" disabled={i===0} onClick={()=>moveSequenceStep(i,-1)}><LabelAsset file="arrow-up-big.svg" size={28}/></button><button aria-label={`Move step ${i+1} down`} type="button" disabled={i===sequenceSteps.length-1} onClick={()=>moveSequenceStep(i,1)}><LabelAsset file="arrow-down-big.svg" size={28}/></button></div>
                 <button className="ibqSequenceRemove" type="button" title={`Remove step ${i+1}`} aria-label={`Remove step ${i+1}`} onClick={()=>update({sequenceSteps:sequenceSteps.filter(v=>v.id!==step.id)})}><span className="ibqSequenceRemoveCircle"><LabelAsset file="cancel-circle-sequencing.svg" size={22}/></span></button>
@@ -471,13 +511,19 @@ export default function ImageBasedContent() {
           </>}
           {name==="Question and Image"&&<>
             <label>Write your Question </label>
-            <RichEditor label="Write your Question" rows={3} value={question.text} onChange={text=>update({text})} placeholder="Write your question..." />
+            <RichEditor editorKey={`${question.id}:field-1`} label="Write your Question" rows={3} value={question.text} onChange={text=>update({text})} placeholder="Write your question..." />
             {!isSorting&&<><label>Choose an Image <span className="ibqRequired">*</span></label>
             {!isLabeling&&!isDropdown&&!isSequencing&&!isSorting&&<div className="ibqGallery">{Array.from({length:4},(_,i)=><GalleryThumb key={i} index={i} src={galleryImages[i]||""} selected={!!galleryImages[i]&&question.image===galleryImages[i]} onSelect={()=>{if(galleryImages[i])update({image:galleryImages[i]});}}/>)}</div>}
-            <UploadImage title="Image" galleryMode={!isLabeling&&!isDropdown&&!isSequencing&&!isSorting} value={question.image} onChange={image=>{
-              if(!isLabeling&&!isDropdown&&!isSequencing&&!isSorting){uploadGalleryImage(image);return;}
-              update({image,...(image!==question.image&&isLabeling?{labelPins:[]}:{}),...(image!==question.image&&isDropdown?{dropdownSpots:[]}: {})});
-            }}/>
+            <UploadImage maxImageKB={imageUploadLimitKB} title="Image" galleryMode={!isLabeling&&!isDropdown&&!isSequencing&&!isSorting} value={question.image} onChange={image=>commitImageChange(current=>{
+              if(!isLabeling&&!isDropdown&&!isSequencing&&!isSorting){
+                const gallery=Array.isArray(current.galleryImages)&&current.galleryImages.length ? current.galleryImages.slice(0,4) : current.image ? [current.image] : [];
+                const empty=Array.from({length:4},(_,index)=>index).find(index=>!gallery[index]);
+                const slot=empty??Math.max(0,gallery.indexOf(current.image));
+                gallery[slot]=image;
+                return {...current,galleryImages:gallery,image};
+              }
+              return {...current,image,...(image!==current.image&&isLabeling?{labelPins:[]}:{}),...(image!==current.image&&isDropdown?{dropdownSpots:[]}: {})};
+            })}/>
             {question.image&&<div className="ibqSelectedImageNote"><Check size={15}/> Image selected <button type="button" onClick={()=>{
               if(!isLabeling&&!isDropdown&&!isSequencing&&!isSorting){
                 const next=galleryImages.filter(src=>src!==question.image);
@@ -492,7 +538,10 @@ export default function ImageBasedContent() {
             <div className="ibqOptionList">{question.options.map((entry,i)=><div className="ibqOptionCard" key={i}>
               <div className="ibqOptionRow"><span className="ibqOptionIndex">{i+1}</span>
                 <input type="text" aria-label={`Option ${i+1}`} maxLength={250} value={entry.text} placeholder={`Enter option ${i+1}`} onChange={e=>option(i,{text:cap(e.target.value)})}/>
-                <UploadImage compact title={`option ${i+1}`} value={entry.image} fallback={question.image} onChange={image=>option(i,{image})}/>
+                <UploadImage maxImageKB={imageUploadLimitKB} compact title={`option ${i+1}`} value={entry.image} fallback={question.image} onChange={image=>commitImageChange(current=>{
+                  if(!current.options[i])throw new Error("The answer option is no longer available.");
+                  return {...current,options:current.options.map((entry,index)=>index===i?{...entry,image}:entry)};
+                })}/>
                 <div className="ibqSwitchHolder"><Toggle value={correctIndices.includes(i)} title={`Mark option ${i+1} correct`} onChange={yes=>setCorrect(i,yes)}/></div>
                 <button className="ibqDelete" type="button" title={`Remove option ${i+1}`} aria-label={`Remove option ${i+1}`} onClick={()=>removeOption(i)}><X size={17}/></button>
               </div>
@@ -510,15 +559,15 @@ export default function ImageBasedContent() {
           {(name==="Feedback"||name==="Model Answer and Grader Information")&&<>
             {name==="Model Answer and Grader Information"&&<p className="ibqLabelHelp">Not shown to Learners</p>}
             <label className="ibqFeedbackLabel is-full">Full Marks </label>
-            <RichEditor tone="ibqRichFull" label="Full Marks feedback" rows={3} value={question.feedbackFull??question.feedback??""} onChange={text=>update({feedbackFull:text,feedback:text})} placeholder="Feedback for correct answers"/>
+            <RichEditor editorKey={`${question.id}:field-2`} tone="ibqRichFull" label="Full Marks feedback" rows={3} value={question.feedbackFull??question.feedback??""} onChange={text=>update({feedbackFull:text,feedback:text})} placeholder="Feedback for correct answers"/>
             <label className="ibqFeedbackLabel is-partial">Partial Marks </label>
-            <RichEditor tone="ibqRichPartial" label="Partial Marks feedback" rows={3} value={question.feedbackPartial||""} onChange={text=>update({feedbackPartial:text})} placeholder="Feedback for partially correct answers"/>
+            <RichEditor editorKey={`${question.id}:field-3`} tone="ibqRichPartial" label="Partial Marks feedback" rows={3} value={question.feedbackPartial||""} onChange={text=>update({feedbackPartial:text})} placeholder="Feedback for partially correct answers"/>
             <label className="ibqFeedbackLabel is-zero">Zero Marks </label>
-            <RichEditor tone="ibqRichZero" label="Zero Marks feedback" rows={3} value={question.feedbackZero||""} onChange={text=>update({feedbackZero:text})} placeholder="Feedback for incorrect answers"/>
+            <RichEditor editorKey={`${question.id}:field-4`} tone="ibqRichZero" label="Zero Marks feedback" rows={3} value={question.feedbackZero||""} onChange={text=>update({feedbackZero:text})} placeholder="Feedback for incorrect answers"/>
             <div className="ibqInnerAccordion"><button type="button" aria-expanded={extraOpen.explanation} onClick={()=>setExtraOpen(p=>({...p,explanation:!p.explanation}))}><span className="ibqSectionIcon"><ClipboardList size={17}/></span><b>Explanation</b>{(isLabeling||isDropdown||isSequencing||isSorting)?<LabelAsset file="arrow-down-01.svg" size={19} className={extraOpen.explanation?"ibqRotated":""}/>:<ChevronDown className={extraOpen.explanation?"ibqRotated":""} size={19}/>}</button>
-              {extraOpen.explanation&&<RichEditor label="Explanation" rows={3} value={question.explanation} onChange={text=>update({explanation:text})} placeholder="Explain the correct answer"/>}</div>
+              {extraOpen.explanation&&<RichEditor editorKey={`${question.id}:field-5`} label="Explanation" rows={3} value={question.explanation} onChange={text=>update({explanation:text})} placeholder="Explain the correct answer"/>}</div>
             <div className="ibqInnerAccordion"><button type="button" aria-expanded={extraOpen.hint} onClick={()=>setExtraOpen(p=>({...p,hint:!p.hint}))}><span className="ibqSectionIcon"><MessageCircleMore size={17}/></span><b>Hint</b>{(isLabeling||isDropdown||isSequencing||isSorting)?<LabelAsset file="arrow-down-01.svg" size={19} className={extraOpen.hint?"ibqRotated":""}/>:<ChevronDown className={extraOpen.hint?"ibqRotated":""} size={19}/>}</button>
-              {extraOpen.hint&&<><RichEditor label="Hint" rows={3} value={question.hint} onChange={text=>update({hint:text})} placeholder="Write a hint"/><label className="ibqHintCheck"><input className="ibqHintNative" type="checkbox" checked={question.showHintBefore!==false} onChange={e=>update({showHintBefore:e.target.checked})}/><span className="ibqHintSquare" aria-hidden="true"/><span>Show hint before answering</span></label><label className="ibqHintCheck"><input className="ibqHintNative" type="checkbox" checked={!!question.allowHintRequest} onChange={e=>update({allowHintRequest:e.target.checked})}/><span className="ibqHintSquare" aria-hidden="true"/><span>Allow learner to request hint</span></label></>}</div>
+              {extraOpen.hint&&<><RichEditor editorKey={`${question.id}:field-6`} label="Hint" rows={3} value={question.hint} onChange={text=>update({hint:text})} placeholder="Write a hint"/><label className="ibqHintCheck"><input className="ibqHintNative" type="checkbox" checked={question.showHintBefore!==false} onChange={e=>update({showHintBefore:e.target.checked})}/><span className="ibqHintSquare" aria-hidden="true"/><span>Show hint before answering</span></label><label className="ibqHintCheck"><input className="ibqHintNative" type="checkbox" checked={!!question.allowHintRequest} onChange={e=>update({allowHintRequest:e.target.checked})}/><span className="ibqHintSquare" aria-hidden="true"/><span>Allow learner to request hint</span></label></>}</div>
           </>}
           </div>}</div>})}
         </section>
@@ -529,7 +578,7 @@ export default function ImageBasedContent() {
             <h2>Question Settings</h2>
             <div className="ibqMcqField"><label htmlFor="ibqPoints">Points</label>
               <div className="ibqMcqPointsControl">
-                <input id="ibqPoints" min={1} max={1000} type="number" value={question.points} onChange={e=>update({points:Math.max(1,Math.min(1000,Number(e.target.value)||1))})}/>
+                <input style={{color:"#374151"}} placeholder="Enter points" id="ibqPoints" min={1} max={1000} type="number" value={question.points} onChange={e=>update({points:Math.max(1,Math.min(1000,Number(e.target.value)||1))})}/>
                 <div className="ibqMcqPointSteppers">
                   <button type="button" aria-label="Increase points" onClick={()=>update({points:Math.min(1000,question.points+1)})}><LabelAsset file="arrow-down-01.svg" size={14} className="ibqMcqArrowUp"/></button>
                   <button type="button" aria-label="Decrease points" onClick={()=>update({points:Math.max(1,question.points-1)})}><LabelAsset file="arrow-down-01.svg" size={14}/></button>

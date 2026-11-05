@@ -1,0 +1,19 @@
+/* Image-Based local copy of the shared assessment rich-text controls.
+   Selector names are prefixed so other assessment types remain untouched. */
+.ibqApp .ibqSharedRichToolbar{display:flex;align-items:center;flex-wrap:nowrap;gap:7px;min-width:0;width:100%;padding:8px 7px 9px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;white-space:nowrap;background:#DFE6E9;box-shadow:-4px -4px 8px #fff,4px 4px 8px #C4C4C4;scrollbar-width:thin;scrollbar-color:#aebac0 transparent}
+.ibqApp .ibqSharedRichToolbar>button{display:flex;align-items:center;justify-content:center;flex:0 0 38px;width:38px;min-width:38px;height:38px;min-height:38px;margin:0;padding:4px;border:0;border-radius:5px;background:#DFE6E9;box-shadow:-2px -2px 3px #fff,2px 2px 3px #C4C4C4;color:#374151;font:600 15px/20px 'Segoe UI',Arial,sans-serif;cursor:pointer}
+.ibqApp .ibqSharedRichToolbar>button.ibqSharedRichSelect{justify-content:space-between;flex:0 0 116px;width:116px;min-width:116px;padding:0 10px;font-weight:400;text-align:left}
+.ibqApp .ibqSharedRichToolbar>button.ibqSharedRichSize{flex-basis:75px;width:75px;min-width:75px}
+.ibqApp .ibqSharedRichToolbar img{display:block;width:18px;height:18px;object-fit:contain}
+.ibqSharedRichSwatch{display:block;width:18px;height:16px;border-bottom:4px solid #374151;border-radius:2px}
+.ibqSharedRichMenu{position:fixed;z-index:99999;max-height:225px;padding:7px;overflow-y:auto;overscroll-behavior:contain;border:1px solid rgba(255,255,255,.65);border-radius:10px;background:#DFE6E9;box-shadow:-4px -4px 8px #fff,5px 5px 10px #aeb9bf;scrollbar-width:thin}
+.ibqSharedRichMenu>button{display:block;width:100%;min-height:34px;padding:7px 10px;border:0;border-radius:6px;background:transparent;color:#374151;font:400 14px/20px 'Segoe UI',Arial,sans-serif;text-align:left;cursor:pointer}
+.ibqSharedRichMenu>button:hover,.ibqSharedRichMenu>button[aria-selected=true]{box-shadow:inset -2px -2px 3px #fff,inset 2px 2px 3px #C4C4C4;color:#2D4CC8}
+.ibqSharedRichPalette{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;overflow:visible}
+.ibqSharedRichPalette>button{width:30px;min-height:24px;height:24px;padding:0;border:1px solid #a9b2b7}
+.ibqApp .ibqUnifiedEditor{position:relative;overflow:visible;min-width:0;padding-bottom:18px;border-radius:6px}
+.ibqApp .ibqUnifiedEditor .ibqRichInput{box-sizing:border-box;min-width:0;width:100%;padding:15px 14px 23px;outline:none;white-space:pre-wrap;overflow-wrap:anywhere;font:400 16px/1.5 'Segoe UI',Arial,sans-serif;}
+.ibqApp .ibqUnifiedEditor .ibqRichInput:focus-visible{outline:none;box-shadow:inset 0 0 0 1px #9baacf}
+.ibqApp .ibqUnifiedEditor .ibqRichCharacterCount{position:absolute;right:12px;bottom:3px;color:#374151;font:400 12px/18px 'Segoe UI',Arial,sans-serif;pointer-events:none;font-variant-numeric:tabular-nums}
+.ibqApp .ibqUnifiedEditor .ibqRichError{position:static;display:block;color:#ac1f33;margin:3px 9px 0}
+@media(max-width:600px){.ibqApp .ibqSharedRichToolbar>button{flex-basis:35px;width:35px;min-width:35px;height:35px;min-height:35px}.ibqApp .ibqSharedRichToolbar>button.ibqSharedRichSelect{flex-basis:100px;width:100px;min-width:100px}.ibqApp .ibqSharedRichToolbar>button.ibqSharedRichSize{flex-basis:60px;width:60px;min-width:60px}}

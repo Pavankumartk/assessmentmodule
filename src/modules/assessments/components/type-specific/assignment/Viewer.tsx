@@ -1,4 +1,5 @@
 "use client";
+import { applyAssessmentFont } from "@/modules/assessments/components/common/assessment-editor-font";
 import {maySubmitCurrentAttempt} from "@/modules/assessments/components/learner/learner-assessment-data";
 
 import Link from "next/link";
@@ -9,6 +10,8 @@ import Sidebar from "../../common/sidebar/page";
 import Header from "../../common/header/Header";
 import { getActiveAssessmentId, getAssessment, assessmentStorage, updateAssessment, viewerPath } from "@/modules/assessments/storage/assessment-storage";
 import { getDemoSession, demoDashboardPath } from "@/modules/assessments/auth/demo-auth";
+import ViewerSubmitConfirm from "@/modules/assessments/components/viewer/ViewerSubmitConfirm";
+import { creatorInstructionLines } from "@/modules/assessments/components/viewer/instruction-text";
 import "./viewassignment.css";
 import "@/modules/assessments/components/viewer/AssessmentViewer/viewer.css";
 
@@ -106,7 +109,10 @@ function readScopedJSON(key:string):Dict {
 function loadDraft(): Draft {
   const assessmentId=getActiveAssessmentId() || "";
   const assessment=getAssessment(assessmentId);
-  const creatorDetails={...readScopedJSON("mcqAssessmentDraft"),...readScopedJSON("assignmentDetailsDraft")};
+  const assignmentDetails=readScopedJSON("assignmentDetailsDraft");
+  const legacyDetails=readScopedJSON("mcqAssessmentDraft");
+  const fallbackDetails=legacyDetails.typeCode==="assignment" || legacyDetails.assessmentType==="Assignment" ? legacyDetails : {};
+  const creatorDetails={...fallbackDetails,...assignmentDetails};
   const content=readScopedJSON("assignmentContentDraft");
   const rawFile=obj(content.questionDocument);
   const creatorTitle=choose(creatorDetails,["name","assessmentTitle","title"]);
@@ -125,8 +131,7 @@ function loadDraft(): Draft {
     marks:Number.isFinite(savedMarks)&&savedMarks>0?savedMarks:100, bloom:choose(creatorDetails,["bloom","taxonomy"],"Apply"),
     attemptsAllowed:Number.isInteger(savedAttempts)&&savedAttempts>0?savedAttempts:1,
     resources:[...documentResource,...attachments], feedback:"", gradingStatus:"Not graded",comments:0,
-    instructions: choose(creatorDetails,["instructions","descriptionInstructions","description","summary"])
-      .split(/\r?\n/).map(line=>line.replace(/<[^>]*>/g," ").trim()).filter(Boolean),
+    instructions: creatorInstructionLines(assignmentDetails.instructions, assignmentDetails.instructionsHtml, fallbackDetails.instructions, fallbackDetails.instructionsHtml),
     duration: choose(creatorDetails,["duration","durationMinutes","timeLimit","timeLimitMinutes"],"Not timed"),
     passingScore: choose(creatorDetails,["passingScore","passingPercentage","passPercentage"],String(evaluation.passGrade??"Not set")),
     settings:{cutoff: str(creatorDetails.cutoffDate), gradeReminder:str(creatorDetails.gradeDate),
@@ -174,7 +179,8 @@ function cleanHtml(value: string): string {
         const allowedHref = child.tagName === "A" && attr.name === "href" && safeLink(href);
         const allowedSrc = child.tagName === "IMG" && attr.name === "src" && safeImage(src);
         const allowedAlt = child.tagName === "IMG" && attr.name === "alt";
-        if (!allowedStyle && !allowedHref && !allowedSrc && !allowedAlt) child.removeAttribute(attr.name);
+        const allowedFace = child.tagName === "FONT" && attr.name === "face" && ["Arial", "Segoe UI", "Georgia", "Times New Roman", "Verdana"].includes(attr.value);
+        if (!allowedStyle && !allowedHref && !allowedSrc && !allowedAlt && !allowedFace) child.removeAttribute(attr.name);
       }
       if (child.tagName === "IMG" && !safeImage(src)) { child.remove(); continue; }
       walk(child);
@@ -244,7 +250,7 @@ function Editor({ value, html, onChange, disabled }: { value: string; html: stri
   };
   const command = (action: string, option?: string) => {
     restore();
-    document.execCommand(action, false, option);
+    if (action === "fontName" && option) applyAssessmentFont(area.current, option); else document.execCommand(action, false, option);
     if (action === "fontSize" && option && area.current) {
       const fontPx: Record<string, string> = {"2":"12", "3":"14", "4":"16", "5":"18", "6":"24"};
       area.current.querySelectorAll('font[size]').forEach(node => {
@@ -551,7 +557,7 @@ export default function ViewAssignmentPage() {
             <div className="vaTop">
               <nav className="vaBreadcrumb" aria-label="Breadcrumb">
                 <Link href={demoDashboardPath()}>Dashboard</Link><Icon name="arrow-right-double.svg" fallback="»"/>
-                <Link href={demoDashboardPath()}>Assessment</Link><Icon name="arrow-right-double.svg" fallback="»"/>
+                <Link href="/assessments/list">Assessment</Link><Icon name="arrow-right-double.svg" fallback="»"/>
                 <strong>{draft.title}</strong>
               </nav>
               {draft.dueAt ? <Clock remaining={ready ? msRemaining : 0}/> : <span className="vaNoDeadline">No deadline set</span>}
@@ -578,14 +584,7 @@ export default function ViewAssignmentPage() {
                     <section className="viewerInstructions" aria-labelledby="va-instructions-heading">
                       <h2 id="va-instructions-heading">Instructions</h2>
                       <ol>
-                        {(draft.instructions.length ? draft.instructions : [
-                          "Read the assignment question document carefully before starting.",
-                          "Complete all tasks using the instructions provided by your instructor.",
-                          "Submit your answers using the allowed text or file submission methods.",
-                          "Save your work as a draft when necessary.",
-                          "Check your answers before final submission. Submitted work cannot be edited.",
-                          "Grade and feedback will appear when released by the evaluator.",
-                        ]).map((item,i)=><li key={i}>{i+1}. {item}</li>)}
+                        {draft.instructions.length ? draft.instructions.map((item,i)=><li key={i}>{i+1}. {item}</li>) : <li>No activity instructions have been provided for this assignment.</li>}
                       </ol>
                     </section>
                     <section className="viewerConfirmation" aria-label="Confirm instructions">
@@ -760,10 +759,10 @@ export default function ViewAssignmentPage() {
               </aside>
             </div>
             )}
-            {showSubmitConfirm && <div className="vaConfirmOverlay" role="presentation"><div className="vaConfirmCard" role="dialog" aria-modal="true" aria-labelledby="va-confirm-title">
-              <h2 id="va-confirm-title">Submit Assignment?</h2><p>You will not be able to change your submission once it is submitted.</p>
-              <div><button type="button" className="vaBigButton" onClick={()=>setShowSubmitConfirm(false)}>Cancel</button><button type="button" className="vaBigButton vaNext" onClick={confirmSubmission}>Submit Assignment</button></div>
-            </div></div>}
+            {showSubmitConfirm && <>
+              <div className="viewerAppShell" />
+              <ViewerSubmitConfirm answered={hasWork ? 1 : 0} remaining={hasWork ? 0 : 1} flagged={0} onBack={()=>setShowSubmitConfirm(false)} onSubmit={confirmSubmission}/>
+            </>}
             {showSuccess && <div className="vaConfirmOverlay" role="presentation"><div className="vaConfirmCard" role="dialog" aria-modal="true" aria-labelledby="va-success-title">
               <h2 id="va-success-title">Assignment Submitted Successfully</h2><p>Your submission is complete. Grade and feedback will appear when released by your evaluator.</p>
               <div><button type="button" className="vaBigButton" onClick={()=>{setShowSuccess(false);router.push(demoDashboardPath());}}>Back to Dashboard</button><button type="button" className="vaBigButton vaNext" onClick={()=>setShowSuccess(false)}>Grade Feedback</button></div>

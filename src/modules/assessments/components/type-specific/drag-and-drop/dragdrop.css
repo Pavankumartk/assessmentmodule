@@ -2076,3 +2076,30 @@
  .dragcRichMenuRoot button{white-space:nowrap;}
  .dragcBuilderPageFooter{flex-wrap:wrap;}
 }
+
+/* BEGIN DRAG QUESTION NAVIGATION FIX */
+.dragcBuilder.dragcBuilder .dragcBuilderMain > .dragcQuestionsHeading{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.dragcBuilder.dragcBuilder .dragcBuilderMain > .dragcQuestionsHeading h2{margin:0 0 6px;font:700 17px/23px 'Segoe UI',Arial,sans-serif;color:#374151}
+.dragcBuilder.dragcBuilder .dragcBuilderMain > .dragcQuestionsHeading p{margin:0;font:400 13px/19px 'Segoe UI',Arial,sans-serif;color:#374151}
+.dragcBuilder.dragcBuilder .dragcLiveQuestionNav{display:flex;align-items:center;justify-content:flex-start;gap:10px;min-width:0;max-width:100%}
+.dragcBuilder.dragcBuilder .dragcLiveQuestionNav .dragcNumberScroller{flex:0 1 auto;width:max-content;min-width:0;max-width:calc(100% - 96px);overflow:hidden}
+.dragcBuilder.dragcBuilder .dragcLiveQuestionNav.dragcManyQuestions .dragcNumberScroller{flex:1 1 0;width:auto}
+.dragcBuilder.dragcBuilder .dragcLiveQuestionNav .dragcQuestionNumbers{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;scroll-behavior:smooth;padding:5px 3px}
+.dragcBuilder.dragcBuilder .dragcLiveQuestionNav .dragcQuestionNumbers::-webkit-scrollbar{display:none}
+.dragcBuilder.dragcBuilder .dragcLiveQuestionNav .dragcRoundNav{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;padding:0;border:1px solid #fff;border-radius:50%;background:#DFE6E9;box-shadow:-3px -3px 4px #fff,3px 3px 4px #C4C4C4;cursor:pointer}
+.dragcBuilder.dragcBuilder .dragcLiveQuestionNav .dragcRoundNav:disabled{opacity:.45!important;cursor:not-allowed!important}
+.dragcBuilder.dragcBuilder .dragcLiveQuestionNav .dragcRoundNav:disabled .dragcIcon{opacity:.6!important}
+.dragcBuilder.dragcBuilder .dragcLiveQuestionNav .dragcQuestionNumber{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:0 0 66px;width:66px;height:48px;padding:2px 5px;border:1px solid #2D4CC8;border-radius:4px;background:#D9E2FB;color:#2D4CC8;box-shadow:-2px -2px 3px #fff,2px 2px 4px #AEB5B9;font:700 17px/20px 'Segoe UI',Arial,sans-serif;cursor:pointer}
+.dragcBuilder.dragcBuilder .dragcLiveQuestionNav .dragcQuestionNumber.is-complete{background:#DFE6E9;color:#2A7308;border-color:#2A7308}
+.dragcBuilder.dragcBuilder .dragcLiveQuestionNav .dragcQuestionNumber small{display:block;font:400 10px/13px 'Segoe UI',Arial,sans-serif;color:inherit}
+.dragcBuilder.dragcBuilder .dragcLiveQuestionNav .dragcNumberStatus{position:absolute;top:3px;right:4px;display:grid;place-items:center;width:13px;height:13px;border-radius:50%;font:700 10px/1 Arial,sans-serif}
+.dragcBuilder.dragcBuilder .dragcLiveQuestionNav .dragcNumberStatus.is-pending{background:#2D4CC8;color:#fff}
+.dragcBuilder.dragcBuilder .dragcLiveQuestionNav .dragcNumberStatus.is-done{background:#2A7308;color:#fff}
+.dragcBuilder .dragcEditorCountFrame{position:relative;min-width:0}
+.dragcBuilder .dragcEditorCountFrame :is(.dragcEditorCount,.dragcCharacterCount,.dragcCharacterCounter,.mcqcCharacterCount,.assessmentEditorCounter,.saCharacterCount){position:absolute;right:10px;bottom:5px;left:auto;margin:0;color:#374151;font:400 11px/16px 'Segoe UI',Arial,sans-serif;pointer-events:none}
+.dragcBuilder .dragcEditorCountFrame :is(.dragcRichEditable,.mcqcRichEditable,[contenteditable="true"],textarea){padding-bottom:28px!important}
+.dragcBuilder .dragcDDFeedbackfeedbackFull :is(.dragcRichEditable,.mcqcRichEditable,[contenteditable="true"],textarea){color:#2A7308!important;caret-color:#2A7308}
+.dragcBuilder .dragcDDFeedbackfeedbackPartial :is(.dragcRichEditable,.mcqcRichEditable,[contenteditable="true"],textarea){color:#B85B0A!important;caret-color:#B85B0A}
+.dragcBuilder .dragcDDFeedbackfeedbackZero :is(.dragcRichEditable,.mcqcRichEditable,[contenteditable="true"],textarea){color:#A91E2C!important;caret-color:#A91E2C}
+@media(max-width:600px){.dragcBuilder.dragcBuilder .dragcLiveQuestionNav{gap:6px}.dragcBuilder.dragcBuilder .dragcLiveQuestionNav .dragcNumberScroller{max-width:calc(100% - 78px)}.dragcBuilder.dragcBuilder .dragcLiveQuestionNav .dragcRoundNav{width:33px;height:33px;flex-basis:33px}.dragcBuilder.dragcBuilder .dragcLiveQuestionNav .dragcQuestionNumber{width:54px;height:47px;flex-basis:54px}}
+/* END DRAG QUESTION NAVIGATION FIX */

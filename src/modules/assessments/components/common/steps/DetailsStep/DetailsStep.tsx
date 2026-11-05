@@ -1,4 +1,5 @@
 "use client";
+import { applyAssessmentFont } from "@/modules/assessments/components/common/assessment-editor-font";
 import { ASSESSMENT_DEPARTMENTS, ASSESSMENT_PROGRAMS, getCourseModuleGroups } from "@/modules/assessments/config/assessment-types";
 import { getAssessmentAdapter } from "@/modules/assessments/config/component-registry";
 import WizardStepLink from "@/modules/assessments/components/common/WizardStepLink";
@@ -459,7 +460,7 @@ function AIVivaInstructionsEditor({value,onChange,onError}:{value:string;onChang
   useEffect(()=>{if(editor.current && document.activeElement!==editor.current && editor.current.innerHTML!==value) editor.current.innerHTML=value;},[value]);
   const remember=()=>{const current=window.getSelection();if(current?.rangeCount && editor.current?.contains(current.anchorNode)) selection.current=current.getRangeAt(0).cloneRange();};
   const restore=()=>{editor.current?.focus();if(selection.current && editor.current?.contains(selection.current.commonAncestorContainer)){const current=window.getSelection();current?.removeAllRanges();current?.addRange(selection.current);}};
-  const command=(name:string,arg?:string)=>{restore();document.execCommand(name,false,arg);remember();onChange(editor.current?.innerHTML || "");};
+  const command=(name:string,arg?:string)=>{restore();if(name==="fontName"&&arg)applyAssessmentFont(editor.current,arg);else document.execCommand(name,false,arg);remember();onChange(editor.current?.innerHTML || "");};
   const icon=(name:string)=><img src={`/assets/assessmenticons/${name}.svg`} alt="" width={20} height={20}/>;
   const tool=(label:string,name:string,action:string)=><button type="button" title={label} aria-label={label} onMouseDown={event=>event.preventDefault()} onClick={()=>command(action)}>{icon(name)}</button>;
   const attach=(file:File | undefined,image:boolean)=>{if(!file)return;if(file.size>1024*1024){onError("Choose an attachment smaller than 1 MB.");return;}const reader=new FileReader();reader.onload=()=>{if(typeof reader.result!=="string")return;restore();if(image)document.execCommand("insertImage",false,reader.result);else {const current=window.getSelection();if(!current?.rangeCount || !editor.current?.contains(current.anchorNode))return;const link=document.createElement("a");link.href=reader.result;link.download=file.name;link.textContent=`Attachment: ${file.name}`;const range=current.getRangeAt(0);range.deleteContents();range.insertNode(link);range.setStartAfter(link);range.collapse(true);current.removeAllRanges();current.addRange(range);}remember();onChange(editor.current?.innerHTML || "");};reader.readAsDataURL(file);};
@@ -654,7 +655,7 @@ export default function MCQDetailsPage({ draftKey = "mcqAssessmentDraft", countK
   };
   const runEditorCommand = (command: string, value?: string) => {
     restoreEditorSelection();
-    document.execCommand(command, false, value);
+    if (command === "fontName" && value) applyAssessmentFont(editorRef.current, value); else document.execCommand(command, false, value);
     rememberEditorSelection();
     update("descriptionInstructions", editorRef.current?.innerHTML ?? "");
   };

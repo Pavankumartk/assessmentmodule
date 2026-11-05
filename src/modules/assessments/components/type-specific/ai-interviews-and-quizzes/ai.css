@@ -241,3 +241,8 @@
 .aiFooterSaveGroup,.aieFooterSaveGroup{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap}
 .aiSaveToast,.aieSaveToast{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:7px 18px;border:1.5px solid #2A7308;border-radius:24px;color:#2A7308;background:#DFE6E9;font:600 14px/20px 'Segoe UI',Arial,sans-serif;box-shadow:-2px -2px 3px #fff,2px 2px 3px #C4C4C4;white-space:nowrap}
 @media(max-width:600px){.aiFooterSaveGroup,.aieFooterSaveGroup{gap:8px}.aiSaveToast,.aieSaveToast{min-height:34px;padding:6px 11px;font-size:12px}}
+
+/* AI question row: keep text dark when hovered or focused. */
+.aiAppShell .aiQuestionList .aiQuestionCardText,
+.aiAppShell .aiQuestionList .aiQuestionCardText:is(:hover, :focus, :active),
+.aiAppShell .aiQuestionList .aiQuestionCardText span { color: #374151 !important; }

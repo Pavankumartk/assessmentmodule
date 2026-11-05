@@ -1,4 +1,5 @@
 "use client";
+import { applyAssessmentFont } from "@/modules/assessments/components/common/assessment-editor-font";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -627,7 +628,7 @@ export default function AIPage() {
     if (selection && selectionRef.current && editor.contains(selectionRef.current.commonAncestorContainer)) {
       try { selection.removeAllRanges(); selection.addRange(selectionRef.current); } catch { /* Keep the current editor caret. */ }
     }
-    document.execCommand(command, false, value);
+    if (command === "fontName" && value) applyAssessmentFont(editor, value); else document.execCommand(command, false, value);
     rememberEditorSelection(target);
     patch(target === "paste" ? { sourceText: editor.innerHTML } : target === "topic" ? { topic: editor.innerHTML } : { learningOutcomes: editor.innerHTML });
   };

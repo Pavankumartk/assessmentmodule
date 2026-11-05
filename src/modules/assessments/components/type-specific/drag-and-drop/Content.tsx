@@ -1,4 +1,6 @@
 "use client";
+import AssessmentRichToolbar from "@/modules/assessments/components/common/AssessmentRichToolbar";
+import { applyAssessmentFont } from "@/modules/assessments/components/common/assessment-editor-font";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useMemo } from "react";
@@ -102,7 +104,7 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
   };
   const command = (name: string, valueArg?: string) => {
     restore();
-    document.execCommand(name, false, name === "fontSize" ? "7" : valueArg);
+    if (name === "fontName" && valueArg) applyAssessmentFont(editor.current, valueArg); else document.execCommand(name, false, name === "fontSize" ? "7" : valueArg);
     if (name === "fontSize" && valueArg && editor.current) {
       editor.current.querySelectorAll('font[size="7"]').forEach(node => {
         node.removeAttribute("size");
@@ -138,20 +140,7 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
   const button = (name: string, title: string, action: () => void) =>
     <button type="button" title={title} aria-label={title} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={action}><Icon name={name} size={18}/></button>;
   return <div className="dragcRichEditorRoot">
-    <div className="dragcRichToolbar dragcOptionToolbar" role="toolbar" aria-label={`${placeholder} formatting`}>
-      {button("undo.svg", "Undo", () => command("undo"))}
-      {button("redo.svg", "Redo", () => command("redo"))}
-      <div className="dragcRichMenuRoot"><button type="button" className="dragcToolbarSelect dragcToolbarFont" aria-expanded={menu === "font"} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={e => openFormatMenu("font", e.currentTarget)}>{font}<Icon name="arrow-down-01.svg" size={15}/></button>
-        </div>
-      <div className="dragcRichMenuRoot"><button type="button" className="dragcToolbarSelect dragcToolbarSize" aria-expanded={menu === "size"} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={e => openFormatMenu("size", e.currentTarget)}>{size}<Icon name="arrow-down-01.svg" size={15}/></button>
-        </div>
-      {button("bold.svg", "Bold", () => command("bold"))}
-      {button("italic.svg", "Italic", () => command("italic"))}
-      {button("underline.svg", "Underline", () => command("underline"))}
-      {button("text-centerline-center-top.svg", "Bulleted list", () => command("insertUnorderedList"))}
-      {button("image.svg", "Insert image", () => { setFileKind("image"); if (fileInput.current) { fileInput.current.accept="image/*"; fileInput.current.value=""; fileInput.current.click(); } })}
-      {button("attachment.svg", "Attach file", () => { setFileKind("attachment"); if (fileInput.current) { fileInput.current.accept=""; fileInput.current.value=""; fileInput.current.click(); } })}
-    </div>
+    <AssessmentRichToolbar label={placeholder} onRemember={remember} onCommand={command} onError={onError} onChooseFile={kind => { setFileKind(kind); if (fileInput.current) { fileInput.current.accept = kind === "image" ? "image/*" : ""; fileInput.current.value = ""; fileInput.current.click(); } }} />
     {menu && typeof document !== "undefined" && createPortal(
       <div ref={floatingMenu} className={`dragcFloatingFormatMenu ${menu === "symbols" ? "dragcFloatingSymbols" : ""}`}
         role={menu === "symbols" ? "group" : "listbox"}
@@ -472,7 +461,7 @@ function DragPreview({ questions, active, setActive, tags, readyAll, onBack, onE
         <div className="dragcPreviewPanel"><h3>Question {currentIndex+1}</h3><QuestionTextWithZones text={q.text} q={q} learner={learner} answers={answers} onSelectZone={answerZone}/></div>
         <div className="dragcPreviewPanel dragcDDPreviewItemsPanel"><button type="button" className="dragcPreviewSectionHead" aria-expanded={expanded.items} onClick={()=>toggle("items")}><span><Icon name="adjust-position.svg" size={18}/> Drag Items (Choices in the blank)</span><Icon name="arrow-down-01.svg" size={18} className={expanded.items?"dragcRotated":""}/></button>
         {expanded.items && <div className="dragcDDPreviewChoices">{displayChoices.map((c,i)=><button type="button" key={c.id} className={`dragcDDChoice ${selectedChoice===c.id?"is-selected":""}`} draggable={learner} onDragStart={e=>{e.dataTransfer.setData("text/plain",c.id);setSelectedChoice(c.id);}} onClick={()=>{if(learner)setSelectedChoice(c.id);}}><span>{LETTERS[i]}. {c.text||"(empty)"}</span>{!learner && <b className={c.role==="Correct"?"dragcDDCorrect":"dragcDDDistractor"}>{c.role}</b>}</button>)}</div>}
-        {learner && <div className="dragcDDLearnerControls"><small>Select or drag an item, then choose a drop zone.</small><button type="button" className="dragcBuilderAction" onClick={()=>setShowResult(true)}>Check Answers</button>{showResult && <strong>{correctCount} of {zones.length} correct · {scoreForZoneMatches(q,matchedZones).toFixed(2)} points</strong>}</div>}</div>
+        {learner && <div className="dragcDDLearnerControls"><small>Select or drag an item, then choose a drop zone.</small><></>{showResult && <strong>{correctCount} of {zones.length} correct · {scoreForZoneMatches(q,matchedZones).toFixed(2)} points</strong>}</div>}</div>
         {!learner && <><div className="dragcPreviewPanel"><button type="button" className="dragcPreviewSectionHead" aria-expanded={expanded.mapping} onClick={()=>toggle("mapping")}><span><Icon name="clipboard-list.svg" size={18}/> Answer mapping &amp; grader information (not shown to learners)</span><Icon name="arrow-down-01.svg" size={18} className={expanded.mapping?"dragcRotated":""}/></button>{expanded.mapping && <div className="dragcDDPreviewMapping">{zones.map(zone=><div key={zone}><span>Zone [[{zone}]]</span><span>{q.items.find(x=>x.id===q.mapping[zone])?.text || "Not mapped"}</span></div>)}<h4>Information for Graders</h4><p className="dragcDDGraderNote">{q.graderInfo || "No additional grading notes."}</p></div>}</div>
         <div className="dragcPreviewPanel"><button type="button" className="dragcPreviewSectionHead" aria-expanded={expanded.grading} onClick={()=>toggle("grading")}>Grading Method <Icon name="arrow-down-01.svg" size={18} className={expanded.grading?"dragcRotated":""}/></button>{expanded.grading && <div className="dragcDDGradingDetails"><div className="dragcDDThree"><label>Grading Method<strong>{q.grading}</strong></label><label>Points (total for Question)<strong>{q.points}</strong></label><label>Negative Marking<strong>{q.negative}</strong></label></div>{[["Partial Credit",q.partialCredit],["Calculate grade with a minimum score of 0",q.minZero],["Allow learner to move items between zones before submit",q.allowMove]].map(([text,value])=><div key={String(text)} className="dragcDDToggleRow"><span>{text}</span><span className={`dragcDDPreviewSwitch ${value ? "is-on" : "is-off"}`} role="img" aria-label={`${text} ${value ? "on" : "off"}`}><span className="dragcDDPreviewSwitchTrack"><span className="dragcDDPreviewSwitchText">{value ? "ON" : "OFF"}</span></span></span></div>)}<div className="dragcDDScoreCheck">Total of zone marks: {zones.reduce((s,z)=>s+getZoneMarks(q,z),0).toFixed(2)} / {q.points} <span>{Math.abs(zones.reduce((s,z)=>s+getZoneMarks(q,z),0)-Number(q.points))<.0001?"Matches Points":"Does not match"}</span></div><div className="dragcDDPreviewScore"><h4>Score Simulator - Outcome per Zone</h4><div className="dragcDDScoreTable"><div className="dragcDDScoreHead"><span>Outcome</span><span>Marks</span></div>{Array.from({length:zones.length+1},(_,i)=>zones.length-i).map(n=><div key={n} className="dragcDDScoreRow"><span>{n} correct, {zones.length-n} wrong</span><span className="dragcDDPreviewScoreMark">{displayedMarks(scoreFor(q,n))}</span></div>)}</div></div></div>}</div>
         <div className="dragcPreviewPanel"><button type="button" className="dragcPreviewSectionHead" aria-expanded={expanded.feedback} onClick={()=>toggle("feedback")}>Feedback and Learning <Icon name="arrow-down-01.svg" size={18} className={expanded.feedback?"dragcRotated":""}/></button>{expanded.feedback && <div className="dragcPreviewLearning">{[["Full Marks",q.feedbackFull,"checkmark-circle.svg"],["Partial Marks",q.feedbackPartial,"alert.svg"],["Zero Marks",q.feedbackZero,"cancel-circle.svg"],["Explanation",q.explanation,"assignments.svg"],["Hint",q.hint,"idea.svg"]].map(([title,value,icon])=><section key={title}><h4><Icon name={icon} size={18}/>{title}</h4><p>{value || "No content entered."}</p></section>)}</div>}</div>
@@ -526,6 +515,19 @@ function QuestionBuilder({ questions, setQuestions, mcqValues, onExit }: {
   }));
   const toggle=(key:keyof typeof sections)=>setSections(old=>({...old,[key]:!old[key]}));
   const jump=(index:number)=>{setActive(Math.max(0,Math.min(mcqValues.questionCount-1,index)));setNotice("");};
+  // Scroll the numbered strip when the selected question changes.
+  const dragcNavigateQuestion = (index:number) => {
+    const next = Math.max(0,Math.min(mcqValues.questionCount-1,index));
+    jump(next);
+    const strip = document.querySelector<HTMLElement>(".dragcLiveQuestionNav .dragcQuestionNumbers");
+    const tile = strip?.querySelector<HTMLElement>('[data-dragc-index="' + next + '"]');
+    if (strip && tile) {
+      const area = strip.getBoundingClientRect(), item = tile.getBoundingClientRect();
+      if (item.left < area.left) strip.scrollLeft -= area.left-item.left;
+      else if (item.right > area.right) strip.scrollLeft += item.right-area.right;
+    }
+  };
+
   const syncScroll=()=>{const el=numberScrollRef.current;if(el)setNumberScrollProgress(el.scrollLeft/Math.max(1,el.scrollWidth-el.clientWidth));};
   useEffect(()=>{
     try {
@@ -563,8 +565,8 @@ function QuestionBuilder({ questions, setQuestions, mcqValues, onExit }: {
     }
   };
   const richEditor=(field:string,value:string,onChange:(s:string)=>void,placeholder:string)=>
-    <MCQRichEditor key={field} editorId={field} value={value} html={richHtml[field]}
-      onChange={onChange} onHtmlChange={html=>setRichHtml(old=>({...old,[field]:html}))} placeholder={placeholder} onError={setNotice}/>;
+    <div className="dragcEditorCountFrame"><MCQRichEditor key={field} editorId={field} value={value} html={richHtml[field]}
+      onChange={onChange} onHtmlChange={html=>setRichHtml(old=>({...old,[field]:html}))} placeholder={placeholder} onError={setNotice}/></div>;
   const addZone=()=>{
     const id=String(Math.max(0,...zones.map(z=>Number(z)))+1);
     const nextText=question.text+(question.text.trim()?" ":"")+`[[${id}]]`;
@@ -588,11 +590,19 @@ function QuestionBuilder({ questions, setQuestions, mcqValues, onExit }: {
     <div className={`dragcBuilderGrid ${active===0&&!questions.slice(1).some(q=>q.text.trim())?"dragcFirstQuestion":""}`}>
       <section className="dragcBuilderMain">
         <div className="assessmentCreatorQuestionHeading"><strong>Question {active + 1} of {mcqValues.questionCount}</strong></div>
-        <nav className="assessmentCreatorNavigator" aria-label="Question navigation">
-          <button type="button" className="assessmentCreatorArrow" aria-label="Previous question" disabled={active === 0} onClick={()=>jump(active - 1)}><Icon name="arrowleft.svg" size={20}/></button>
-          <div className="assessmentCreatorNumbers">{Array.from({length:mcqValues.questionCount},(_,index)=>{const done=!!questions[index] && isComplete(questions[index]);return <button key={index} type="button" className={`assessmentCreatorNumber ${done ? "is-complete" : index === active ? "is-active" : "is-empty"}`} aria-current={index===active?"step":undefined} aria-label={`Question ${index+1}, ${done?"complete":"incomplete"}`} onClick={()=>jump(index)}><strong>{index+1}</strong><span className="assessmentCreatorStatus">{done?"✓":""}</span><small>DD</small></button>})}</div>
-          <button type="button" className="assessmentCreatorArrow" aria-label="Next question" disabled={active >= mcqValues.questionCount - 1} onClick={()=>jump(active + 1)}><Icon name="arrowright.svg" size={20}/></button>
-        </nav>
+        <div className="dragcQuestionsHeading" data-dragc-question-heading="true"><div><h2>Question {active+1} of {mcqValues.questionCount}</h2><p>{mcqValues.questionCount} {mcqValues.questionCount===1?"Question":"Questions"} | {mcqValues.totalMarks} Marks</p></div></div>
+        <div className={"dragcNumberNavigation dragcLiveQuestionNav " + (mcqValues.questionCount<=7?"dragcFewQuestions":"dragcManyQuestions")} data-dragc-question-navigation="mcq" role="group" aria-label="Question navigation">
+  <button type="button" className="dragcRoundNav" aria-label="Previous question" disabled={active===0} onClick={()=>dragcNavigateQuestion(active-1)}><Icon name="arrowleft.svg" size={20}/></button>
+  <div className="dragcNumberScroller"><div className="dragcQuestionNumbers" aria-label="Question numbers">
+    {Array.from({length:mcqValues.questionCount},(_,index)=>{
+      const item=questions[index];const status=item&&isComplete(item)?"is-complete":index===active?"is-active":"is-empty";
+      return <button type="button" key={index} data-dragc-index={index} className={"dragcQuestionNumber " + status} aria-label={"Question " + (index+1)} aria-current={active===index?"step":undefined} onClick={()=>dragcNavigateQuestion(index)}>
+        <span className="dragcNumberValue">{index+1}</span><span className={"dragcNumberStatus " + (status==="is-complete"?"is-done":"is-pending")} aria-hidden="true">{status==="is-complete"?"✓":""}</span><small>DD</small>
+      </button>;
+    })}
+  </div></div>
+  <button type="button" className="dragcRoundNav" aria-label="Next question" disabled={active>=mcqValues.questionCount-1} onClick={()=>dragcNavigateQuestion(active+1)}><Icon name="arrowright.svg" size={20}/></button>
+</div>
         <div className="dragcQuestionForm dragcDDQuestionForm">
           <div className="dragcBuilderField"><label>Question Type</label><QuestionTypeDropdown value="Drag & Drop" onChange={v=>{if(v==="Drag & Drop" || v==="Match the Following"){update({type:"Drag & Drop"});setNotice("");}else{setNotice(`${v} is a different assessment type. Drag & Drop remains selected on this page.`);}}}/></div>
           <DragPanel title="Question and Drop Zone" icon="chart-01.svg" open={sections.question} onToggle={()=>toggle("question")}>
@@ -625,7 +635,7 @@ function QuestionBuilder({ questions, setQuestions, mcqValues, onExit }: {
             <div className="dragcDDScoreCheck">Total of zone marks : {totalZoneMarks.toFixed(2)} / {question.points}<strong className={Math.abs(totalZoneMarks-Number(question.points))<.0001?"dragcDDCorrect":"dragcDDDistractor"}>{Math.abs(totalZoneMarks-Number(question.points))<.0001?"Matches Points":"Check Points"}</strong></div>
             <div className="dragcBuilderField"><label>Score Simulator - Outcome per Zone</label><div className="dragcDDScoreTable"><div className="dragcDDScoreHead"><span>Outcome</span><span>Marks</span></div>{zones.length > 0 && Array.from({length:zones.length+1},(_,i)=>zones.length-i).map(n=><div className="dragcDDScoreRow" key={n}><span>{n} correct, {zones.length-n} wrong</span><NeumoSelect value={displayedMarks(scoreFor(question,n))} options={marksMenu(Number(question.points),scoreFor(question,n))} onChange={value=>update({scoreOverrides:{...question.scoreOverrides,[n]:String(Number(value))}})}/></div>)}</div></div>
           </DragPanel>
-          <DragPanel title="Feedback" icon="message-circle-more.svg" subtitle={`${Math.max(question.feedbackFull.length, question.feedbackPartial.length, question.feedbackZero.length)}/250`} open={sections.feedback} onToggle={()=>toggle("feedback")}>
+          <DragPanel title="Feedback" icon="message-circle-more.svg"  open={sections.feedback} onToggle={()=>toggle("feedback")}>
             {([["Full Marks","feedbackFull","Write feedback for all zones matched..."],["Partial Marks","feedbackPartial","Write feedback for partial marks..."],["Zero Marks","feedbackZero","Write feedback for zero marks..."]] as const).map(([label,key,placeholder])=><div className={`dragcBuilderField dragcDDFeedbackField dragcDDFeedback${key}`} key={key}><label>{label}</label><div className="dragcEditorSurface">{richEditor(`dragc-dd-${key}-${active}`,question[key],v=>update({[key]:v}),placeholder)}</div></div>)}
             {([["Explanation","explanation","assignments.svg","Explain the correct mapping..."],["Hint","hint","idea.svg","Write a hint..."]] as const).map(([label,key,icon,placeholder])=><div key={key} className="dragcDDFeedbackSubpanel">
               <button type="button" className="dragcDDFeedbackSubhead" aria-expanded={feedbackSubsections[key]} onClick={()=>setFeedbackSubsections(old=>({...old,[key]:!old[key]}))}>

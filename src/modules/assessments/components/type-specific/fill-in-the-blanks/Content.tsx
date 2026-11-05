@@ -1,4 +1,6 @@
 "use client";
+import AssessmentRichToolbar from "@/modules/assessments/components/common/AssessmentRichToolbar";
+import { applyAssessmentFont } from "@/modules/assessments/components/common/assessment-editor-font";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -108,7 +110,7 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
   };
   const command = (name: string, valueArg?: string) => {
     restore();
-    document.execCommand(name, false, name === "fontSize" ? "7" : valueArg);
+    if (name === "fontName" && valueArg) applyAssessmentFont(editor.current, valueArg); else document.execCommand(name, false, name === "fontSize" ? "7" : valueArg);
     if (name === "fontSize" && valueArg && editor.current) {
       editor.current.querySelectorAll('font[size="7"]').forEach(node => {
         node.removeAttribute("size");
@@ -144,20 +146,7 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
   const button = (name: string, title: string, action: () => void) =>
     <button type="button" title={title} aria-label={title} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={action}><Icon name={name} size={18}/></button>;
   return <div className="fillqcRichEditorRoot">
-    <div className="fillqcRichToolbar fillqcOptionToolbar" role="toolbar" aria-label={`${placeholder} formatting`}>
-      {button("undo.svg", "Undo", () => command("undo"))}
-      {button("redo.svg", "Redo", () => command("redo"))}
-      <div className="fillqcRichMenuRoot"><button type="button" className="fillqcToolbarSelect fillqcToolbarFont" aria-expanded={menu === "font"} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={e => openFormatMenu("font", e.currentTarget)}>{font}<Icon name="arrow-down-01.svg" size={15}/></button>
-        </div>
-      <div className="fillqcRichMenuRoot"><button type="button" className="fillqcToolbarSelect fillqcToolbarSize" aria-expanded={menu === "size"} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={e => openFormatMenu("size", e.currentTarget)}>{size}<Icon name="arrow-down-01.svg" size={15}/></button>
-        </div>
-      {button("bold.svg", "Bold", () => command("bold"))}
-      {button("italic.svg", "Italic", () => command("italic"))}
-      {button("underline.svg", "Underline", () => command("underline"))}
-      {button("text-centerline-center-top.svg", "Bulleted list", () => command("insertUnorderedList"))}
-      {button("image.svg", "Insert image", () => { setFileKind("image"); if (fileInput.current) { fileInput.current.accept="image/*"; fileInput.current.value=""; fileInput.current.click(); } })}
-      {button("attachment.svg", "Attach file", () => { setFileKind("attachment"); if (fileInput.current) { fileInput.current.accept=""; fileInput.current.value=""; fileInput.current.click(); } })}
-    </div>
+    <AssessmentRichToolbar label={placeholder} onRemember={remember} onCommand={command} onError={onError} onChooseFile={kind => { setFileKind(kind); if (fileInput.current) { fileInput.current.accept = kind === "image" ? "image/*" : ""; fileInput.current.value = ""; fileInput.current.click(); } }} />
     {menu && typeof document !== "undefined" && createPortal(
       <div ref={floatingMenu} className={`fillqcFloatingFormatMenu ${menu === "symbols" ? "fillqcFloatingSymbols" : ""}`}
         role={menu === "symbols" ? "group" : "listbox"}
@@ -178,7 +167,7 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
     <div ref={editor} id={editorId} role="textbox" aria-label={placeholder} aria-multiline="true" contentEditable suppressContentEditableWarning data-placeholder={placeholder}
       className="fillqcRichEditable" onInput={notify} onBeforeInput={e => { const input = e.nativeEvent as InputEvent; if (input.data && allowedText(input.data) !== input.data) e.preventDefault(); }} onKeyUp={remember} onMouseUp={remember} onFocus={remember} onPaste={e => { e.preventDefault(); const text=allowedText(e.clipboardData.getData("text/plain")); if (text) document.execCommand("insertText", false, text); notify(); }}/>
     <small className="assessmentEditorCounter" aria-live="polite">{value.length}/250</small>
-  </div>;
+  {250 !== undefined && <small className="assessmentRichCounter" aria-live="polite">{Array.from((value || "").replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/^\r?\n$/, "")).length}/{250}</small>}</div>;
 }
 
 type Question = {
@@ -324,7 +313,7 @@ function QuestionsPreview({ questions, details, tags, onBack, onEdit, onContinue
             const expected=current.q.options[answerIndex] ?? "";
             const correct=response.trim().toLocaleLowerCase()===expected.trim().toLocaleLowerCase();
             return <label key={key}>Blank {i+1}<input value={response} placeholder={`Type answer for blank ${i+1}`} onChange={event=>{setLearnerAnswers(old=>({...old,[key]:event.target.value}));setCheckedLearner(false);}}/>{checkedLearner && <small className={correct?"is-correct":"is-wrong"}>{correct?"Correct answer":"Try again"}</small>}</label>;
-          })}<button type="button" className="fillqcBuilderAction" onClick={()=>setCheckedLearner(true)}><Icon name="checkmark-circle.svg" size={18}/>Check Answers</button></div>}
+          })}<></></div>}
         </div>
         <div className="fillqcPreviewPanel"><button type="button" className="fillqcPreviewSectionHead" onClick={()=>toggle("answers")}>Answer Options <Icon name="arrow-down-01.svg" size={18} className={sections.answers?"fillqcRotated":""}/></button>{sections.answers && <div className="fillqcPreviewAnswers">{current.q.options.map((answer,i)=>{ const correctFor = blankChoices(current.q).flatMap((choice,blankIndex)=>choice===i?[blankIndex+1]:[]); const correct=correctFor.length>0; return <div key={i} className={`fillqcPreviewAnswer ${learner?"":correct?"correct":"incorrect"}`}>{!learner && <PreviewStatus correct={correct} size={20}/>}<span className="fillqcAnswerLetter">{String.fromCharCode(65+i)}</span><span className="fillqcPreviewAnswerText">{learner ? (answer || `Option ${String.fromCharCode(65+i)}`) : (answer || `Option ${String.fromCharCode(65+i)} (empty)`)}</span>{!learner && <small>{correct?"Correct Answer":"Wrong Answer"}</small>}</div>;})}</div>}</div>
         {!learner && <div className="fillqcPreviewPanel"><button type="button" className="fillqcPreviewSectionHead" onClick={()=>toggle("learning")}>Feedback and Learning <Icon name="arrow-down-01.svg" size={18} className={sections.learning?"fillqcRotated":""}/></button>{sections.learning && <div className="fillqcPreviewLearning"><section><h4><PreviewStatus correct={true} size={20}/> Correct-answer Feedback</h4>{current.q.options.map((answer,i)=>blankChoices(current.q).includes(i)?<div key={i} className="fillqcPreviewFeedbackItem"><button type="button" onClick={()=>setOpenFeedback(openFeedback===i?null:i)}><PreviewStatus correct={true} size={17}/>{String.fromCharCode(65+i)} — {answer||"(empty)"}<Icon name="arrow-down-01.svg" size={16}/></button>{(openFeedback===i||openFeedback===null) && <p>{detail(current.index,i).feedback || "No feedback entered."}</p>}</div>:null)}</section><section><h4><PreviewStatus correct={false} size={20}/> Wrong-answer Feedback</h4>{current.q.options.map((answer,i)=>!blankChoices(current.q).includes(i)?<div key={i} className="fillqcPreviewFeedbackItem"><button type="button" onClick={()=>setOpenFeedback(openFeedback===i?null:i)}><PreviewStatus correct={false} size={17}/>{String.fromCharCode(65+i)} — {answer||"(empty)"}<Icon name="arrow-down-01.svg" size={16}/></button>{(openFeedback===i||openFeedback===null) && <p>{detail(current.index,i).feedback || "No feedback entered."}</p>}</div>:null)}</section><section><h4><Icon name="assignments.svg" size={20}/> Explanation</h4><p>{blankChoices(current.q).map(i=>i>=0?detail(current.index,i).explanation.trim():"").filter(Boolean).join("\n") || "No explanation entered."}</p></section><section><h4><Icon name="idea.svg" size={20}/> Hint</h4><p>{blankChoices(current.q).map(i=>i>=0?detail(current.index,i).hint.trim():"").filter(Boolean).join("\n") || "No hint entered."}</p></section></div>}</div>}

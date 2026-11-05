@@ -86,11 +86,16 @@ export default function MCQReviewPage({detailsKey,contentKey,evaluationKey}:Revi
       }
     }
     const publishedMarks=questions.reduce((sum,q)=>sum+(Number(q.points)||0),0);
-    updateAssessment({title:activeTitle||title,course:activeCourse||course,questions:questions.length,marks:publishedMarks||activeTotal||Number(total)||0,status:"Published"});
+    const publishValues = {title:activeTitle||title,course:activeCourse||course,questions:questions.length,marks:publishedMarks||activeTotal||Number(total)||0,status:"Published" as const};
+    if (activeType === "mcq") {
+      try {
+        updateAssessment(publishValues);
+        if (getAssessment(record.id)?.status !== "Published") { setPublishError("Could not publish the assessment. Please try again."); return; }
+      } catch { setPublishError("Could not publish the assessment. Please try again."); return; }
+    } else updateAssessment(publishValues);
     setPublishError("");
     setPublishConfirmOpen(false);
     setPublishSuccess(true);
-    window.setTimeout(() => router.push("/assessments"), 3000);
   };
   const [details, setDetails] = useState<Dict>({});
   const [evaluation, setEvaluation] = useState<Dict>({});
@@ -272,5 +277,5 @@ export default function MCQReviewPage({detailsKey,contentKey,evaluationKey}:Revi
       </>}
     </div><footer className="reviewFooter"><button type="button" onClick={()=>router.push("/assessments/create/evaluation")}>Back</button>{publishError && !publishConfirmOpen && <span role="alert" className="reviewPublishError">{publishError}</span>}{publishSuccess && <span role="status" style={{color:"#2A7308"}}>Assessment published successfully.</span>}<button type="button" className="reviewPublish" onClick={()=>{setPublishError("");setPublishConfirmOpen(true);}} disabled={publishSuccess}>Publish</button></footer>
     {publishConfirmOpen && <ViewerSubmitConfirm variant="publish" answered={0} remaining={0} flagged={0} error={publishError} onBack={()=>setPublishConfirmOpen(false)} onSubmit={publish}/>}
-  </div></div></section></div></main>;
+  </div></div></section></div>{publishSuccess && <div className="mcqPublishSuccessOverlay"><section className="mcqPublishSuccessDialog" role="dialog" aria-modal="true" aria-labelledby="mcqPublishSuccessTitle"><div className="mcqPublishSuccessArt"><img src="/assets/viewericons/blast.png" alt=""/><img src="/assets/viewericons/checkmark-circle.svg" alt=""/></div><h2 id="mcqPublishSuccessTitle">Assessment Published Successfully</h2><p>{title}</p><button type="button" autoFocus onClick={()=>router.push("/assessments")}>Back to Assessments</button></section></div>}</main>;
 }

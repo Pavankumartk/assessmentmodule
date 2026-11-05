@@ -1250,7 +1250,7 @@ return <main className="superAdminPage institutionAdminPage viewerAppShell viewM
 
                 <Link href="/learner">Dashboard</Link><Icon name="arrow-right-double.svg" size={20} />
 
-                <Link href="/learner">Assessment</Link><Icon name="arrow-right-double.svg" size={20} />
+                <Link href="/assessments/list">Assessment</Link><Icon name="arrow-right-double.svg" size={20} />
 
                 <strong>{draft.title}</strong>
 

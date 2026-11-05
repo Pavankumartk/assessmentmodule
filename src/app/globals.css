@@ -63,7 +63,7 @@ body {
 
 /* Shared typography for Creator, Learner and every Viewer page.
    Scoped component CSS may set sizing/weight; only the font family is unified. */
-html, body, body *, body *::before, body *::after {
+html, body, body *:not([contenteditable], [contenteditable] *, textarea[style*="font-family"]), body *::before, body *::after {
   font-family: "Segoe UI", "Inter", sans-serif !important;
 }
 

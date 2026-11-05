@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -161,7 +162,7 @@ export default function ImageLabelingViewer() {
   return <div className="ilvApp">
     <aside className="ilvSidebar"><Sidebar /></aside>
     <div className="ilvRight"><div className="ilvHeader"><Header /></div>
-      <main className="ilvScroll"><div className="ilvBreadcrumb"><span>Dashboard</span><span>Assessment</span><strong>Image Labeling</strong></div>
+      <main className="ilvScroll"><div className="ilvBreadcrumb"><span>Dashboard</span><Link href="/assessments/list" style={{color:"inherit",textDecoration:"none"}}>Assessment</Link><strong>Image Labeling</strong></div>
         <div className="ilvHeading"><h1>{data.title}</h1><Clock seconds={seconds}/></div>
         {questions.length === 0 ? <section className="ilvEmpty"><h2>No Image Labeling questions found</h2><p>This assessment has no stored image-labeling questions. Add an image and label points in its creator Content step.</p><button onClick={() => router.push("/learner")}>Back to Assessments</button></section> : step === "results" && release.mode === "immediate" ? <section className="ilvResult"><h2>Assessment Results</h2><p>{answered} of {questions.length} questions answered</p><strong>{Math.round(score * 100) / 100} / {maxScore} marks</strong><div className="ilvResultActions"><button onClick={retry}>Retry Test</button><button onClick={() => router.push("/learner")}>Continue</button></div><div className="ilvReviewRows">{questions.map((item, i) => <div key={item.id}><b>Question {i + 1}</b><span>{item.title}</span><small>{item.points.filter(p => answers[`${item.id}:${p.id}`]?.toLowerCase() === p.text.toLowerCase()).length} / {item.points.length} labels correct</small></div>)}</div></section> : step === "submitted" || step === "results" ? <section className="ilvResult"><div className="ilvSuccess">✓</div><h2>Assessment Submitted Successfully</h2><p>Your Image Labeling assessment has been submitted.</p><div className="ilvResultActions"><button disabled={release.mode!=="immediate"} onClick={() => setStep("results")}>View Result</button><button onClick={() => router.push("/learner")}>Continue</button></div></section> : <>
           <div className="ilvGrid">

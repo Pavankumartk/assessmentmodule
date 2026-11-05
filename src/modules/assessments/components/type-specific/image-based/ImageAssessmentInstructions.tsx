@@ -68,7 +68,7 @@ export default function ImageAssessmentInstructions({ assessmentId, onStart }: {
           <div className="viewerContent">
             <nav className="viewerBreadcrumb" aria-label="Breadcrumb">
               <Link href="/learner">Dashboard</Link><Icon name="arrow-right-double.svg" />
-              <Link href="/learner">Assessment</Link><Icon name="arrow-right-double.svg" />
+              <Link href="/assessments/list">Assessment</Link><Icon name="arrow-right-double.svg" />
               <strong>{info.title}</strong>
             </nav>
             <div className="viewerPageHeading"><h1>{info.title}</h1><p>Image-Based Assessment</p></div>

@@ -1,0 +1,279 @@
+/* Image-Based creator only — MCQ Question Settings / Assessment Summary parity.
+   This single stylesheet supersedes the conflicting 2026-11-05 visual patch.
+   Do not import in a shared layout or another assessment type. */
+
+.ibqApp {
+  --ibq-panel-bg: #DFE6E9;
+  --ibq-panel-text: #374151;
+  --ibq-panel-raised: -4px -4px 4px #FFFFFF, 4px 4px 4px #C4C4C4;
+  --ibq-panel-inset: inset -4px -4px 4px #FFFFFF, inset 4px 4px 4px #C4C4C4;
+}
+
+/* MCQ Content page: compact 264px sidebar, one raised outer surface,
+   two inset-bordered sections (not another set of heavy raised cards). */
+.ibqApp .ibqColumns {
+  grid-template-columns: minmax(0,1fr) minmax(230px,264px);
+  gap: 16px;
+  align-items: start;
+}
+.ibqApp .ibqAside.ibqMcqAside {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch;
+  gap: 12px !important;
+  min-width: 0;
+  width: 100%;
+  padding: 12px !important;
+  border: 0;
+  border-radius: 12px !important;
+  background: var(--ibq-panel-bg) !important;
+  box-shadow: var(--ibq-panel-raised) !important;
+  overflow: visible;
+  box-sizing: border-box;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqAsideSection {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 11px !important;
+  min-width: 0;
+  width: 100%;
+  padding: 13px 11px !important;
+  border: 1px solid #CED4D8 !important;
+  border-radius: 5px !important;
+  background: var(--ibq-panel-bg) !important;
+  box-shadow: none !important;
+  overflow: visible;
+  position: relative;
+  box-sizing: border-box;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqAsideSection:has(.ibqAsidePick.is-open) { z-index: 30; }
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqAsideSection > h2 {
+  margin: 0 0 2px !important;
+  color: var(--ibq-panel-text) !important;
+  font: 600 16px/23px 'Segoe UI',Arial,sans-serif !important;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqField {
+  display: flex; flex-direction: column;
+  min-width: 0; width: 100%; gap: 6px !important;
+  position: relative;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqField > label,
+.ibqApp .ibqAside.ibqMcqAside .ibqMandatory > label {
+  margin: 0;
+  color: var(--ibq-panel-text) !important;
+  font: 600 13px/19px 'Segoe UI',Arial,sans-serif !important;
+}
+
+/* Every editable sidebar control MUST look inset (Points, tag text, dropdowns).
+   Avoid relying on inherited button/input styles or the focus state. */
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqPointsControl,
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqField .ibqAsidePickTrigger,
+.ibqApp .ibqAside.ibqMcqAside .ibqTagEntry > input {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  min-height: 36px;
+  border: 0 !important;
+  border-radius: 7px !important;
+  padding: 6px 11px;
+  background: var(--ibq-panel-bg) !important;
+  box-shadow: var(--ibq-panel-inset) !important;
+  color: var(--ibq-panel-text) !important;
+  font: 400 13px/19px 'Segoe UI',Arial,sans-serif !important;
+  outline: 0 !important;
+  appearance: none;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqPointsControl:focus-within,
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqField .ibqAsidePickTrigger:focus-visible,
+.ibqApp .ibqAside.ibqMcqAside .ibqTagEntry > input:focus {
+  box-shadow: var(--ibq-panel-inset) !important;
+  outline: 0 !important;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqPointsControl { position:relative; padding:0; overflow:visible; }
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqPointsControl > input#ibqPoints {
+  display:block; width:100%; height:100%; min-height:0;
+  padding:5px 39px 5px 10px !important;
+  border:0 !important; border-radius:7px;
+  background:transparent !important;box-shadow:none !important;
+  font:400 13px/19px 'Segoe UI',Arial,sans-serif !important;
+  color:var(--ibq-panel-text) !important;outline:none !important;
+  -moz-appearance:textfield; appearance:textfield;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqPointsControl input::-webkit-inner-spin-button,
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqPointsControl input::-webkit-outer-spin-button { -webkit-appearance:none;margin:0; }
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqPointSteppers {
+  position:absolute;right:5px;top:50%;transform:translateY(-50%);
+  width:22px;height:27px;display:flex;flex-direction:column;z-index:2;
+  border-radius:3px;background:var(--ibq-panel-bg);
+  box-shadow:-1px -1px 2px #FFF,1px 1px 2px #C4C4C4;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqPointSteppers > button {
+  width:100%;height:13.5px;min-height:0;padding:0;
+  display:grid;place-items:center;background:transparent;border:0;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqPointSteppers .ibqAssetIcon {
+  position:static !important;display:block;
+  width:12px;height:12px;max-width:12px;max-height:12px;
+  margin:0 !important;object-fit:contain;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqPointSteppers .ibqMcqArrowUp {
+  transform:rotate(180deg) !important;
+}
+
+/* Dropdown menu opens over, not below, subsequent Question Settings fields. */
+.ibqApp .ibqAside.ibqMcqAside .ibqAsidePick {
+  position:relative;min-width:0;width:100%;box-sizing:border-box;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqAsidePick.is-open { z-index:50; }
+.ibqApp .ibqAside.ibqMcqAside .ibqAsidePickTrigger {
+  display:flex;justify-content:space-between;gap:9px;text-align:left;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqAsidePickTrigger > span {
+  display:block;flex:1;min-width:0;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqAsidePickTrigger > .ibqAssetIcon {
+  position:static !important;inset:auto !important;
+  display:block;flex:0 0 18px;width:18px;height:18px;
+  margin:0 0 0 auto !important;object-fit:contain;transform:none;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqAsidePickTrigger > .ibqAssetIcon.ibqRotated {
+  transform:rotate(180deg) !important;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqAsidePickMenu {
+  display:grid;position:absolute !important;
+  top:calc(100% + 5px) !important;left:0 !important;right:0 !important;
+  width:100% !important;max-height:min(245px,44dvh);
+  margin:0 !important;padding:8px !important;gap:5px;
+  overflow-x:hidden;overflow-y:auto;
+  border:0;border-radius:8px;background:var(--ibq-panel-bg);
+  box-shadow:var(--ibq-panel-raised);box-sizing:border-box;z-index:60;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqAsidePickOption,
+.ibqApp .ibqAside.ibqMcqAside .ibqAsidePickOption:hover,
+.ibqApp .ibqAside.ibqMcqAside .ibqAsidePickOption.is-selected {
+  display:block;width:100%;min-height:36px;padding:7px 10px;
+  border:0;border-radius:6px;
+  color:var(--ibq-panel-text) !important;
+  background:var(--ibq-panel-bg);font:400 13px/20px 'Segoe UI',Arial,sans-serif;
+  text-align:left;overflow-wrap:anywhere;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqAsidePickOption:is(:hover,.is-selected,:focus-visible) {
+  box-shadow:inset -2px -2px 3px #FFF,inset 2px 2px 3px #C4C4C4 !important;
+}
+
+/* MCQ-style Tags: raised Add Tag action, inset entry, no squeezed input / button. */
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqTagHolder,
+.ibqApp .ibqAside.ibqMcqAside .ibqTags {display:flex;flex-wrap:wrap;gap:7px;min-width:0;}
+.ibqApp .ibqAside.ibqMcqAside .ibqTagAdd,
+.ibqApp .ibqAside.ibqMcqAside .ibqTagEntry > button {
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-width:0;min-height:32px;padding:6px 10px;
+  border:0 !important;border-radius:5px;
+  background:var(--ibq-panel-bg) !important;
+  box-shadow:-2px -2px 3px #FFF,2px 2px 3px #C4C4C4 !important;
+  color:#2A7308 !important;
+  font:600 13px/19px 'Segoe UI',Arial,sans-serif !important;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqTagEntry {
+  display:flex;align-items:center;width:100%;min-width:0;gap:7px;
+  margin-top:3px;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqTagEntry > input {
+  display:block;flex:1 1 0;min-width:0;width:1px;
+  padding:6px 10px !important;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqTagEntry > button {
+  flex:0 0 auto;min-width:39px;min-height:36px;color:#2D4CC8 !important;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqTags > span {
+  max-width:100%;overflow-wrap:anywhere;
+  background:var(--ibq-panel-bg);border:0;border-radius:5px;
+  color:#374151;font-size:12px;
+  box-shadow:inset -2px -2px 2px #FFF,inset 2px 2px 2px #C4C4C4;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqMandatory {margin-top:4px;gap:9px;}
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqAsideSection > small {
+  color:#374151;font:400 11px/17px 'Segoe UI',Arial,sans-serif;
+}
+
+/* MCQ summary: three equally sized raised value tiles; stable labels and progress. */
+.ibqApp .ibqAside.ibqMcqAside .ibqStats {
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqStats > div {
+  display:flex;flex-direction:column;align-items:center;min-width:0;text-align:center;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqStats b {
+  display:grid;place-items:center;width:100%;height:48px;min-height:48px;
+  padding:0 2px;border-radius:7px;background:var(--ibq-panel-bg);
+  box-shadow:-3px -3px 4px #FFF,3px 3px 4px #C4C4C4;
+  font:700 23px/28px 'Segoe UI',Arial,sans-serif;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqStats span {
+  margin-top:7px;font:500 12px/18px 'Segoe UI',Arial,sans-serif;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqSummary > p {
+  margin:0 !important;padding:0 !important;border:0 !important;
+  font:400 11px/17px 'Segoe UI',Arial,sans-serif;color:#374151;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqSummaryProgress {
+  height:4px;max-width:100%;margin:8px 0 1px;
+  border-radius:8px;overflow:hidden;background:#BCC6CB;
+}
+.ibqApp .ibqAside.ibqMcqAside .ibqMcqSummaryProgress > span {display:block;height:100%;}
+
+/* FIX REGRESSION: hint boxes keep a clearly visible blue tick if checked.
+   The wording always stays neutral gray. No image asset is required. */
+.ibqApp label.ibqHintCheck,
+.ibqApp label.ibqHintCheck:hover,
+.ibqApp label.ibqHintCheck:has(input:checked),
+.ibqApp label.ibqHintCheck > span:last-child {
+  color:#374151 !important;
+}
+.ibqApp .ibqHintNative + .ibqHintSquare {position:relative;}
+.ibqApp .ibqHintNative:checked + .ibqHintSquare::after {
+  content:'';display:block;width:17px;height:17px;
+  background:#2D4CC8 !important;
+  background-image:none !important;
+  border:0;border-radius:4px;
+  box-shadow:none !important;
+}
+.ibqApp .ibqHintNative:checked + .ibqHintSquare::before {
+  content:'';position:absolute;z-index:2;top:5px;left:9px;
+  display:block;width:5px;height:9px;
+  border-right:2px solid #FFF;border-bottom:2px solid #FFF;
+  transform:rotate(45deg);pointer-events:none;
+}
+.ibqApp .ibqHintNative:not(:checked) + .ibqHintSquare::before {content:none;}
+.ibqApp .ibqHintNative:not(:checked) + .ibqHintSquare::after {
+  background-image:none !important;
+}
+
+/* Subtype selector: selection is conveyed by inset row, NOT a checkmark.
+   Applies ONLY to the Image-Based subtype menu (not hints or correct answers). */
+.ibqApp .ibqSubtypeMenu .ibqSubtypeOption > .ibqAssetIcon {display:none !important;}
+.ibqApp .ibqSubtypeMenu .ibqSubtypeOption,
+.ibqApp .ibqSubtypeMenu .ibqSubtypeOption.is-selected,
+.ibqApp .ibqSubtypeMenu .ibqSubtypeOption:hover {
+  color:#374151 !important;
+}
+.ibqApp .ibqSubtypeMenu .ibqSubtypeOption:is(.is-selected,:hover) {
+  box-shadow:inset -2px -2px 3px #FFF,inset 2px 2px 3px #C4C4C4;
+}
+
+@media(max-width:1100px) and (min-width:901px) {
+  .ibqApp .ibqColumns {grid-template-columns:minmax(0,1fr) 244px;gap:14px;}
+}
+@media(max-width:900px) {
+  .ibqApp .ibqColumns {grid-template-columns:minmax(0,1fr);}
+  .ibqApp .ibqAside.ibqMcqAside {max-width:100%;}
+}
+@media(max-width:600px) {
+  .ibqApp .ibqAside.ibqMcqAside {padding:12px !important;gap:12px !important;}
+  .ibqApp .ibqAside.ibqMcqAside .ibqMcqAsideSection {padding:12px !important;}
+  .ibqApp .ibqAside.ibqMcqAside .ibqMcqField .ibqAsidePickTrigger {height:40px;min-height:40px;}
+}

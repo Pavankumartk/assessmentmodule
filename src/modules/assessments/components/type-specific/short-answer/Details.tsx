@@ -1,4 +1,6 @@
 "use client";
+import AssessmentRichToolbar from "@/modules/assessments/components/common/AssessmentRichToolbar";
+import { applyAssessmentFont } from "@/modules/assessments/components/common/assessment-editor-font";
 import { validateMcqDetails } from "@/modules/assessments/validation/mcq-validation";
 import { ASSESSMENT_DEPARTMENTS, ASSESSMENT_PROGRAMS, getCourseModuleGroups } from "@/modules/assessments/config/assessment-types";
 import { AssessmentEditorDropdown } from "@/modules/assessments/components/common/steps/DetailsStep/DetailsStep";
@@ -546,7 +548,7 @@ export default function MCQDetailsPage() {
   };
   const runEditorCommand = (command: string, value?: string) => {
     restoreEditorSelection();
-    document.execCommand(command, false, value);
+    if (command === "fontName" && value) applyAssessmentFont(editorRef.current, value); else document.execCommand(command, false, value);
     rememberEditorSelection();
     update("descriptionInstructions", editorRef.current?.innerHTML ?? "");
   };
@@ -610,29 +612,7 @@ export default function MCQDetailsPage() {
       <div className="mcqField mcqFieldWide">
         <span>Description / Instructions</span>
         <div className="mcqEditor">
-          <div className="mcqEditorToolbar" role="toolbar" aria-label="Description formatting toolbar">
-            {editorTool("Undo", "undo", "undo")}
-            {editorTool("Redo", "redo", "redo")}
-            <AssessmentEditorDropdown className="mcqEditorFont" label="Font" value={editorFont} options={["Arial", "Segoe UI", "Georgia", "Times New Roman"]} onOpen={rememberEditorSelection} onChange={value => { setEditorFont(value); runEditorCommand("fontName", value); }} />
-            <AssessmentEditorDropdown className="mcqEditorSize" label="Font size" value={editorSize} options={["12", "16", "18", "24"]} onOpen={rememberEditorSelection} onChange={value => { setEditorSize(value); runEditorCommand("fontSize", ({"12":"2", "16":"3", "18":"4", "24":"5"} as Record<string,string>)[value]); }} />
-            {editorTool("Bold", "bold", "bold")}
-            {editorTool("Italic", "italic", "italic")}
-            {editorTool("Underline", "underline", "underline")}
-            <label className="mcqEditorColor" title="Text color" onMouseDown={rememberEditorSelection}>
-              <span className="mcqColorLetter">A</span><input aria-label="Text color" type="color" defaultValue="#374151" onChange={event => runEditorCommand("foreColor", event.target.value)} />
-              <Image src="/assets/assessmenticons/arrow-down-01.svg" alt="" width={14} height={14} />
-            </label>
-            <label className="mcqEditorColor" title="Pen color" onMouseDown={rememberEditorSelection}><span className="mcqColorLetter">✎</span><input aria-label="Pen color" type="color" defaultValue="#374151" onChange={event => runEditorCommand("foreColor", event.target.value)} /></label>
-            <button type="button" title="Highlight" aria-label="Highlight" onMouseDown={event=>event.preventDefault()} onClick={()=>runEditorCommand("hiliteColor","#fff59d")}>{toolbarIcon("highlighter","Highlight")}</button>
-            {editorTool("Pen line", "pen-line", "removeFormat")}
-            {editorTool("Bullet list", "text-centerline-center-top", "insertUnorderedList")}
-            <label className="mcqEditorFile" title="Attach a file" onMouseDown={rememberEditorSelection}>{toolbarIcon("attachment", "Attach a file")}<input type="file" onChange={event => {
-              const file = event.target.files?.[0]; if (file) insertEditorFile(file, false); event.target.value = "";
-            }} /></label>
-            <label className="mcqEditorFile" title="Insert image" onMouseDown={rememberEditorSelection}>{toolbarIcon("image", "Insert image")}<input type="file" accept="image/*" onChange={event => {
-              const file = event.target.files?.[0]; if (file) insertEditorFile(file, true); event.target.value = "";
-            }} /></label>
-          </div>
+          <AssessmentRichToolbar label="Description and instructions" onRemember={rememberEditorSelection} onCommand={(name, value) => { if (name === "fontSize" && value) { runEditorCommand(name, "7"); editorRef.current?.querySelectorAll('font[size="7"]').forEach(node => { node.removeAttribute("size"); (node as HTMLElement).style.fontSize = value + "px"; }); update("descriptionInstructions", editorRef.current?.innerHTML ?? ""); } else runEditorCommand(name, value); }} />
           <div className="mcqEditorBody" ref={editorRef} contentEditable suppressContentEditableWarning role="textbox" aria-label="Description and instructions" data-placeholder="Enter assessment description and instructions..." onKeyUp={rememberEditorSelection} onMouseUp={rememberEditorSelection} onBlur={rememberEditorSelection} onPaste={(event) => { event.preventDefault(); document.execCommand("insertText", false, event.clipboardData.getData("text/plain")); rememberEditorSelection(); update("descriptionInstructions", event.currentTarget.innerHTML); }} onInput={(event) => { rememberEditorSelection(); update("descriptionInstructions", event.currentTarget.innerHTML); }} />
         </div>
       </div>

@@ -1,4 +1,5 @@
 "use client";
+import { MCQRichEditor } from "@/modules/assessments/components/common/steps/ContentStep/ContentStep";
 import WizardStepLink from "@/modules/assessments/components/common/WizardStepLink";
 import { assessmentStorage, updateAssessment, publishAssessment, viewerPath, resultPath } from "@/modules/assessments/storage/assessment-storage";
 
@@ -462,6 +463,7 @@ function ShortAnswerBuilder({ onExit, mcqValues }: { onExit: () => void; mcqValu
   const router = useRouter();
   const [questions,setQuestions] = useState<SAQuestion[]>([{text:"",points:"",difficulty:"",category:"",bloom:"",mandatory:true,answer:"",rubric:"",feedback:"",hint:""}]);
   const [extras,setExtras] = useState<Record<number,OneWordExtra>>({0:makeOneWordExtra()});
+  const [richHtml,setRichHtml]=useState<Record<string,string>>({});
   const [active,setActive] = useState(0);
   const [previewing,setPreviewing] = useState(false);
   const [answerOpen,setAnswerOpen] = useState(false);
@@ -481,7 +483,7 @@ function ShortAnswerBuilder({ onExit, mcqValues }: { onExit: () => void; mcqValu
     document.addEventListener("pointerdown", outside); document.addEventListener("keydown", escape);
     return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); };
   }, [oneWordAddOpen]);
-  useEffect(()=>{try{const saved=JSON.parse(assessmentStorage.getItem("oneWordContentDraft")||"null");if(!saved)return;if(Array.isArray(saved.questions))setQuestions(saved.questions);if(Array.isArray(saved.tags))setTags(saved.tags);if(saved.extras)setExtras(saved.extras);}catch{}},[]);
+  useEffect(()=>{try{const saved=JSON.parse(assessmentStorage.getItem("oneWordContentDraft")||"null");if(!saved)return;if(Array.isArray(saved.questions))setQuestions(saved.questions);if(Array.isArray(saved.tags))setTags(saved.tags);if(saved.extras)setExtras(saved.extras);if(saved.richHtml && typeof saved.richHtml === "object")setRichHtml(saved.richHtml);}catch{}},[]);
   const current=questions[active]??questions[0];
   const extra=extras[active]??makeOneWordExtra();
   const update=(patch:Partial<SAQuestion>)=>setQuestions(old=>old.map((q,i)=>i===active?{...q,...patch}:q));
@@ -499,7 +501,7 @@ function ShortAnswerBuilder({ onExit, mcqValues }: { onExit: () => void; mcqValu
     }
     const sum=questions.slice(0,mcqValues.questionCount).reduce((n,q)=>n+Number(q.points),0);
     if(Math.abs(sum-mcqValues.totalMarks)>0.001){setNotice(`Question marks total ${sum}, but Total Marks is ${mcqValues.totalMarks}.`);setPreviewing(false);return false;}
-    try{assessmentStorage.setItem("oneWordContentDraft",JSON.stringify({questions,tags,extras}));setNotice("Successfully saved");return true;}
+    try{assessmentStorage.setItem("oneWordContentDraft",JSON.stringify({questions,tags,extras,richHtml}));setNotice("Successfully saved");return true;}
     catch{setNotice("Could not save. Please try again.");return false;}
   };
   const navigate=(next:number)=>{if(next<0)return;setQuestions(old=>Array.from({length:Math.max(old.length,next+1)},(_,i)=>old[i]??{text:"",points:"",difficulty:"",category:"",bloom:"",mandatory:true,answer:"",rubric:"",feedback:"",hint:""}));setActive(next);setAnswerOpen(false);};
@@ -514,8 +516,9 @@ function ShortAnswerBuilder({ onExit, mcqValues }: { onExit: () => void; mcqValu
     if (next >= 0) { navigate(next); setNotice(""); }
     else setNotice(`Only ${mcqValues.questionCount} questions are configured.`);
   };
-  const toolbar=(label:string)=><SAToolbar className="mcqcShortToolbar" label={label} onAction={()=>document.getElementById(label)?.focus()}/>;
-  const editor=(key:keyof Pick<OneWordExtra,"correct"|"correctFeedback"|"wrongFeedback"|"explanation"|"hint">,placeholder="")=><div className="mcqcOWEditor">{toolbar(`ow-${key}`)}<textarea id={`ow-${key}`} maxLength={250} placeholder={placeholder} value={extra[key]} onChange={e=>updateExtra({[key]:e.target.value})}/><small className="assessmentEditorCounter">{extra[key].length}/250</small></div>;
+  const oneWordSharedEditorId = (name:string) => `ow-${active}-${name}`;
+  const richEditor = (name:string, text:string, change:(value:string)=>void, placeholder:string, limit=250) => { const id=oneWordSharedEditorId(name); return <div className="oneWordSharedEditor"><MCQRichEditor key={id} editorId={id} value={text} html={richHtml[id]} onChange={change} onHtmlChange={html=>setRichHtml(old=>({...old,[id]:html}))} placeholder={placeholder} onError={setNotice} maxLength={limit}/><small className="oneWordSharedCount" aria-live="polite">{(text||"").replace(/[\u200B-\u200D\uFEFF]/g,"").replace(/^\r?\n$/,"").length}/{limit}</small></div>; };
+  const editor=(key:keyof Pick<OneWordExtra,"correct"|"correctFeedback"|"wrongFeedback"|"explanation"|"hint">,placeholder="")=><div className="mcqcOWEditor">{richEditor(key,extra[key],value=>updateExtra({[key]:value}),placeholder)}</div>;
   const accordion=(key:string,title:string,icon:string,body:React.ReactNode,description="")=><section className="mcqcOWAccordion"><button type="button" className="mcqcOWAccordionHead" onClick={()=>setPanels(old=>({...old,[key]:!old[key]}))}><span className="mcqcOWAccordionLabel"><Icon name={icon} size={18}/><span>{title}</span></span><span className="mcqcOWHeadRight">{description&&!/^\d+\s*\/\s*\d+/.test(description)&&<small>{description}</small>}<Icon name="arrow-down-01.svg" size={18} className={panels[key]?"mcqcRotated":""}/></span></button>{panels[key]&&<div className="mcqcOWAccordionBody">{body}</div>}</section>;
   const toggle=(label:string,key:keyof Pick<OneWordExtra,"caseSensitive"|"ignoreSpaces"|"ignorePunctuation"|"allowTypos">)=><div className="mcqcOWOptionSwitch"><span>{label}</span><button type="button" className={`mcqcSwitch ${extra[key]?"mcqcSwitchOn":""}`} role="switch" aria-checked={extra[key]} onClick={()=>updateExtra({[key]:!extra[key]})}><span className="mcqcSwitchText">{extra[key]?"ON":"OFF"}</span><span className="mcqcSwitchKnob"/></button></div>;
   if(previewing)return <ShortAnswerPreview questions={questions} extras={extras} tags={tags} totalQuestions={mcqValues.questionCount} totalMarks={mcqValues.totalMarks} notice={notice} saving={continuing} onBack={(index)=>{if(index!==undefined)setActive(index);setPreviewing(false)}} onExit={onExit} onContinue={saveAndContinue}/>;
@@ -552,10 +555,10 @@ function ShortAnswerBuilder({ onExit, mcqValues }: { onExit: () => void; mcqValu
       </div>
       <div className="mcqcQuestionForm">
       <div className="mcqcBuilderField"><label>Question Type</label><QuestionTypeDropdown value="One-Word Answer" onChange={()=>{}}/></div>
-      <div className="mcqcBuilderField mcqcWriteField"><div className="mcqcFormHeading"><label htmlFor="short-question-text">Write Your Question</label></div><div className="mcqcEditorSurface">{toolbar("short-question-text")}<textarea id="short-question-text" maxLength={250} value={current.text} onChange={e=>update({text:e.target.value})}/><small className="assessmentEditorCounter">{current.text.length}/250</small></div></div>
+      <div className="mcqcBuilderField mcqcWriteField"><div className="mcqcFormHeading"><label htmlFor="short-question-text">Write Your Question</label></div><div className="mcqcEditorSurface">{richEditor("question",current.text,value=>update({text:value}),"Write your question...")}</div></div>
       <div className="mcqcOWAnswerArea"><button type="button" className="mcqcOWAnswerTrigger" aria-expanded={answerOpen} onClick={()=>setAnswerOpen(v=>!v)}>Answer Box Placeholder<Icon name="arrow-down-01.svg" size={18} className={answerOpen?"mcqcRotated":""}/></button>
       {answerOpen&&<div className="mcqcOWExpanded">
-        <div className="mcqcOWMaximum"><label htmlFor="ow-answer-text">Maximum Characters</label></div><div className="mcqcOWEditor">{toolbar("ow-answer-text")}<textarea id="ow-answer-text" placeholder="Type your one-word answer ...." aria-invalid={current.answer.length > 30} value={current.answer} onChange={e=>update({answer:e.target.value})}/><small className="assessmentEditorCounter">{current.answer.length}/30</small></div>{current.answer.length > 30 && <p role="alert" style={{color:"#BC1E2D"}}>Enter no more than 30 characters.</p>}
+        <div className="mcqcOWMaximum"><label htmlFor="ow-answer-text">Maximum Characters</label></div><div className="mcqcOWEditor">{richEditor("answer",current.answer,value=>update({answer:value}),"Type your one-word answer ....",30)}</div>{current.answer.length > 30 && <p role="alert" style={{color:"#BC1E2D"}}>Enter no more than 30 characters.</p>}
         {accordion("correct","Correct Answers","circle-check.svg",<>{editor("correct")}<div className="mcqcOWCorrectTags">{extra.correct.split(",").filter(v=>v.trim()).map((v,i)=><span key={i}>{v.trim()}</span>)}</div><div className="mcqcOWToggles">{toggle("Case Sensitive","caseSensitive")}{toggle("Ignore Extra Spaces","ignoreSpaces")}{toggle("Ignore Punctuation","ignorePunctuation")}{toggle("Allow Minor Typos (character)","allowTypos")}</div></>,`${extra.correct.length}/250`)}
         {accordion("good","Feedback for Correct Answer","circle-check.svg",editor("correctFeedback"),`${extra.correctFeedback.length}/250`)}
         {accordion("bad","Feedback for Wrong Answer","cancel-circle.svg",editor("wrongFeedback"),`${extra.wrongFeedback.length}/250`)}
