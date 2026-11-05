@@ -716,3 +716,14 @@
 
 /* Content validation message uses red, not blue. */
 .mcqcBuilderNotice.mcqcValidationError,.mcqcMessage.mcqcValidationError{color:#BC1E2D!important;font-weight:600;}
+
+/* Question status reflects completion; incomplete questions use an empty circle. */
+.mcqcBuilder .mcqcNumberStatus.is-pending{display:grid;place-items:center;background:transparent!important;border:1.5px solid currentColor!important;color:inherit!important;box-sizing:border-box;opacity:1!important;}
+.mcqcBuilder .mcqcNumberStatus.is-done{display:grid;place-items:center;background:#2A7308!important;border:0!important;color:#fff!important;font:700 10px/1 Arial,sans-serif!important;opacity:1!important;}
+.mcqcBuilder .mcqcRoundNav:disabled{opacity:.45!important;cursor:not-allowed;}
+.mcqcBuilder .mcqcRoundNav:disabled .mcqcIcon{opacity:.6!important;}
+
+.mcqcBuilder .mcqcRemoveQuestion{align-self:flex-end;border:0;background:transparent;color:#a23a24;font:600 14px Segoe UI,Arial,sans-serif;cursor:pointer}.mcqcBuilder .mcqcRemoveQuestion:disabled{opacity:.5;cursor:not-allowed}
+
+.mcqcBuilder .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}
+.mcqcBuilder .mcqcNumberStatus.is-pending{background:#2D4CC8!important;border:0!important;color:#fff!important}

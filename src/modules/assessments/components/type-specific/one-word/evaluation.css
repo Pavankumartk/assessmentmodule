@@ -983,3 +983,5 @@
     width:100%;
   }
 }
+
+.assessment-variant--one-word .ev-setting-row input[type="datetime-local"]{min-width:0;max-width:60%;padding:7px;border:0;border-radius:5px;background:#DFE6E9;color:#374151;box-shadow:inset -2px -2px 3px #fff,inset 2px 2px 3px #C4C4C4;font:inherit}

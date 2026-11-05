@@ -1244,6 +1244,10 @@
 .assessment-variant--one-word .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionNumber.is-empty{color:#2a7308;}
 .assessment-variant--one-word .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionNumber:disabled{opacity:.55;cursor:default;}
 .assessment-variant--one-word .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcNumberStatus{position:absolute;top:5px;right:6px;width:10px;height:10px;border-radius:50%;background:#2a7308;}
+.assessment-variant--one-word .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcNumberStatus{min-width:10px;min-height:10px;max-width:10px;max-height:10px;}
+.assessment-variant--one-word .mcqcOneWordBuilder .mcqcShortQuestionNavigator .mcqcNumberNavigation { display:flex; justify-content:flex-start; }
+.assessment-variant--one-word .mcqcOneWordBuilder .mcqcShortQuestionNavigator .mcqcNumberScroller { flex:0 1 auto; min-width:0; }
+.assessment-variant--one-word .mcqcOneWordBuilder .mcqcShortQuestionNavigator .mcqcRoundNav:disabled { opacity:.45; cursor:not-allowed; }
 .assessment-variant--one-word .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionNumber.is-active .mcqcNumberStatus{background:#2d4cc8;}
 .assessment-variant--one-word .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcRoundNav{width:34px;height:34px;min-width:34px;border-radius:50%;background:#dfe6e9;box-shadow:-2px -2px 4px #fff,2px 2px 4px #c4c4c4;}
 .assessment-variant--one-word .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionProgress{width:calc(100% - 100px);height:18px;margin:8px auto 0;padding:3px 10px;border-radius:20px;box-shadow:inset 3px 3px 4px #c4c4c4,inset -3px -3px 4px #fff;}
@@ -1423,3 +1427,15 @@
 }
 
 .assessment-variant--one-word .mcqcAppShell .mcqcOneWordBuilder .mcqcShortFooterRight {margin-right:0;margin-left:auto;}
+
+/* Question status reflects completion; incomplete questions use an empty circle. */
+.mcqcBuilder .mcqcNumberStatus.is-pending{display:grid;place-items:center;background:transparent!important;border:1.5px solid currentColor!important;color:inherit!important;box-sizing:border-box;opacity:1!important;}
+.mcqcBuilder .mcqcNumberStatus.is-done{display:grid;place-items:center;background:#2A7308!important;border:0!important;color:#fff!important;font:700 10px/1 Arial,sans-serif!important;opacity:1!important;}
+.mcqcBuilder .mcqcRoundNav:disabled{opacity:.45!important;cursor:not-allowed;}
+.mcqcBuilder .mcqcRoundNav:disabled .mcqcIcon{opacity:.6!important;}
+
+.assessment-variant--one-word .mcqcShortBuilder .mcqcQuestionNumber.is-empty{border-color:#A6AFB5;color:#374151;}
+
+.mcqcBuilder .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}
+.mcqcBuilder .mcqcNumberStatus.is-pending{background:#2D4CC8!important;border:0!important;color:#fff!important}
+.assessment-variant--one-word .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}

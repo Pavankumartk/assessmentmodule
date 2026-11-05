@@ -1,4 +1,6 @@
 "use client";
+import { creatorInstructionLines } from "@/modules/assessments/components/viewer/instruction-text";
+
 
 // Reuse the exact existing MCQ instruction-card classes and shared styling.
 // This is shown by the viewer route before it mounts an Image-Based question viewer.
@@ -42,10 +44,7 @@ export default function ImageAssessmentInstructions({ assessmentId, onStart }: {
     try { draft = JSON.parse((assessmentStorage.getItem("imageBasedAssessmentDraft") || assessmentStorage.getItem("imageBasedDetailsDraft") || assessmentStorage.getItem("mcqAssessmentDraft") || "{}")); }
     catch { /* use record/defaults */ }
     const questions = readImageDraft().questions.filter(imageQuestionValid);
-    const raw = draft.instructions ?? draft.descriptionInstructions;
-    const list = Array.isArray(raw)
-      ? raw.map(part => text(part)).filter(Boolean)
-      : text(raw).split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+    const list = creatorInstructionLines(draft.instructions, draft.descriptionInstructions);
     const duration = text(draft.duration ?? draft.timeLimit ?? draft.totalTime, "60");
     const passing = text(draft.passingScore ?? draft.passingMarks, "60");
     const negative = text(draft.negativeMarkingValue ?? draft.negativeMarking, "NA");

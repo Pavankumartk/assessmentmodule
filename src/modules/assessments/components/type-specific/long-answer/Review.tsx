@@ -13,11 +13,6 @@ type Dict = Record<string, unknown>;
 type ReviewQuestion = { text?: string; answer?: string; points?: string | number; correct?: number; options?: string[]; difficulty?: string; bloom?: string; mandatory?: boolean };
 const ROOT = "/assets/assessmenticons/";
 const STEPS = ["Type", "Details", "Content", "Evaluation", "Review"];
-const DEFAULT_LEARNERS = [
-  { learner: "Ananya Sharma", id: "S001", extraTime: "+50%", accommodation: "Extended Time" },
-  { learner: "Rahul Kumar", id: "S002", extraTime: "+25%", accommodation: "Extra Breaks" },
-  { learner: "Priya Nair", id: "S003", extraTime: "+60%", accommodation: "Extended Time" },
-];
 const get = (data: Dict, keys: string[], fallback = "—"): string => {
   for (const key of keys) { const value = data[key]; if (value !== null && value !== undefined && String(value).trim()) return String(value); }
   return fallback;
@@ -161,7 +156,7 @@ export default function MCQReviewPage() {
   const duration = get(details, ["duration", "timeLimit"], "30 Minutes");
   const title = get(details, ["assessmentTitle", "title", "assessmentName"], "Introduction to Artificial Intelligence");
   const course = get(details, ["course", "courseName"], "Introduction to AI");
-  const learnerRecords = Array.isArray(details.accommodationRows) ? details.accommodationRows as { learner: string; id?: string; extraTime?: string; accommodation?: string }[] : DEFAULT_LEARNERS;
+  const learnerRecords = Array.isArray(details.accommodationRows) ? details.accommodationRows as { learner: string; id?: string; extraTime?: string; accommodation?: string }[] : [];
   const totalQuestionMarks = questions.reduce((sum, q) => sum + Number(q.points || 0), 0);
   const allCorrect = questions.length > 0 && questions.every(q => !!q.text?.trim() && !!String((q as ReviewQuestion & {modelAnswer?:string}).modelAnswer||q.answer||"").trim() && Number(q.points || 0) > 0);
   const setting = (key: string, fallback = "on") => get(evaluation, [key], fallback);

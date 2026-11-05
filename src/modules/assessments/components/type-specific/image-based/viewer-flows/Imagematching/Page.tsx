@@ -402,7 +402,7 @@ export default function ImageMatchingViewerPage() {
     const time = Date.now();
     let state: Partial<Attempt> = {};
     try { state = JSON.parse(sessionStorage.getItem(key) || "{}"); } catch { /* corrupted state */ }
-    if (state.signature === stamp && state.expiresAt && (state.expiresAt > time || state.submitted)) {
+    if (state.signature === stamp && state.expiresAt) {
       setCurrent(Math.min(Math.max(0, state.current ?? 0), Math.max(loaded.questions.length - 1, 0)));
       setAnswers(state.answers ?? {});
       setVisited(state.visited ?? []);
@@ -548,8 +548,8 @@ export default function ImageMatchingViewerPage() {
                   </div>
                   {notice && <p className="viewerInlineNotice" role="status">{notice}</p>}
                   <div className="viewerExamActions">
-                    <button type="button" className="viewerExamButton" disabled={current === 0}
-                      onClick={() => goTo(current - 1)}><Icon name="arrowleft.svg"/>Previous</button>
+                    {current > 0 && <button type="button" className="viewerExamButton" disabled={current === 0}
+                      onClick={() => goTo(current - 1)}><Icon name="arrowleft.svg"/>Previous</button>}
                     <button type="button" className="viewerExamButton viewerNext"
                       disabled={submitted && current === total - 1}
                       onClick={() => current === total - 1 ? submit() : goTo(current + 1)}>

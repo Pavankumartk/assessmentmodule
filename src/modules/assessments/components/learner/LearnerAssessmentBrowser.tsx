@@ -3,9 +3,10 @@
 import {useEffect,useMemo,useState} from "react";
 import {useRouter} from "next/navigation";
 import {getDemoSession} from "@/modules/assessments/auth/demo-auth";
-import {getAssessments,setActiveAssessmentId,viewerPath,assessmentStorage} from "@/modules/assessments/storage/assessment-storage";
+import {getAssessment,getAssessments,setActiveAssessmentId,viewerPath,resultPath,assessmentStorage} from "@/modules/assessments/storage/assessment-storage";
 import type {LearnerAssessment,LearnerStatus} from "./learner-assessment-data";
-import {learnerAssessmentsForTenant} from "./learner-assessment-data";
+import {releaseForAssessment} from "@/modules/assessments/components/viewer/assessment-result-bridge";
+import {learnerAssessmentData,learnerAssessmentsForTenant} from "./learner-assessment-data";
 import "./learner-assessment.css";
 
 type Filter = "All" | LearnerStatus;
@@ -34,9 +35,10 @@ export default function LearnerAssessmentBrowser(){
       setReady(true);
     };
     update();
+    const refreshTimer=window.setInterval(update,30000);
     window.addEventListener("storage",update);
     window.addEventListener("neurolxp-assessments-changed",update);
-    return ()=>{window.removeEventListener("storage",update);window.removeEventListener("neurolxp-assessments-changed",update);};
+    return ()=>{window.clearInterval(refreshTimer);window.removeEventListener("storage",update);window.removeEventListener("neurolxp-assessments-changed",update);};
   },[router]);
   useEffect(()=>{
     if (!ready) return;
@@ -44,19 +46,34 @@ export default function LearnerAssessmentBrowser(){
     if (scrollArea) scrollArea.scrollTop=0;
   },[ready]);
   const selected=items.find(item=>item.record.id===chosen);
+  const release=selected ? releaseForAssessment(selected.record.typeCode, Number(selected.attempts.at(-1)?.pendingCount) || 0, selected.record.id) : null;
   const visible=useMemo(()=>items.filter(item=>filter==="All"||item.status===filter),[items,filter]);
   const proceed=()=>{
     if(!selected?.canStart)return;
+    const latest=getAssessment(selected.record.id);
+    if(!latest || !learnerAssessmentData(latest).canStart) {
+      const session=getDemoSession();
+      if(session)setItems(learnerAssessmentsForTenant(getAssessments(),session.tenantId));
+      return;
+    }
     setActiveAssessmentId(selected.record.id);
+    if (selected.record.typeCode === "image-based") {
+      try { const key=`neurolxp.imageLabeling.viewer.${selected.record.id}`; const state=JSON.parse(sessionStorage.getItem(key)||"null"); if (state?.step === "submitted" || state?.step === "results") sessionStorage.removeItem(key); } catch {}
+    }
+    if (/^(ai-assessment|ai-interviews)/.test(selected.record.typeCode)) {
+      try { const key=`aiInterviewSession:${selected.record.id}`; const state=JSON.parse(sessionStorage.getItem(key)||"null"); if(state?.finished) sessionStorage.removeItem(key); } catch {}
+    }
     // Entering from the learner list is always a fresh Instructions entry.
     // Preserve the viewer itself, all Submit dialogs, Results and retry routes.
     if (selected.record.typeCode === "fill-in-the-blanks") {
       assessmentStorage.removeItem("fillBlanksViewerStarted");
     }
-    if (selected.record.typeCode === "short-answer") {
-      assessmentStorage.removeItem("shortAnswerViewerReturnState");
+    // A completed attempt must not be restored when another attempt is allowed.
+    for (const key of ["viewerAttemptDraft", "fillBlanksViewerState", "dragDropViewerState", "matchFollowingViewerState", "connectDotsViewerState", "viewClickHotspotViewerState"]) {
+      try { const saved=JSON.parse(assessmentStorage.getItem(key) || "null"); if(saved && (saved.submitted || saved.finished)) assessmentStorage.removeItem(key); } catch { /* Keep malformed or unfinished work untouched. */ }
     }
-    router.push(`${viewerPath(selected.record.id)}?instructions=1`);
+    const resumeProblem = /^problem-solving/.test(selected.record.typeCode) && selected.attemptsUsed > 0 && !selected.hasActiveAttempt;
+    router.push(`${viewerPath(selected.record.id)}?instructions=1${resumeProblem ? "&retry=1" : ""}`);
   };
   if(!ready)return null;
   return <div className="portalScreen learnerAssessmentRoot">
@@ -85,12 +102,22 @@ export default function LearnerAssessmentBrowser(){
               <div><span>Duration</span><strong>{selected.duration?`${selected.duration} min`:"Untimed"}</strong></div>
               <div><span>Passing score</span><strong>{selected.passingScore}</strong></div>
               <div><span>Negative marking</span><strong>{selected.negativeMarking}</strong></div>
-              <div><span>Attempts used</span><strong>{selected.attempts.length||selected.record.attemptCount||0} / {selected.maxAttempts ?? "Unlimited"}</strong></div>
+              <div><span>Attempts used</span><strong>{selected.attemptsUsed + (selected.hasActiveAttempt ? 1 : 0)} / {selected.attemptLimitLabel}</strong></div>
             </div>
           </section>
           <section className="learnerDetailCard"><h3>Schedule</h3><div className="learnerScheduleGrid"><div><span>Available window</span><strong>{selected.schedule}</strong></div><div><span>Mode</span><strong>{selected.mode}</strong></div></div></section>
-          <section className="learnerDetailCard learnerHistoryCard"><h3>Attempt History</h3><div className="learnerTableScroll"><table className="learnerAttemptsTable"><thead><tr><th>Attempt</th><th>Date</th><th>Score</th><th>Result</th></tr></thead><tbody>{selected.attempts.length?selected.attempts.map((attempt,index)=><tr key={attempt.attemptId||index}><td>{index+1}</td><td>{dateText(attempt.submittedAt)}</td><td>{Number.isFinite(attempt.scorePercent)?`${attempt.scorePercent}%`:"Awaiting grading"}</td><td>{Number(attempt.pendingCount)>0?"Pending review":"Submitted"}</td></tr>):<tr className="learnerEmptyHistoryRow"><td colSpan={4}><span className="learnerNoAttempts">No attempt yet</span></td></tr>}</tbody></table></div></section>
-          <section className="learnerDetailCard learnerReadyCard"><h3>Ready to Begin</h3><div className="learnerReadyChecks"><p className={selected.canStart?"is-positive":"is-muted"}>{selected.canStart?"Assessment open now":selected.status==="Upcoming"?"Assessment is not open yet":"Assessment is closed or completed"}</p><p className="is-positive">{selected.maxAttempts===null?"Attempts are available":`${Math.max(0,selected.maxAttempts-(selected.attempts.length||selected.record.attemptCount||0))} attempt(s) remaining`}</p><p className="learnerReadyNeutral">Stable internet connection</p><p className="learnerReadyNeutral">Quiet place{selected.duration?`, ${selected.duration} minutes free`:""}</p></div>
+          <section className="learnerDetailCard learnerHistoryCard"><h3>Attempt History</h3><div className="learnerTableScroll"><table className="learnerAttemptsTable"><thead><tr><th>Attempt</th><th>Date</th><th>Score</th><th>Result</th><th>Grade</th></tr></thead><tbody>{selected.attempts.length?selected.attempts.map((attempt,index)=>{
+            const policy=releaseForAssessment(selected.record.typeCode,Number(attempt.pendingCount)||0,selected.record.id);
+            const waiting=policy.mode!=="immediate";
+            const pending=Number(attempt.pendingCount)>0 || attempt.scorePercent === null;
+            const score=Number.isFinite(attempt.scorePercent)?Number(attempt.scorePercent):null;
+            const threshold=Number.parseFloat(selected.passingScore);
+            const grade=policy.showPassFail && score!==null && Number.isFinite(threshold) ? (score>=threshold?"Passed":"Not passed") : "—";
+            return <tr key={attempt.attemptId||index}><td>{index+1}</td><td>{dateText(attempt.submittedAt)}</td><td>{waiting ? (policy.mode==="scheduled"?"Scheduled":"Not released") : pending ? "Awaiting grading" : policy.showScore && score!==null ? String(score) + "%" : "—"}</td><td>{waiting ? (policy.mode==="scheduled"?"Scheduled: " + policy.releaseDateLabel:"Not released") : pending ? "Pending review" : "Available"}</td><td>{waiting ? (policy.mode==="scheduled"?"Scheduled":"Not released") : pending ? "Awaiting grading" : grade}</td></tr>;
+          }):<tr className="learnerEmptyHistoryRow"><td colSpan={5}><span className="learnerNoAttempts">{selected.hasActiveAttempt?"Attempt in progress":"No attempt yet"}</span></td></tr>}</tbody></table></div>
+            {selected.attempts.length>0 && release?.mode !== "never" && <div className="learnerReadyActions"><button type="button" disabled={release?.mode!=="immediate"} onClick={()=>{setActiveAssessmentId(selected.record.id);router.push(resultPath(selected.record.id));}}>View Result</button></div>}
+          </section>
+          <section className="learnerDetailCard learnerReadyCard"><h3>Ready to Begin</h3><div className="learnerReadyChecks"><p className={selected.canStart?"is-positive":"is-muted"}>{selected.canStart?"Assessment open now":selected.status==="Upcoming"?"Assessment is not open yet":"Assessment is closed or completed"}</p><p className="is-positive">{selected.maxAttempts===null?"Attempts are available":`${Math.max(0,selected.maxAttempts-selected.attemptsUsed-(selected.hasActiveAttempt?1:0))} attempt(s) remaining`}</p><p className="learnerReadyNeutral">Stable internet connection</p><p className="learnerReadyNeutral">Quiet place{selected.duration?`, ${selected.duration} minutes free`:""}</p></div>
             <div className="learnerReadyActions"><button type="button" disabled={!selected.canStart} onClick={proceed}>Proceed to instructions <span aria-hidden="true">→</span></button></div>
             {!selected.canStart&&<p className="learnerUnavailableNote">{selected.status==="Upcoming"?`Available when the assessment opens${selected.startAt?` on ${dateText(selected.startAt.toISOString())}`:""}.`:"This assessment is no longer available to start."}</p>}
           </section>

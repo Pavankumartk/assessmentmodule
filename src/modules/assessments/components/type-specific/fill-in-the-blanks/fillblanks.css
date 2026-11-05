@@ -111,6 +111,7 @@
 .fillqcQuestionNumber.is-complete { background:#DFE6E9; border-color:#2A7308; color:#2A7308; }
 .fillqcQuestionNumber.is-partial { background:#DFE6E9; border-color:#CE580B; color:#CE580B; }
 .fillqcQuestionNumber.is-active { background:#D9E2FB; border-color:#2D4CC8; color:#2D4CC8; }
+.fillqcQuestionNumber.is-active .fillqcNumberStatus { background:#2D4CC8; }
 .fillqcQuestionNumber small { font-size:10px; line-height:13px; }
 .fillqcBuilder .fillqcRoundNav { width:38px; height:38px; flex:0 0 38px; background:#DFE6E9; border:1px solid #fff; box-shadow:-3px -3px 4px #fff,3px 3px 4px #C4C4C4; }
 .fillqcBuilder .fillqcRoundNav:disabled { opacity:.46; }
@@ -760,3 +761,12 @@
 .fillqcAppShell .fillqcPreviewBottom { margin-top: 30px; }
 
 .fillqcSummaryValue{width:100%;min-height:45px;padding:11px 14px;background:#DFE6E9;box-shadow:inset 2px 2px 4px #C4C4C4,inset -2px -2px 3px #fff;border:0;border-radius:9px;color:#374151;font:500 15px "Segoe UI",Arial,sans-serif;}
+
+/* Question status reflects completion; incomplete questions use an empty circle. */
+.fillqcBuilder .fillqcNumberStatus.is-pending{display:grid;place-items:center;background:transparent!important;border:1.5px solid currentColor!important;color:inherit!important;box-sizing:border-box;opacity:1!important;}
+.fillqcBuilder .fillqcNumberStatus.is-done{display:grid;place-items:center;background:#2A7308!important;border:0!important;color:#fff!important;font:700 10px/1 Arial,sans-serif!important;opacity:1!important;}
+.fillqcBuilder .fillqcRoundNav:disabled{opacity:.45!important;cursor:not-allowed;}
+.fillqcBuilder .fillqcRoundNav:disabled .fillqcIcon{opacity:.6!important;}
+
+.fillqcBuilder .fillqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}
+.fillqcBuilder .fillqcNumberStatus.is-pending{background:#2D4CC8!important;border:0!important;color:#fff!important}

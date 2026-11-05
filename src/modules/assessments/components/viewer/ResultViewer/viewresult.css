@@ -549,3 +549,5 @@ body:has(.vrAppShell.vrDragDropResult) {
   height: 100%;
   overflow: hidden;
 }
+
+.vrAppShell .vrDetailBottom{justify-content:space-between}.vrAppShell .vrDetailPaging{display:flex;gap:20px;align-items:center}.vrAppShell .vrDetailPrevious{border:1px solid transparent}@media(max-width:520px){.vrAppShell .vrDetailBottom{flex-wrap:wrap}.vrAppShell .vrDetailPaging{flex:1;gap:10px;min-width:0}}

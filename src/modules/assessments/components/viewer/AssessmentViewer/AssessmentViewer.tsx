@@ -1,4 +1,7 @@
 "use client";
+import {maySubmitCurrentAttempt,nextAttemptCount} from "@/modules/assessments/components/learner/learner-assessment-data";
+import { creatorInstructionLines } from "@/modules/assessments/components/viewer/instruction-text";
+
 import {demoDashboardPath} from "@/modules/assessments/auth/demo-auth";
 
 import { assessmentStorage, viewerPath, resultPath, updateAssessment } from "@/modules/assessments/storage/assessment-storage";
@@ -38,7 +41,7 @@ const ICONS = "/assets/viewericons/";
 
 
 
-const defaultInstructions = ["Select one answer for each question", "Each correct answer carries 1 Mark", "The timer starts when you begin", "You can flag questions for later review", "You can change your answer before Final Submission", "The test will auto-submit when time is up."];
+const defaultInstructions = ["Select one answer for each question", "Each question carries its configured marks", "The timer starts when you begin", "You can flag questions for later review", "You can change your answer before Final Submission", "The test will auto-submit when time is up."];
 
 
 
@@ -99,6 +102,7 @@ function getResultRelease(viewerMode?: "true-false"): ResultRelease {
     const combined = releaseTime && /^\d{4}-\d{2}-\d{2}$/.test(releaseDate) ? `${releaseDate}T${releaseTime}` : releaseDate;
     const parsed = new Date(combined);
     if (!Number.isNaN(parsed.getTime())) {
+      if (mode === "scheduled" && Date.now() >= parsed.getTime()) mode = "immediate";
       const datePart = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(parsed);
       const timePart = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", hour12: true }).format(parsed).replace(" ", "");
       dateLabel = `${datePart}, ${timePart}`;
@@ -186,6 +190,7 @@ export default function ViewerPage({ mode }: { mode?: "true-false" } = {}) {
 
 
   const [secondsLeft,setSecondsLeft] = useState(3600);
+  const [expiresAt,setExpiresAt] = useState(0);
 
 
 
@@ -282,11 +287,11 @@ export default function ViewerPage({ mode }: { mode?: "true-false" } = {}) {
 
 
 
-      const rawInstructions = firstValue(draft,["instructions"],"");
+      const creatorInstructions = creatorInstructionLines(draft.instructions, draft.descriptionInstructions);
 
 
 
-      setDetails({ title:firstValue(draft,["assessmentTitle","assessmentName","title"],initialDetails.title), type:firstValue(draft,["assessmentType"],mode === "true-false" ? "True / False" : "MCQ"), totalQuestions:available.length?String(available.length):"20", totalMarks:firstValue(draft,["totalMarks"],available.length?String(available.reduce((n,q)=>n+q.points,0)):"20"), totalTime:/minute|hour/i.test(duration)?duration:`${duration} Minutes`, passingScore:passing.includes("%")?passing:`${passing}%`, negativeMarking:/wrong|per/i.test(negative)?negative:`${negative} Per Wrong Answers`, instructions:rawInstructions?rawInstructions.split(/\r?\n/).map(s=>s.trim()).filter(Boolean):defaultInstructions });
+      setDetails({ title:firstValue(draft,["assessmentTitle","assessmentName","title"],initialDetails.title), type:firstValue(draft,["assessmentType"],mode === "true-false" ? "True / False" : "MCQ"), totalQuestions:available.length?String(available.length):"20", totalMarks:firstValue(draft,["totalMarks"],available.length?String(available.reduce((n,q)=>n+q.points,0)):"20"), totalTime:/minute|hour/i.test(duration)?duration:`${duration} Minutes`, passingScore:passing.includes("%")?passing:`${passing}%`, negativeMarking:/wrong|per/i.test(negative)?negative:`${negative} Per Wrong Answers`, instructions:creatorInstructions.length ? creatorInstructions : defaultInstructions });
 
 
 
@@ -299,7 +304,8 @@ export default function ViewerPage({ mode }: { mode?: "true-false" } = {}) {
         if(Array.isArray(state.skipped))setSkipped(state.skipped);
         if(Number.isInteger(state.current))setCurrent(state.current);
         if(typeof state.started==="boolean")setStarted(state.started);
-        if(Number.isFinite(state.secondsLeft))setSecondsLeft(state.secondsLeft);
+        if(Number.isFinite(state.expiresAt) && state.expiresAt>0) {setExpiresAt(state.expiresAt);setSecondsLeft(Math.max(0,Math.ceil((state.expiresAt-Date.now())/1000)));}
+        else if(Number.isFinite(state.secondsLeft))setSecondsLeft(state.secondsLeft);
       }
       if(new URLSearchParams(window.location.search).get("retry")==="wrong") {
         const retry=JSON.parse(assessmentStorage.getItem("viewerRetryQuestions")||"[]");
@@ -317,7 +323,7 @@ export default function ViewerPage({ mode }: { mode?: "true-false" } = {}) {
 
 
 
-  useEffect(()=>{ if (!started || finished || secondsLeft <= 0) return; const timer=window.setInterval(()=>setSecondsLeft(s=>Math.max(0,s-1)),1000); return ()=>window.clearInterval(timer); },[started,finished,secondsLeft]);
+  useEffect(()=>{if(!started || finished)return;if(!expiresAt){setExpiresAt(Date.now()+secondsLeft*1000);return;}const tick=()=>setSecondsLeft(Math.max(0,Math.ceil((expiresAt-Date.now())/1000)));tick();const timer=window.setInterval(tick,1000);return()=>window.clearInterval(timer);},[started,finished,expiresAt]);
 
 
 
@@ -395,10 +401,11 @@ export default function ViewerPage({ mode }: { mode?: "true-false" } = {}) {
 
   useEffect(()=>{
     if(!hydrated || finished || new URLSearchParams(window.location.search).get("preview")==="true") return;
-    try { assessmentStorage.setItem("viewerAttemptDraft",JSON.stringify({answers,flagged,skipped,current,started,secondsLeft,finished:false}));assessmentStorage.setItem("viewerCurrentQuestion",String(current)); }catch{}
-  },[hydrated,answers,flagged,skipped,current,started,secondsLeft,finished]);
+    try { assessmentStorage.setItem("viewerAttemptDraft",JSON.stringify({answers,flagged,skipped,current,started,secondsLeft,expiresAt,finished:false}));assessmentStorage.setItem("viewerCurrentQuestion",String(current)); }catch{}
+  },[hydrated,answers,flagged,skipped,current,started,secondsLeft,expiresAt,finished]);
   const resultText = useMemo(()=>Object.entries(answers).reduce((score,[idx,answer])=>score+(questions[Number(idx)]?.correct===answer?questions[Number(idx)]?.points||0:0),0),[answers,questions]);
   const submitAssessment=()=>{
+    if (!maySubmitCurrentAttempt()) { router.replace("/learner"); return; }
     const isPreview=new URLSearchParams(window.location.search).get("preview")==="true";
     const totalMarks=Number(details.totalMarks)||questions.reduce((n,q)=>n+q.points,0);
     const entries=questions.map((q,i)=>({
@@ -418,12 +425,12 @@ export default function ViewerPage({ mode }: { mode?: "true-false" } = {}) {
     try {
       const retrying = new URLSearchParams(window.location.search).get("retry") === "wrong";
       if (!isPreview) assessmentStorage.setItem(retrying ? "viewerRetryResult" : "viewerAssessmentResult", JSON.stringify(result));
-      if (!isPreview && !retrying) {
+      if (!isPreview) {
         const prior=JSON.parse(assessmentStorage.getItem("viewerAttempts")||"[]");
         const attempts=[...(Array.isArray(prior)?prior:[]),result];
         assessmentStorage.setItem("viewerAttempts",JSON.stringify(attempts));
         assessmentStorage.setItem("viewerAttemptDraft",JSON.stringify({finished:true}));
-        updateAssessment({attemptCount:attempts.length});
+        updateAssessment({attemptCount:nextAttemptCount(attempts.length)});
       }
     }catch{}
     setResultRelease(getResultRelease(mode));setSubmitOpen(false);setFinished(true);setSubmittedPopupOpen(!isPreview);
@@ -447,7 +454,7 @@ export default function ViewerPage({ mode }: { mode?: "true-false" } = {}) {
 
 
 
-      {finished ? <section className="viewerExamCard viewerExamFinished"><h2>Assessment submitted</h2><p>{answered} of {total} questions answered.</p><p>Score: {resultText} marks (based on your checked responses).</p><button className="viewerExamButton" onClick={()=>{setFinished(false);setStarted(false);setAccepted(false);setAnswers({});setFlagged([]);setSkipped([]);setCurrent(0);}}>Return to instructions</button></section> : <div className="viewerExamGrid"><section className="viewerExamCard viewerQuestionCard">
+      {finished ? <section className="viewerExamCard viewerExamFinished"><h2>Assessment submitted</h2><p>{answered} of {total} questions answered.</p><p>{resultRelease.mode === "immediate" ? `Score: ${resultText} marks` : "Your result will be available according to the release settings."}</p><button className="viewerExamButton" onClick={()=>router.push("/learner")}>Return to assessments</button></section> : <div className="viewerExamGrid"><section className="viewerExamCard viewerQuestionCard">
 
 
 
@@ -471,7 +478,7 @@ export default function ViewerPage({ mode }: { mode?: "true-false" } = {}) {
 
 
 
-        <div className="viewerExamActions"><button type="button" className="viewerExamButton" disabled={current===0} onClick={()=>goTo(Math.max(0,current-1))}><Icon name="arrowleft.svg"/>Previous</button><button type="button" className="viewerExamButton viewerNext" onClick={()=> current===total-1?setSubmitOpen(true):goTo(Math.min(total-1,current+1))}>{current===total-1?"Submit":"Next"}<Icon name="arrowrightg.svg"/></button></div>
+        <div className="viewerExamActions">{current > 0 && <button type="button" className="viewerExamButton" disabled={current===0} onClick={()=>goTo(Math.max(0,current-1))}><Icon name="arrowleft.svg"/>Previous</button>}<button type="button" className="viewerExamButton viewerNext" onClick={()=> current===total-1?setSubmitOpen(true):goTo(Math.min(total-1,current+1))}>{current===total-1?"Submit":"Next"}<Icon name="arrowrightg.svg"/></button></div>
 
 
 

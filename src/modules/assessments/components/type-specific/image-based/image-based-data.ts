@@ -40,7 +40,7 @@ export type ImageDraft = { questions: ImageQuestion[]; active: number; savedAt?:
 export const newImageQuestion = (): ImageQuestion => ({
   id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : String(Date.now()),
   text: "", image: "", options: Array.from({ length: 4 }, () => ({ text: "", image: "" })),
-  correct: -1, points: (() => {const d=imageDetails(); const average=d.totalMarks/d.count;return Number.isInteger(average) && average>0 ? average : 1;})(), difficulty: "Medium", category: "AI", bloom: "Analyse",
+  correct: -1, points: (() => {const d=imageDetails(); const average=d.totalMarks/d.count;return Number.isInteger(average) && average>0 ? average : 1;})(), difficulty: "", category: "", bloom: "",
   tags: [], mandatory: true, grading: "Automatic", feedback: "", hint: "", explanation: "",
   allowMultiple: false, correctAnswers: [], shuffleOptions: true, gradingMethod: "Partial credit - equal marks",
   negativeMarking: 0, minimumZero: true, feedbackFull: "", feedbackPartial: "", feedbackZero: "",

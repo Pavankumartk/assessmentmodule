@@ -692,8 +692,8 @@
 
 /* Screenshot typography, applied consistently to the complete Short Answer page.
    Editor text: Arial 16/24, normal. Toolbar captions: Arial 14/20, normal. */
-.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder{ font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:24px; font-weight:400; letter-spacing:0; }
-.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder :is(button, .assessment-variant--short-answer input, .assessment-variant--short-answer select, .assessment-variant--short-answer textarea, .assessment-variant--short-answer label, .assessment-variant--short-answer h1, .assessment-variant--short-answer h2, .assessment-variant--short-answer h3, .assessment-variant--short-answer p, .assessment-variant--short-answer span, .assessment-variant--short-answer div, .assessment-variant--short-answer a){ font-family:Arial,Helvetica,sans-serif; letter-spacing:0; }
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder{ font-family:"Segoe UI",Arial,sans-serif; font-size:16px; line-height:24px; font-weight:400; letter-spacing:0; }
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder :is(button,input,select,textarea){ font-family:"Segoe UI",Arial,sans-serif; letter-spacing:0; }
 .assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderField > label, .assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcFormHeading > label, .assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saSmallLabel, .assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saSettingsGrid label{ font-size:16px; font-weight:600; line-height:24px; }
 .assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderAside .mcqcBuilderField > label{ font-size:14px; font-weight:600; line-height:22px; }
 .assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcAsideSection h3{ font-size:18px; font-weight:600; line-height:24px; }
@@ -1366,3 +1366,151 @@
   .assessment-variant--short-answer .mcqcAppShell .mcqcShortFooter .mcqcFooterPill.mcqcFooterContinue,
   .assessment-variant--short-answer .mcqcAppShell .mcqcBuilderPageFooter .mcqcFooterPill.mcqcFooterContinue {min-width:165px;}
 }
+
+/* Keep question states and text controls legible without moving other pages. */
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionNumbers{justify-content:safe center;}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionNumber.is-empty{border-color:#fff;color:#374151;}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcNumberStatus{width:10px;height:10px;min-width:10px;min-height:10px;border-radius:50%;}
+.assessment-variant--short-answer .mcqcShortBuilder .saRichPlain{background:#DFE6E9;box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4;}
+.assessment-variant--short-answer .mcqcShortBuilder .saRichPlain textarea{padding:12px 24px;}
+.assessment-variant--short-answer .mcqcShortBuilder .saRich textarea::placeholder{color:#7b8792;opacity:1;}
+.assessment-variant--short-answer .mcqcShortBuilder .saRich{position:relative;}
+.assessment-variant--short-answer .mcqcShortBuilder .saCharacterCount{align-self:flex-end;padding:0 12px 3px;color:#6b7280;font:400 11px/16px "Segoe UI",Arial,sans-serif;}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcBuilderAside{position:sticky;top:12px;align-self:start;}
+.assessment-variant--short-answer .mcqcShortBuilder .saSelectOpen{height:auto;}
+.assessment-variant--short-answer .mcqcShortBuilder .saSelectOpen .saSelectButton{height:58px;}
+.assessment-variant--short-answer .mcqcShortBuilder .saSelectCompact.saSelectOpen .saSelectButton{height:32px;}
+.assessment-variant--short-answer .mcqcShortBuilder .saSelectOpen .saSelectPopup{position:relative;top:auto;left:auto;margin-top:8px;min-width:0;}
+@media(max-width:850px){.assessment-variant--short-answer .mcqcShortBuilder .mcqcBuilderAside{position:static;}}
+
+.assessment-variant--short-answer .saGradingGrid{margin-top:0;}
+.assessment-variant--short-answer .saGradeInput{width:100%;min-height:42px;padding:8px 12px;border:0;border-radius:6px;background:#DFE6E9;color:#374151;box-shadow:inset -3px -3px 4px #fff,inset 3px 3px 4px #C4C4C4;font:inherit;}
+.assessment-variant--short-answer .saGradeOutcome{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:10px;}
+.assessment-variant--short-answer .saGradeOutcome input{max-width:100px;}
+
+.assessment-variant--short-answer .mcqcShortQuestionsHeading .mcqcAIBuilderActions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;}
+
+/* Question status reflects completion; incomplete questions use an empty circle. */
+.mcqcBuilder .mcqcNumberStatus.is-pending{display:grid;place-items:center;background:transparent!important;border:1.5px solid currentColor!important;color:inherit!important;box-sizing:border-box;opacity:1!important;}
+.mcqcBuilder .mcqcNumberStatus.is-done{display:grid;place-items:center;background:#2A7308!important;border:0!important;color:#fff!important;font:700 10px/1 Arial,sans-serif!important;opacity:1!important;}
+.mcqcBuilder .mcqcRoundNav:disabled{opacity:.45!important;cursor:not-allowed;}
+.mcqcBuilder .mcqcRoundNav:disabled .mcqcIcon{opacity:.6!important;}
+
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcQuestionNumber.is-empty{border-color:#A6AFB5;color:#374151;}
+
+.mcqcBuilder .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}
+.mcqcBuilder .mcqcNumberStatus.is-pending{background:#2D4CC8!important;border:0!important;color:#fff!important}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}
+
+/* Short Answer creator: Figma's 16px Segoe UI and neumorphic spacing, with the working MCQ editor. */
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcBuilderGrid{display:grid;grid-template-columns:minmax(0,1fr) 304px;align-items:start;gap:24px}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcBuilderMain,.assessment-variant--short-answer .mcqcShortBuilder .mcqcBuilderAside{min-width:0}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcQuestionForm,.assessment-variant--short-answer .mcqcShortBuilder .saExpanded{min-width:0}
+.assessment-variant--short-answer .mcqcShortBuilder .saRich{height:auto;min-height:138px;overflow:visible}
+.assessment-variant--short-answer .mcqcShortBuilder .saRichPlain{min-height:102px}
+.assessment-variant--short-answer .mcqcShortBuilder .saRichTall{min-height:153px}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcRichEditorRoot{width:100%;min-width:0}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcRichToolbar.mcqcOptionToolbar{display:flex;align-items:center;flex-wrap:wrap;gap:7px;width:100%;min-width:0;height:auto;padding:8px;overflow:visible;background:#DFE6E9;box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcRichToolbar > button{flex:0 0 36px;width:36px;min-width:36px;height:36px}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcRichToolbar .mcqcRichMenuRoot{flex:0 0 auto;width:auto;min-width:0;height:36px}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcRichToolbar .mcqcToolbarSelect{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;height:36px;padding:0 10px;white-space:nowrap;font:400 14px/20px "Segoe UI",Arial,sans-serif}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcRichToolbar .mcqcToolbarFont{min-width:115px}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcRichToolbar .mcqcToolbarSize{min-width:64px}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcHiddenColorInput{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcColorTrigger{font:600 17px/1 "Segoe UI",Arial,sans-serif;text-decoration:underline;text-underline-offset:3px}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcRichEditable{min-height:75px;padding:12px 16px;margin:0;color:#374151;font:400 16px/24px "Segoe UI",Arial,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere;outline:none}
+.assessment-variant--short-answer .mcqcShortBuilder .saRichTall .mcqcRichEditable{min-height:87px}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcRichEditable:empty::before{content:attr(data-placeholder);color:#7b8792;pointer-events:none}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcNumberScroller{min-width:0;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionNumbers{width:max-content;min-width:100%;justify-content:safe center}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortFooter{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;width:100%}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortFooterLeft,.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortFooterRight{display:flex;align-items:center;gap:20px;flex-wrap:wrap;min-width:0}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortFooterRight{margin-left:auto;margin-right:0;justify-content:flex-end}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortFooter .mcqcFooterPill{width:auto;min-width:150px;height:48px;min-height:48px;padding:0 20px;border-radius:24px;font:600 18px/26px "Segoe UI",Arial,sans-serif;white-space:nowrap}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortFooterLeft .mcqcFooterPill:nth-child(2){min-width:210px}
+.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortFooter .mcqcFooterContinue{min-width:210px;color:#2A7308}
+@media(max-width:850px){.assessment-variant--short-answer .mcqcShortBuilder .mcqcBuilderGrid{grid-template-columns:minmax(0,1fr)}.assessment-variant--short-answer .mcqcShortBuilder .mcqcBuilderAside{position:static}}
+@media(max-width:600px){.assessment-variant--short-answer .mcqcShortBuilder .mcqcRichToolbar.mcqcOptionToolbar{gap:6px;padding:6px}.assessment-variant--short-answer .mcqcShortBuilder .mcqcRichToolbar .mcqcToolbarFont{min-width:100px}.assessment-variant--short-answer .mcqcShortBuilder .mcqcRichToolbar .mcqcToolbarSize{min-width:58px}.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortFooter,.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortFooterLeft,.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortFooterRight{gap:12px}.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortFooter .mcqcFooterPill{min-width:120px;font-size:14px}.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortFooterLeft .mcqcFooterPill:nth-child(2){min-width:165px}.assessment-variant--short-answer .mcqcShortBuilder .mcqcShortFooter .mcqcFooterContinue{min-width:165px}}
+.assessment-variant--short-answer .mcqcShortBuilder .saCriterion .saRich,
+.assessment-variant--short-answer .mcqcShortBuilder .saAccordion-feedback .saRich{height:auto;min-height:137px}
+.assessment-variant--short-answer .mcqcShortBuilder .saLevel{position:relative}
+.assessment-variant--short-answer .mcqcShortBuilder .saRemoveLevel{top:10px;right:10px}
+.assessment-variant--short-answer .mcqcShortBuilder .saGradeInput{min-width:0}
+.assessment-variant--short-answer .mcqcShortBuilder .saGradingGrid{margin-bottom:24px}
+.assessment-variant--short-answer .mcqcShortBuilder .saFeedback-0 .mcqcRichEditable{color:#2A7308}
+.assessment-variant--short-answer .mcqcShortBuilder .saFeedback-1 .mcqcRichEditable{color:#C05512}
+.assessment-variant--short-answer .mcqcShortBuilder .saFeedback-2 .mcqcRichEditable{color:#A91E2C}
+
+/* Short Answer creator: dimensions and shadows from the supplied Figma creator frame. */
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder{width:100%;min-width:0;color:#374151;font-family:"Segoe UI",Arial,sans-serif;font-size:16px;line-height:24px}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderTop{display:flex;position:relative;min-height:178px;height:auto;margin:0;align-items:flex-start}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderCrumb{display:flex;align-items:center;flex-wrap:wrap;gap:14px;min-width:0;font:400 16px/24px "Segoe UI",Arial,sans-serif}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderWelcome{position:absolute;top:52px;right:0;left:auto;transform:none;width:372px;max-width:100%;min-width:0;height:104px;min-height:104px;display:flex;align-items:center;justify-content:center;gap:8px;padding:16px;background:#DFE6E9;border:1px solid #2D4CC8;border-right-color:#E01E5A;border-radius:10px;box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderWelcome h2{margin:0;font:700 22px/26px "Segoe UI",Arial,sans-serif;letter-spacing:.03em;white-space:normal}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderWelcome p{margin:0;font:400 16px/26px "Segoe UI",Arial,sans-serif;letter-spacing:.03em}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderGrid{display:grid;grid-template-columns:minmax(0,1000fr) minmax(0,304fr);gap:24px;align-items:start;width:100%;min-width:0}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderMain{display:flex;flex-direction:column;gap:24px;min-width:0;min-height:0;padding:24px;background:#DFE6E9;border:0;border-radius:16px;box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortQuestionsHeading{width:100%;min-width:0;margin:0}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortQuestionsHeading h2{margin:0 0 4px;font:600 18px/26px "Segoe UI",Arial,sans-serif}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortQuestionsHeading p{margin:0;font:400 14px/22px "Segoe UI",Arial,sans-serif}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcQuestionForm{display:flex;flex-direction:column;gap:32px;width:100%;min-width:0;min-height:0;padding:16px;border:1px solid #AEAEAE;border-radius:16px;background:#DFE6E9;box-shadow:none}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderField{display:flex;flex-direction:column;gap:16px;width:100%;min-width:0}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder :is(.mcqcBuilderField>label,.mcqcFormHeading>label,.saSmallLabel,.saSettingsGrid label){font:600 16px/24px "Segoe UI",Arial,sans-serif;letter-spacing:.02em;color:#374151}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcSelectTrigger{min-width:0;min-height:58px;padding:0 24px;background:#DFE6E9;border:0;border-radius:8px;box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4;color:#374151;font:400 16px/24px "Segoe UI",Arial,sans-serif}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortAnswerTrigger{height:auto;min-height:57px;border-radius:4px;text-align:left;font-weight:600;font-size:18px;line-height:28px;box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saExpanded{display:flex;flex-direction:column;gap:24px;margin-top:-16px;padding:19px 16px 22px;background:#DFE6E9;border-radius:0 0 8px 8px;box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saAccordion{width:100%;min-width:0;background:#DFE6E9;border-radius:8px;box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saAccordionTitle{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;height:auto;min-height:46px;padding:10px 16px;border:0;border-radius:4px;background:#DFE6E9;box-shadow:-4px -4px 4px #fff,4px 4px 8px #C4C4C4;color:#374151;font:600 18px/24px "Segoe UI",Arial,sans-serif;letter-spacing:.02em;text-align:left}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saAccordionBody{display:flex;flex-direction:column;gap:24px;padding:24px 16px 16px;min-width:0}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saAccordionBody[hidden]{display:none}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saCriteria{display:flex;flex-direction:column;gap:24px}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saCriterion{display:flex;flex-direction:column;gap:16px;min-width:0}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saLevelGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;width:100%}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saLevel{position:relative;min-width:0;min-height:0;padding:16px;border-radius:8px;background:#DFE6E9;box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saSwitchLine{min-height:58px;height:auto;padding:11px 16px 11px 24px;background:#DFE6E9;border-radius:4px;box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saRubricOptions{display:flex;flex-direction:column;gap:24px;margin-top:8px}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saRubricSwitches{display:flex;flex-direction:column;gap:16px}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saAdvancedGrading{margin-top:8px;color:#374151}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saAdvancedGrading summary{cursor:pointer;font:600 16px/24px "Segoe UI",Arial,sans-serif}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saAdvancedGradingBody{display:flex;flex-direction:column;gap:16px;padding-top:16px}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saCustomSelect.saSelectOpen{height:58px}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saCustomSelect.saSelectOpen .saSelectPopup{position:absolute;top:calc(100% + 8px);left:0;margin:0;z-index:1000;min-width:185px}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderAside{position:static;min-width:0;min-height:0;padding:14px;background:#DFE6E9;border:0;border-radius:16px;box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcAsideSection{display:flex;flex-direction:column;gap:14px;min-height:0;padding:0;border:0;border-radius:0;box-shadow:none}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderAside .mcqcBuilderField{gap:12px}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderAside h3{margin:0 0 10px;font:600 18px/26px "Segoe UI",Arial,sans-serif}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderAside .mcqcBuilderField>label{font:600 14px/20px "Segoe UI",Arial,sans-serif}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderAside .mcqcSelectTrigger,.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderAside input[type=number]{height:36px;min-height:36px;padding:5px 14px;font:400 14px/20px "Segoe UI",Arial,sans-serif}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortFooter{width:calc((100% - 24px) * 1000 / 1304);max-width:100%;margin-top:32px}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortFooter .mcqcFooterPill{height:48px;min-height:48px;border-radius:24px;box-shadow:-4px -4px 4px #fff,4px 4px 8px #C4C4C4;font:600 18px/26px "Segoe UI",Arial,sans-serif;letter-spacing:.03em}
+@media(max-width:900px){.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderGrid{grid-template-columns:minmax(0,1fr)}.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortFooter{width:100%}}
+@media(max-width:760px){.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderTop{display:flex;flex-direction:column;gap:18px;height:auto;min-height:0;margin-bottom:20px}.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderWelcome{position:static;width:min(372px,100%);height:auto;min-height:90px;margin-left:auto}.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderMain{padding:16px}.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saLevelGrid{grid-template-columns:minmax(0,1fr);gap:16px}}
+@media(max-width:520px){.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcQuestionForm{padding:12px;gap:24px}.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saAccordionBody{padding:16px 12px}.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saSectionMeta{gap:6px;white-space:normal;text-align:right}.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortFooterLeft,.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortFooterRight{gap:10px}.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortFooter .mcqcFooterPill{font-size:14px}}
+
+/* Match the MCQ question navigation and welcome box on Short Answer only. */
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcNumberNavigation{display:flex;justify-content:flex-start;align-items:center;gap:10px;width:100%;min-width:0}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcFewQuestions .mcqcNumberScroller{flex:0 1 auto;width:max-content;min-width:0;max-width:calc(100% - 112px);overflow-x:auto;overflow-y:hidden;padding:0;scrollbar-width:none}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcManyQuestions .mcqcNumberScroller{flex:1 1 0;width:auto;min-width:0;overflow-x:auto;overflow-y:hidden;padding:0;scrollbar-width:none}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionNumbers{display:flex;justify-content:flex-start;gap:8px;width:max-content;min-width:0;padding:5px 3px}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionNumber{flex:0 0 66px;width:66px;min-width:66px;height:48px;font-size:17px}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionNumber .mcqcNumberValue{font:700 17px/22px "Segoe UI",Arial,sans-serif}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionNumber small{font:500 10px/13px "Segoe UI",Arial,sans-serif}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcRoundNav{flex:0 0 38px;width:38px;min-width:38px;height:38px;background:#DFE6E9;border:1px solid #fff;border-radius:50%;box-shadow:-3px -3px 4px #fff,3px 3px 4px #C4C4C4}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionProgress{width:100%;height:15px;margin:8px 0 0;padding:3px 7px;border-radius:20px;box-shadow:inset 2px 2px 3px #C4C4C4,inset -2px -2px 3px #fff}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderWelcome{width:min(320px,100%);height:auto;min-height:90px;padding:12px 15px;gap:9px;border-radius:9px}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderWelcome>div{min-width:0}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderWelcome h2{font:700 18px/25px "Segoe UI",Arial,sans-serif;letter-spacing:.02em;white-space:normal}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderWelcome p{font:400 13px/20px "Segoe UI",Arial,sans-serif}
+/* Feedback labels and editor text use the same green, orange and red as the other creators. */
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saFeedback-0 .saSmallLabel,.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saFeedback-0 .mcqcRichEditable{color:#2A7308}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saFeedback-1 .saSmallLabel,.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saFeedback-1 .mcqcRichEditable{color:#C05512}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saFeedback-2 .saSmallLabel,.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saFeedback-2 .mcqcRichEditable{color:#A91E2C}
+/* The MCQ toolbar opens these inputs through its buttons; don't show a second file field. */
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcRichEditorRoot input[type="file"][hidden]{display:none!important}
+@media(max-width:600px){.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcFewQuestions .mcqcNumberScroller{max-width:calc(100% - 78px)}.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcRoundNav{flex-basis:29px;width:29px;min-width:29px;height:29px}.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcShortQuestionNavigator .mcqcQuestionNumber{flex-basis:55px;width:55px;min-width:55px;height:48px}.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .mcqcBuilderWelcome{width:min(320px,100%)}}
+
+/* Keep an open dropdown above adjacent fields and the following sections. */
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saAccordion:has(.saCustomSelect.saSelectOpen){position:relative;z-index:50;overflow:visible}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saSettingsGrid>label:has(.saCustomSelect.saSelectOpen){position:relative;z-index:50}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saCustomSelect.saSelectOpen{position:relative;z-index:50;overflow:visible}
+.assessment-variant--short-answer .mcqcAppShell .mcqcShortBuilder .saCustomSelect.saSelectOpen .saSelectPopup{position:absolute;z-index:51;top:calc(100% + 8px);left:0;overflow-y:auto;overscroll-behavior:contain}

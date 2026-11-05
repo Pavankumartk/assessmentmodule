@@ -1,0 +1,70 @@
+{
+  "src/modules/assessments/components/common/steps/DetailsStep/DetailsStep.tsx": [
+    {
+      "name": "Restore original imports",
+      "from": "import { assessmentStorage,updateAssessment , getActiveAssessmentId, getAssessment } from \"@/modules/assessments/storage/assessment-storage\";",
+      "to": "import { assessmentStorage,updateAssessment } from \"@/modules/assessments/storage/assessment-storage\";"
+    },
+    {
+      "name": "Remove injected state overwrite",
+      "from": "  // Assessment type is chosen on the Type step; show it here without editing it.\n  const [fixedAssessmentType, setFixedAssessmentType] = useState(\"MCQ\");\n  useEffect(() => {\n    const id = getActiveAssessmentId();\n    const chosen = id ? getAssessment(id)?.typeLabel : undefined;\n    if (!chosen) return;\n    const label = chosen === \"Multiple Choice Question (MCQ)\" ? \"MCQ\" : chosen;\n    setFixedAssessmentType(label);\n    setForm(previous => previous.assessmentType === chosen ? previous : { ...previous, assessmentType: chosen });\n  }, []);\n",
+      "to": ""
+    },
+    {
+      "name": "Restore original assessment-type control and event handling",
+      "from": "\n\n      <div className=\"mcqField mcqReferenceField\">\n        <span>Assessment Type</span>\n        <div className=\"mcqReferenceTrigger\" role=\"textbox\" aria-label=\"Assessment Type\" aria-readonly=\"true\" style={{ cursor: \"default\" }}>\n          <span>{fixedAssessmentType}</span>\n        </div>\n      </div>",
+      "to": "\n      <MCQReferenceDropdown label=\"Assessment Type\" kind=\"assessmentType\" value={form.assessmentType ?? \"MCQ\"} onChange={v => update(\"assessmentType\", v)} />"
+    }
+  ],
+  "src/modules/assessments/components/type-specific/long-answer/Details.tsx": [
+    {
+      "name": "Restore original imports",
+      "from": "import { assessmentStorage, updateAssessment, publishAssessment, viewerPath, resultPath , getActiveAssessmentId, getAssessment } from \"@/modules/assessments/storage/assessment-storage\";",
+      "to": "import { assessmentStorage, updateAssessment, publishAssessment, viewerPath, resultPath } from \"@/modules/assessments/storage/assessment-storage\";"
+    },
+    {
+      "name": "Remove injected state overwrite",
+      "from": "  // Assessment type is chosen on the Type step; show it here without editing it.\n  const [fixedAssessmentType, setFixedAssessmentType] = useState(\"Long Answer\");\n  useEffect(() => {\n    const id = getActiveAssessmentId();\n    const chosen = id ? getAssessment(id)?.typeLabel : undefined;\n    if (!chosen) return;\n    const label = chosen === \"Multiple Choice Question (MCQ)\" ? \"MCQ\" : chosen;\n    setFixedAssessmentType(label);\n    setForm(previous => previous.assessmentType === chosen ? previous : { ...previous, assessmentType: chosen });\n  }, []);\n",
+      "to": ""
+    },
+    {
+      "name": "Restore original assessment-type control and event handling",
+      "from": "\n\n      <div className=\"mcqField mcqReferenceField\">\n        <span>Assessment Type</span>\n        <div className=\"mcqReferenceTrigger\" role=\"textbox\" aria-label=\"Assessment Type\" aria-readonly=\"true\" style={{ cursor: \"default\" }}>\n          <span>{fixedAssessmentType}</span>\n        </div>\n      </div>",
+      "to": "\n      <MCQReferenceDropdown label=\"Assessment Type\" kind=\"assessmentType\" value={form.assessmentType ?? \"\"} onChange={v => update(\"assessmentType\", v)} />"
+    }
+  ],
+  "src/modules/assessments/components/type-specific/short-answer/Details.tsx": [
+    {
+      "name": "Restore original imports",
+      "from": "import { assessmentStorage, updateAssessment, publishAssessment, viewerPath, resultPath , getActiveAssessmentId, getAssessment } from \"@/modules/assessments/storage/assessment-storage\";",
+      "to": "import { assessmentStorage, updateAssessment, publishAssessment, viewerPath, resultPath } from \"@/modules/assessments/storage/assessment-storage\";"
+    },
+    {
+      "name": "Remove injected state overwrite",
+      "from": "  // Assessment type is chosen on the Type step; show it here without editing it.\n  const [fixedAssessmentType, setFixedAssessmentType] = useState(\"Short Answer\");\n  useEffect(() => {\n    const id = getActiveAssessmentId();\n    const chosen = id ? getAssessment(id)?.typeLabel : undefined;\n    if (!chosen) return;\n    const label = chosen === \"Multiple Choice Question (MCQ)\" ? \"MCQ\" : chosen;\n    setFixedAssessmentType(label);\n    setForm(previous => previous.assessmentType === chosen ? previous : { ...previous, assessmentType: chosen });\n  }, []);\n",
+      "to": ""
+    },
+    {
+      "name": "Restore original assessment-type control and event handling",
+      "from": "\n\n      <div className=\"mcqField mcqReferenceField\">\n        <span>Assessment Type</span>\n        <div className=\"mcqReferenceTrigger\" role=\"textbox\" aria-label=\"Assessment Type\" aria-readonly=\"true\" style={{ cursor: \"default\" }}>\n          <span>{fixedAssessmentType}</span>\n        </div>\n      </div>",
+      "to": "\n      <MCQReferenceDropdown label=\"Assessment Type\" kind=\"assessmentType\" value={form.assessmentType ?? \"MCQ\"} onChange={v => update(\"assessmentType\", v)} />"
+    }
+  ],
+  "src/modules/assessments/components/type-specific/one-word/Details.tsx": [
+    {
+      "name": "Restore original imports",
+      "from": "import { assessmentStorage, updateAssessment, publishAssessment, viewerPath, resultPath , getActiveAssessmentId, getAssessment } from \"@/modules/assessments/storage/assessment-storage\";",
+      "to": "import { assessmentStorage, updateAssessment, publishAssessment, viewerPath, resultPath } from \"@/modules/assessments/storage/assessment-storage\";"
+    },
+    {
+      "name": "Remove injected state overwrite",
+      "from": "  // Assessment type is chosen on the Type step; show it here without editing it.\n  const [fixedAssessmentType, setFixedAssessmentType] = useState(\"One-Word Answer\");\n  useEffect(() => {\n    const id = getActiveAssessmentId();\n    const chosen = id ? getAssessment(id)?.typeLabel : undefined;\n    if (!chosen) return;\n    const label = chosen === \"Multiple Choice Question (MCQ)\" ? \"MCQ\" : chosen;\n    setFixedAssessmentType(label);\n    setForm(previous => previous.assessmentType === chosen ? previous : { ...previous, assessmentType: chosen });\n  }, []);\n",
+      "to": ""
+    },
+    {
+      "name": "Restore original assessment-type control and event handling",
+      "from": "\n\n      <div className=\"mcqField mcqReferenceField\">\n        <span>Assessment Type</span>\n        <div className=\"mcqReferenceTrigger\" role=\"textbox\" aria-label=\"Assessment Type\" aria-readonly=\"true\" style={{ cursor: \"default\" }}>\n          <span>{fixedAssessmentType}</span>\n        </div>\n      </div>",
+      "to": "\n      <MCQReferenceDropdown label=\"Assessment Type\" kind=\"assessmentType\" value={form.assessmentType ?? \"One-Word Answer\"} onChange={v => update(\"assessmentType\", v)} />"
+    }
+  ]
+}

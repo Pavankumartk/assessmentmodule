@@ -16,7 +16,7 @@ export const makePair = (n: number): MemoryPair => ({
 export const makeQuestion = (marks = 1): MemoryQuestion => ({
   id: `memory-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, type: "Memory Game",
   text: "", image: "", pairs: [makePair(1), makePair(2)], points: String(marks),
-  difficulty: "Easy", category: "", bloom: "", mandatory: true, tags: [],
+  difficulty: "", category: "", bloom: "", mandatory: true, tags: [],
   shuffle: true, showCardsSeconds: "2", grading: "All or Nothing",
   feedbackFull: "", feedbackPartial: "", feedbackZero: "", explanation: "", hint: "",
   columns: "Auto", cardBackColor: "Blue", flipBackDelay: "1000", timeLimit: "0",

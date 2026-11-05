@@ -298,7 +298,7 @@
   }
 
   .sidebarCollapseToggleCollapsed { left: 60px; }
-  .sidebarCollapseToggleCollapsed svg { transform: rotate(180deg); }
+  .sidebarCollapseToggle:not(.sidebarCollapseToggleCollapsed) svg { transform: rotate(180deg); }
 }
 
 /* Keep the original mobile menu exactly as supplied — no desktop toggle on mobile. */
@@ -319,22 +319,5 @@
     width: 21px;
     height: 21px;
     transition: none !important;
-  }
-}
-
-
-/* RIGHT-SIDE MOBILE SIDEBAR FIX — MOBILE ONLY */
-@media (max-width: 700px) {
-  .sidebar,
-  .sidebar.sidebarCollapsed {
-    left: auto !important;
-    right: 0 !important;
-    border-radius: 10px 0 0 10px !important;
-    transform: translateX(105%) !important;
-  }
-
-  body.mobileSidebarOpen .sidebar,
-  body.mobileSidebarOpen .sidebar.sidebarCollapsed {
-    transform: translateX(0) !important;
   }
 }

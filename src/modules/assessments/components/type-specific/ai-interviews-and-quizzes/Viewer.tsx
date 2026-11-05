@@ -2,9 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
+import Link from "next/link";
 import Header from "@/modules/assessments/components/common/header/Header";
 import Sidebar from "@/modules/assessments/components/common/sidebar/page";
-import { assessmentStorage, getActiveAssessmentId } from "@/modules/assessments/storage/assessment-storage";
+import ViewerSubmitConfirm from "@/modules/assessments/components/viewer/ViewerSubmitConfirm";
+import { assessmentStorage, getActiveAssessmentId, getAssessment, updateAssessment } from "@/modules/assessments/storage/assessment-storage";
+import { learnerAssessmentData } from "@/modules/assessments/components/learner/learner-assessment-data";
+import "@/modules/assessments/components/viewer/AssessmentViewer/viewer.css";
 import "./viewai.css";
 
 const ICONS = "/assets/aiicons/";
@@ -14,16 +18,38 @@ const SESSION_KEY = "aiInterviewSession";
 const RESULT_KEY = "aiInterviewResult";
 const scopedKey = (name: string) => {
   const id = getActiveAssessmentId() || (typeof window !== "undefined" ? window.location.pathname.match(/\/assessments\/([^/]+)\/viewer/)?.[1] : "") || "preview";
-  return `${name}:${id}`;
+  const isPreview = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("preview") === "true";
+  return `${name}:${id}${isPreview ? ":preview" : ""}`;
 };
 const EVALUATION_KEY = "aiEvaluationDraft";
+
+function maySubmitCurrentAttempt(): boolean {
+  if (typeof window === "undefined") return false;
+  if (new URLSearchParams(window.location.search).get("preview") === "true") return true;
+  const record = getAssessment(getActiveAssessmentId() || "");
+  if (!record || record.status !== "Published") return false;
+  const data = learnerAssessmentData(record);
+  return data.maxAttempts === null || data.attemptsUsed < data.maxAttempts;
+}
+
+function nextAttemptCount(historyLength: number): number {
+  const record = getAssessment(getActiveAssessmentId() || "");
+  return Math.max(historyLength, (Number(record?.attemptCount) || 0) + 1);
+}
+
+function canRestartInterview(): boolean {
+  if (typeof window === "undefined") return false;
+  if (new URLSearchParams(window.location.search).get("preview") === "true") return true;
+  const record = getAssessment(getActiveAssessmentId() || "");
+  return Boolean(record && learnerAssessmentData(record).canStart);
+}
 
 type CheckName = "microphone" | "camera" | "noise";
 type CheckState = "Pending" | "Testing" | "Passed" | "Failed";
 type CheckMap = Record<CheckName, CheckState>;
 type CameraOption = { deviceId: string; label: string };
-type InterviewInfo = { title: string; role: string; duration: number; language: string; questionCount: number; questions: string[] };
-type ResultsEvaluation = { passingScore?: number; weights?: Record<string, number>; showFeedback?: boolean };
+type InterviewInfo = { title: string; role: string; format: "interview" | "viva"; duration: number; language: string; questionCount: number; questions: string[]; creatorInstructions?: string };
+type ResultsEvaluation = { passingScore?: number; weights?: Record<string, number>; showFeedback?: boolean; showRubric?: boolean };
 const RESULT_CRITERIA = [
   { id: "accuracy", title: "Content Accuracy", color: "#67096E", example: 83 },
   { id: "understanding", title: "Depth of understanding", color: "#2D4CC8", example: 73 },
@@ -62,7 +88,7 @@ const FALLBACK_QUESTIONS = [
   "Where do you see yourself in three years?",
 ];
 const DEFAULT_INFO: InterviewInfo = {
-  title: "AI Interview", role: "Software Engineer", duration: 20,
+  title: "AI Interview", role: "Software Engineer", format: "interview", duration: 20,
   language: "English (India)", questionCount: 5, questions: FALLBACK_QUESTIONS,
 };
 const CHECK_CONFIG: { id: CheckName; title: string; description: string; icon: string; color: string }[] = [
@@ -89,6 +115,10 @@ function wordsFromHtml(html: string): string {
 function readInfo(): InterviewInfo {
   const info = { ...DEFAULT_INFO, questions: [] as string[] };
   try {
+    if (getAssessment(getActiveAssessmentId() || "")?.typeCode === "ai-viva") {
+      info.format = "viva";
+      info.title = "AI Viva";
+    }
     const raw = assessmentStorage.getItem(CONTENT_KEY) || sessionStorage.getItem(CONTENT_KEY);
     if (raw) {
       const content = JSON.parse(raw) as Record<string, unknown>;
@@ -113,6 +143,19 @@ function readInfo(): InterviewInfo {
       if (typeof config.language === "string" && config.language.trim()) info.language = config.language.trim();
       const minutes = Number(config.durationMinutes ?? config.duration);
       if (Number.isFinite(minutes) && minutes > 0 && minutes <= 240) info.duration = Math.round(minutes);
+    }
+    // A creator preview must reflect this assessment's saved Details, not the demo defaults.
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("preview") === "true") {
+      const details = JSON.parse(assessmentStorage.getItem("mcqAssessmentDraft") || "{}") as Record<string, unknown>;
+      const record = getAssessment(getActiveAssessmentId() || "");
+      const name = details.assessmentName || details.assessmentTitle || record?.title;
+      if (typeof name === "string" && name.trim()) info.title = name.trim();
+      if (typeof details.language === "string" && details.language.trim()) info.language = details.language.trim();
+      const toggles = details.toggles && typeof details.toggles === "object" ? details.toggles as Record<string, unknown> : {};
+      const minutes = Number(String(details.timeLimit || "").match(/\d+/)?.[0]);
+      info.duration = toggles.timeLimit === true && Number.isFinite(minutes) && minutes > 0 ? minutes : 0;
+      const instructions = details.activityInstructions || details.descriptionInstructions;
+      if (typeof instructions === "string") info.creatorInstructions = wordsFromHtml(instructions);
     }
   } catch { /* Use displayed defaults if the creator's storage isn't present. */ }
   info.questions = info.questions.slice(0, Math.min(info.questionCount, 100));
@@ -193,10 +236,18 @@ export default function AIInterviewPreparationPage() {
   const [listening, setListening] = useState(false);
   const [speechAvailable, setSpeechAvailable] = useState(true);
   const [finished, setFinished] = useState(false);
+  const [restartAllowed, setRestartAllowed] = useState(false);
   const [expiresAt, setExpiresAt] = useState(0);
   const [now, setNow] = useState(0);
   const [tabSwitches, setTabSwitches] = useState(0);
   const [evaluation, setEvaluation] = useState<ResultsEvaluation>({});
+  useEffect(() => {
+    const refresh = () => setRestartAllowed(canRestartInterview());
+    refresh();
+    window.addEventListener("storage", refresh);
+    window.addEventListener("neurolxp-assessments-changed", refresh);
+    return () => { window.removeEventListener("storage", refresh); window.removeEventListener("neurolxp-assessments-changed", refresh); };
+  }, [screen, finished]);
   const appElement = useRef<HTMLDivElement>(null);
   const sidebarElement = useRef<HTMLElement>(null);
   const cameraElement = useRef<HTMLVideoElement>(null);
@@ -208,6 +259,7 @@ export default function AIInterviewPreparationPage() {
   const transcriptRef = useRef("");
   const wantsListening = useRef(false);
   const restartListeningTimer = useRef<number | null>(null);
+  const submissionRecorded = useRef(false);
   const startListeningRef = useRef<() => void>(() => {});
   const questionVoiceTimer = useRef<number | null>(null);
   const questionVoiceFallback = useRef<number | null>(null);
@@ -376,6 +428,9 @@ export default function AIInterviewPreparationPage() {
     cancelQuestionVoice();
     stopSpeech();
     turnCameraOff();
+    if (submissionRecorded.current) return;
+    if (!maySubmitCurrentAttempt()) { setNotice("The allowed attempts have been used."); return; }
+    submissionRecorded.current = true;
     const finalAnswers = latestAnswers ?? answers;
     setAnswers(finalAnswers);
     setFinished(true);
@@ -383,7 +438,15 @@ export default function AIInterviewPreparationPage() {
     setNotice("");
     try {
       sessionStorage.setItem(scopedKey(SESSION_KEY), JSON.stringify({ current, answers: finalAnswers, expiresAt, finished: true, tabSwitches }));
-      sessionStorage.setItem(scopedKey(RESULT_KEY), JSON.stringify({ title: info.title, role: info.role, questions: info.questions, answers: finalAnswers, tabSwitches, completedAt: new Date().toISOString(), scoringMode: "example-only" }));
+      const submittedAt = new Date().toISOString();
+      sessionStorage.setItem(scopedKey(RESULT_KEY), JSON.stringify({ title: info.title, role: info.role, questions: info.questions, answers: finalAnswers, tabSwitches, completedAt: submittedAt, scoringMode: "example-only" }));
+      if (new URLSearchParams(window.location.search).get("preview") !== "true") {
+        const questions=info.questions.map((text,index)=>({text,options:[],correct:-1,selected:null,questionType:"short-answer",answerText:finalAnswers[index]||"",expectedAnswer:"",gradingStatus:finalAnswers[index]?"pending":"unanswered",points:1}));
+        const pendingCount=questions.filter(q=>q.gradingStatus==="pending").length;
+        const result={attemptId:crypto.randomUUID(),title:info.title,questions,totalQuestions:questions.length,correctAnswers:0,incorrectAnswers:0,unanswered:questions.length-pendingCount,pendingCount:Math.max(1,pendingCount),totalMarks:questions.length,earnedMarks:0,scorePercent:null,submittedAt};
+        const prior=JSON.parse(assessmentStorage.getItem("viewerAttempts")||"[]");const attempts=[...(Array.isArray(prior)?prior:[]),result];
+        assessmentStorage.setItem("viewerAssessmentResult",JSON.stringify(result));assessmentStorage.setItem("viewerAttempts",JSON.stringify(attempts));updateAssessment({attemptCount:nextAttemptCount(attempts.length)});
+      }
     } catch { /* Local storage can be unavailable. */ }
   }, [cancelQuestionVoice, stopSpeech, turnCameraOff, current, expiresAt, info, answers, tabSwitches]);
 
@@ -464,6 +527,15 @@ export default function AIInterviewPreparationPage() {
       if (!stream.getVideoTracks().some(track => track.readyState === "live") || video.videoWidth <= 0) {
         throw new Error("Chrome opened a camera but did not receive a live video preview. Retry the camera check.");
       }
+      const activeStream = stream;
+      stream.getVideoTracks().forEach(track => track.addEventListener("ended", () => {
+        if (!isMounted.current || cameraStream.current !== activeStream) return;
+        cameraStream.current = null;
+        if (cameraElement.current) cameraElement.current.srcObject = null;
+        setCameraOn(false);
+        setCheck("camera", "Pending");
+        setCameraError("The camera stopped. Turn it on again to continue.");
+      }, { once: true }));
       setCameraOn(true);
       setNotice("");
       await scanCameraDevices();
@@ -486,7 +558,7 @@ export default function AIInterviewPreparationPage() {
       setNotice(message);
       return false;
     }
-  }, [selectedCameraId, scanCameraDevices]);
+  }, [selectedCameraId, scanCameraDevices, setCheck]);
   const checkCamera = async () => {
     if (busy) return;
     setCheck("camera", "Testing");
@@ -653,6 +725,9 @@ export default function AIInterviewPreparationPage() {
   }, [screen, current, finished, speakQuestion, cancelQuestionVoice]);
 
   const startInterview = () => {
+    const record=getAssessment(getActiveAssessmentId()||"");
+    if (new URLSearchParams(window.location.search).get("preview") !== "true" && record && !learnerAssessmentData(record).canStart) { setNotice("The allowed attempts have been used."); return; }
+    submissionRecorded.current=false;
     const unpassed = CHECK_CONFIG.filter(item => checks[item.id] !== "Passed").map(item => item.title);
     if (unpassed.length) { setNotice(`Complete these checks first: ${unpassed.join(", ")}.`); return; }
     if (!cameraOn) { setNotice("Turn on your camera before starting."); return; }
@@ -660,7 +735,7 @@ export default function AIInterviewPreparationPage() {
     const time = Date.now();
     blurGuard.current = time;
     setNow(time);
-    setExpiresAt(time + info.duration * 60 * 1000);
+    setExpiresAt(info.duration > 0 ? time + info.duration * 60 * 1000 : 0);
     setScreen("interview");
     setCurrent(0); setAnswers({}); setTranscript(""); transcriptRef.current = ""; setFinished(false);
     try { sessionStorage.setItem(scopedKey(PREFLIGHT_KEY), JSON.stringify({ info, checks, voiceFlag, tabFlag, accepted, checkedAt: new Date().toISOString() })); }
@@ -694,6 +769,8 @@ export default function AIInterviewPreparationPage() {
   };
 
   const restartInterview = () => {
+    if (!canRestartInterview()) {setNotice("The allowed attempts have been used or the assessment is closed.");return;}
+    submissionRecorded.current=false;
     cancelQuestionVoice();
     stopSpeech();
     turnCameraOff();
@@ -719,38 +796,38 @@ export default function AIInterviewPreparationPage() {
     <div className="viewaiHeader"><Header /></div>
     <div className="viewaiScrollable">
       <div className="viewaiTopRow">
-        <nav className="viewaiBreadcrumb" aria-label="Breadcrumb"><span>Dashboard</span><Asset name="arrow-right-double.svg" size={20}/><span>Assessment</span><Asset name="arrow-right-double.svg" size={20}/><strong>{info.title}</strong></nav>
-        {screen === "interview" && <div className="viewaiTopStats"><span className="viewaiTabCounter"><Asset name="alert-01.svg" size={24}/>Tab Switches :{tabSwitches}</span><Clock seconds={secondsRemaining}/></div>}
+        <nav className="viewaiBreadcrumb" aria-label="Breadcrumb"><Link href="/dashboard">Dashboard</Link><Asset name="arrow-right-double.svg" size={20}/><Link href="/assessments/list">Assessment</Link><Asset name="arrow-right-double.svg" size={20}/><strong>{info.title}</strong></nav>
+        {screen === "interview" && <div className="viewaiTopStats"><span className="viewaiTabCounter"><Asset name="alert-01.svg" size={24}/>Tab Switches :{tabSwitches}</span>{info.duration > 0 && <Clock seconds={secondsRemaining}/>}</div>}
       </div>
-      {screen === "success" ? <section className="viewaiResults viewaiSuccess" aria-label="Submission complete"><div className="viewaiResultsIntro"><h1>Assessment Submitted Successfully</h1><p>Your answers have been saved. This assessment is awaiting evaluation.</p><button type="button" className="viewaiResultRestart" onClick={() => setScreen("result")}>View Results</button></div></section> : screen === "result" ? <section className="viewaiResults" aria-label="Interview results">
+      {screen === "success" ? <section className="viewaiResults viewaiSuccess" aria-label="Submission complete"><Link href="/assessments/list" className="viewaiBackToAssessments"><img src="/assets/viewericons/arrowleft.svg" alt="" width={20} height={20}/>Back to Assessments</Link><div className="viewaiResultsIntro"><h1>Assessment Submitted Successfully</h1><p>Your answers have been saved. This assessment is awaiting evaluation.</p><button type="button" className="viewaiResultRestart" onClick={() => setScreen("result")}>View Results</button></div></section> : screen === "result" ? <section className="viewaiResults" aria-label="Interview results">
+        <Link href="/assessments/list" className="viewaiBackToAssessments"><img src="/assets/viewericons/arrowleft.svg" alt="" width={20} height={20}/>Back to Assessments</Link>
         <div className="viewaiResultsIntro">
-          <div className="viewaiConfetti" aria-hidden="true"><img src={`${ICONS}blast.png`} alt="" onError={event => { event.currentTarget.style.visibility = "hidden"; }} /></div>
           <h1>Session Complete</h1>
           <strong className="viewaiResultsScore">Pending</strong>
           <span className="viewaiResultsOutcome">Awaiting evaluator feedback · Passing mark {minimumScore}%</span>
-          <p className="viewaiDemoNote">Example rubric ({previewScore}%) — not your grade. AI grading is not connected yet.</p>
+          {evaluation.showRubric !== false && <p className="viewaiDemoNote">Example rubric ({previewScore}%) — not your grade. AI grading is not connected yet.</p>}
         </div>
-        <div className="viewaiResultsRubrics">{RESULT_CRITERIA.map(item => <div className="viewaiResultRubric" key={item.id} style={{ "--result-color": item.color } as CSSProperties}>
+        {evaluation.showRubric !== false && <div className="viewaiResultsRubrics">{RESULT_CRITERIA.map(item => <div className="viewaiResultRubric" key={item.id} style={{ "--result-color": item.color } as CSSProperties}>
           <strong>{item.title}</strong><div className="viewaiResultBarRow"><span className="viewaiResultBar"><span style={{ width: `${item.example}%` }}/></span><b>{item.example}%</b></div>
-        </div>)}</div>
-        <div className="viewaiResultFeedback"><h2>AI Feedback</h2><p>AI feedback will be available when the scoring service is connected. The rubric percentages above are sample values for layout preview only.</p></div>
+        </div>)}</div>}
+        {evaluation.showFeedback !== false && <div className="viewaiResultFeedback"><h2>AI Feedback</h2><p>AI feedback will be available when the scoring service is connected.</p></div>}
         <div className="viewaiResultFlag">Proctoring : {tabSwitches} Tab switch event{tabSwitches === 1 ? "" : "s"} Flagged</div>
         <section className="viewaiResultTranscript"><h2>Your Transcript</h2>{info.questions.map((question, index) => <article className="viewaiResultAnswer" key={index}><strong>Q{index + 1}- {question}</strong><p>{answers[index]?.trim() || "No answer recorded."}</p></article>)}</section>
-        <button type="button" className="viewaiResultRestart" onClick={restartInterview}>Restart</button>
+        <button type="button" className="viewaiResultRestart" disabled={!restartAllowed} title={!restartAllowed ? "No attempts remain or this assessment is closed." : undefined} onClick={restartInterview}>Restart</button>
       </section> : <div className="viewaiColumns">
         <section className="viewaiOverview" aria-label="Interview overview">
-          <h1>{info.role} Mock Interview</h1>
-          <p className="viewaiMeta">{info.duration} Minutes <span>|</span> {info.language} <span>|</span> {info.questionCount} Questions</p>
+          <h1>{info.role} {info.format === "viva" ? "Viva" : "Mock Interview"}</h1>
+          <p className="viewaiMeta">{info.duration > 0 ? `${info.duration} Minutes` : "Untimed"} <span>|</span> {info.language} <span>|</span> {info.questionCount} Questions</p>
           <div className="viewaiCameraPanel"><div className="viewaiCameraOval">
             <video ref={cameraElement} autoPlay playsInline muted className={cameraOn ? "viewaiCameraVideo" : "viewaiHiddenVideo"} aria-label="Your camera preview"/>
             {!cameraOn && <span>Run the camera to see yourself here</span>}
           </div>
-          <button className="viewaiCameraButton" type="button" disabled={checks.camera === "Testing"} onClick={() => cameraOn ? turnCameraOff() : void checkCamera()}>
-            Camera {checks.camera === "Testing" ? "Starting" : cameraOn ? "On" : "Off"}
+          <button className="viewaiCameraButton" type="button" aria-pressed={cameraOn} disabled={checks.camera === "Testing" || (busy && !cameraOn)} onClick={() => cameraOn ? turnCameraOff() : void checkCamera()}>
+            {checks.camera === "Testing" ? "Starting camera" : cameraOn ? "Camera OFF" : "Camera ON"}
           </button>
           {(cameraDevices.length > 0 || cameraError) && <div className="viewaiCameraControls">
             {cameraDevices.length > 0 && <label htmlFor="viewaiCameraChoice">Camera source
-              <select id="viewaiCameraChoice" value={selectedCameraId} onChange={event => {
+              <select id="viewaiCameraChoice" value={selectedCameraId} disabled={checks.camera === "Testing"} onChange={event => {
                 setSelectedCameraId(event.target.value);
                 if (cameraOn) turnCameraOff();
               }}><option value="">Default camera</option>{cameraDevices.filter(device => device.deviceId).map((device, index) => <option key={device.deviceId} value={device.deviceId}>{device.label || ("Camera " + (index + 1))}</option>)}</select>
@@ -764,7 +841,7 @@ export default function AIInterviewPreparationPage() {
           {cameraDiagnostics && <p className="viewaiCameraDiagnostics" role="status">{cameraDiagnostics}</p>}
         </div>
         </section>
-        {screen === "instructions" ? <section className="viewaiChecks viewaiInstructions" aria-labelledby="aiInstructionsHeading"><h2 id="aiInstructionsHeading">Assessment Instructions</h2><div className="viewaiInfoBanner">Read all instructions before beginning the assessment.</div><ul className="viewaiInstructionsList"><li>Complete the camera, microphone and background-noise checks before you start.</li><li>Answer each question clearly. You may also type your response.</li><li>Keep the interview tab open. Tab switching may be recorded.</li><li>Submit each answer to move to the next question.</li><li>Once the final answer is submitted, the attempt is complete.</li></ul><label className="viewaiInstructionCheckbox"><input type="checkbox" checked={instructionAccepted} onChange={event => setInstructionAccepted(event.target.checked)}/> I have read and understood the assessment instructions.</label><div className="viewaiStartRow"><button type="button" className="viewaiStartButton" disabled={!instructionAccepted || !info.questions.length} onClick={() => setScreen("preflight")}>Continue to System Check</button></div>{!info.questions.length && <p role="alert">No saved AI assessment questions were found. Ask the creator to publish the questions before starting.</p>}</section> : screen === "preflight" ? <section className="viewaiChecks" aria-labelledby="viewaiChecksHeading">
+        {screen === "instructions" ? <section className="viewaiChecks viewaiInstructions" aria-labelledby="aiInstructionsHeading"><h2 id="aiInstructionsHeading">Assessment Instructions</h2><div className="viewaiInfoBanner">Read all instructions before beginning the assessment.</div>{info.creatorInstructions && <p>{info.creatorInstructions}</p>}<ul className="viewaiInstructionsList"><li>Complete the camera, microphone and background-noise checks before you start.</li><li>Answer each question clearly. You may also type your response.</li><li>Keep the interview tab open. Tab switching may be recorded.</li><li>Submit each answer to move to the next question.</li><li>Once the final answer is submitted, the attempt is complete.</li></ul><label className="viewaiInstructionCheckbox"><input type="checkbox" checked={instructionAccepted} onChange={event => setInstructionAccepted(event.target.checked)}/> I have read and understood the assessment instructions.</label><div className="viewaiStartRow"><button type="button" className="viewaiStartButton" disabled={!instructionAccepted || !info.questions.length} onClick={() => setScreen("preflight")}><span>Continue to System Check</span></button></div>{!info.questions.length && <p role="alert">No saved AI assessment questions were found. Ask the creator to publish the questions before starting.</p>}</section> : screen === "preflight" ? <section className="viewaiChecks" aria-labelledby="viewaiChecksHeading">
           <div className="viewaiInfoBanner"><Asset name="info.svg" size={24}/><span>Speak clearly. You may ask the examiner to repeat a question.</span></div>
           <h2 id="viewaiChecksHeading">System Check before you begin</h2>
           <div className="viewaiCheckList">
@@ -801,6 +878,6 @@ export default function AIInterviewPreparationPage() {
         </section>}
       </div>}
     </div>
-    {showSubmitConfirm && <div className="viewaiModalBackdrop" role="presentation"><div className="viewaiModal" role="dialog" aria-modal="true" aria-labelledby="aiSubmitHeading"><h2 id="aiSubmitHeading">Submit Assessment?</h2><p>Submitting the final response completes this attempt. You cannot change your answers afterwards.</p><div className="viewaiModalActions"><button type="button" onClick={() => setShowSubmitConfirm(false)}>Cancel</button><button type="button" onClick={() => { setShowSubmitConfirm(false); finishInterview({...answers, [current]: transcript.trim()}); }}>Submit Assessment</button></div></div></div>}
+    {showSubmitConfirm && <div className="viewerAppShell"><ViewerSubmitConfirm answered={answered} remaining={Math.max(0, info.questionCount - answered)} flagged={0} onBack={() => setShowSubmitConfirm(false)} onSubmit={() => { setShowSubmitConfirm(false); finishInterview({...answers, [current]: transcript.trim()}); }}/></div>}
   </div></main></div></div>;
 }

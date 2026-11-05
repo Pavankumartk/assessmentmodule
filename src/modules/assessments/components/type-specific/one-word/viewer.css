@@ -1039,3 +1039,5 @@
   box-shadow: inset 4px 4px 4px #C4C4C4,
               inset -4px -4px 4px #FFFFFF !important;
 }
+/* Keep the forward action in its usual position on the first question. */
+.assessment-variant--one-word .viewerAppShell .viewerOneWord .viewerExamActions > .viewerNext:only-child{margin-right:0!important;margin-left:auto!important}

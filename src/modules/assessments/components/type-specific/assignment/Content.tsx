@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type DragEvent, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type DragEvent, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { AssetIcon, AssignmentShell, Field, Notice, Panel } from "./AssignmentUI";
 import {
@@ -109,6 +109,10 @@ export default function AssignmentContentStep() {
   const [ready, setReady] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [message, setMessage] = useState("");
+  useEffect(() => { if (message !== "Assignment content saved successfully.") return; const timer = window.setTimeout(() => setMessage(""), 3000); return () => window.clearTimeout(timer); }, [message]);
+  const [continuing, setContinuing] = useState(false);
+  const continueTimer = useRef<number | null>(null);
+  useEffect(() => () => { if (continueTimer.current) window.clearTimeout(continueTimer.current); }, []);
 
   useEffect(() => {
     setData(readAssignment(CONTENT_KEY, figmaDefaults));
@@ -170,13 +174,14 @@ export default function AssignmentContentStep() {
   };
 
   const continueToEvaluation = () => {
+    if (continuing) return;
     const validation = validateContent(data);
     setErrors(validation);
     if (validation.length) {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    if (save()) router.push("/assessments/create/evaluation");
+    if (save()) { setMessage(""); setContinuing(true); continueTimer.current = window.setTimeout(() => { setContinuing(false); router.push("/assessments/create/evaluation"); }, 3000); }
   };
 
   return (
@@ -269,7 +274,7 @@ export default function AssignmentContentStep() {
           <button type="button" className="asgn-button" onClick={() => router.push("/assessments/create/details")}>Back</button>
           <div className="asgn-footer-right">
             <button type="button" className="asgn-button" onClick={save}>Save</button>
-            <button type="button" className="asgn-button asgn-button-primary" onClick={continueToEvaluation}>Continue</button>
+            {continuing && <span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}<button type="button" className="asgn-button asgn-button-primary" disabled={continuing} onClick={continueToEvaluation}>Continue</button>
           </div>
         </div>
       </div>

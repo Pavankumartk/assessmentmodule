@@ -15,6 +15,7 @@ type Props = {
   onEdit: (index: number) => void;
   onContinue: () => void;
   notice?: string;
+  saving: boolean;
 };
 function Inset({ children }: { children: ReactNode }) { return <div className="memPrevInset">{children}</div>; }
 function PreviewToggle({ value }: { value: boolean }) { return <span className={`memPrevToggle ${value ? "active" : ""}`}>{value ? "ON" : "OFF"}<i /></span>; }
@@ -25,7 +26,7 @@ function PreviewAccordion({ heading, icon, open, onToggle, children }: { heading
   </button>{open && <div className="memPrevAccordionBody">{children}</div>}</section>;
 }
 
-export default function MemoryGamePreview({ breadcrumb, questions, onBack, onEdit, onContinue, notice }: Props) {
+export default function MemoryGamePreview({ breadcrumb, questions, onBack, onEdit, onContinue, notice, saving }: Props) {
   const [filter, setFilter] = useState("All Questions");
   const [learnerPreview, setLearnerPreview] = useState(false);
   const [revealed, setRevealed] = useState<string[]>([]);
@@ -78,6 +79,6 @@ export default function MemoryGamePreview({ breadcrumb, questions, onBack, onEdi
       </article>;
     })}
     {notice && <p role="alert" className="memNotice">{notice}</p>}
-    <footer className="memPrevFooter"><button type="button" onClick={onBack}>Back to Question</button><button type="button" className="memPrevContinue" onClick={onContinue}>Save And Continue</button></footer>
+    <footer className="memPrevFooter"><button type="button" onClick={onBack}>Back to Question</button>{saving && <span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}</footer>
   </section>;
 }

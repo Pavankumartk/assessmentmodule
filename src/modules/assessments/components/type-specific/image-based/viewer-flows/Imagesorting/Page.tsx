@@ -415,7 +415,7 @@ export default function ImageSortingViewerPage() {
                   </div>
                   {notice && <p className="viewerInlineNotice" role="status">{notice}</p>}
                   <div className="viewerExamActions">
-                    <button type="button" className="viewerExamButton" disabled={current === 0} onClick={() => goTo(current - 1)}><Icon name="arrowleft.svg"/>Previous</button>
+                    {current > 0 && <button type="button" className="viewerExamButton" disabled={current === 0} onClick={() => goTo(current - 1)}><Icon name="arrowleft.svg"/>Previous</button>}
                     <button type="button" className="viewerExamButton viewerNext" disabled={isLocked}
                       onClick={() => current === total - 1 ? submit() : goTo(current + 1)}>
                       {current === total - 1 ? "Submit" : "Next"}<Icon name="arrowrightg.svg"/>

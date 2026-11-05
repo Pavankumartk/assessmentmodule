@@ -1659,3 +1659,11 @@
 .ibqApp .ibqMcqSummaryProgress>span{display:block;height:100%;background:linear-gradient(90deg,#2D4CC8,#E01E5A)}
 @media(max-width:860px){.ibqApp .ibqAside.ibqMcqAside{display:flex;flex-direction:column;max-width:100%;padding:18px}}
 @media(max-width:590px){.ibqApp .ibqAside.ibqMcqAside{padding:12px}.ibqApp .ibqMcqAsideSection{padding:12px}.ibqApp .ibqMcqAside .ibqAsidePickMenu{max-width:100%}}
+.ibqApp .ibqRichToolbar > .mcqEditorFormatTrigger { display:inline-flex; align-items:center; justify-content:space-between; padding:0 9px; font-size:16px; }
+.ibqApp .ibqRichToolbar > .mcqEditorFont { width:132px; min-width:132px; }
+.ibqApp .ibqRichToolbar > .mcqEditorSize { width:77px; min-width:77px; }
+
+.ibqNumber .ibqDot.is-pending{background:transparent;border:1.5px solid currentColor;width:13px;height:13px;box-sizing:border-box;}
+.ibqNumber .ibqDot.is-done{display:grid;place-items:center;width:13px;height:13px;background:#2A7308;color:#fff;font:700 10px/1 Arial,sans-serif;}
+
+.ibqNumber:not(.is-done){border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}.ibqNumber .ibqDot.is-pending{background:#2D4CC8;border:0}

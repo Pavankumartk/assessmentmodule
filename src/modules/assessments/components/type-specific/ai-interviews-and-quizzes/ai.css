@@ -210,6 +210,8 @@
 .aieSwitchKnob{position:absolute;left:4px;top:4px;width:28px;height:28px;border-radius:50%;background:#DFE6E9;box-shadow:0 -2px 4px rgba(0,0,0,.1),0 4px 4px rgba(0,0,0,.25);transition:left .15s ease}
 .aieSwitchOn .aieSwitchKnob{left:39px}
 .aieError{margin:15px 6px 0;color:#B33B2E;font-size:14px;line-height:22px}
+.aieServiceNote{margin:18px 6px 0;color:#596575;font-size:14px;line-height:22px}
+.aieSaved{margin:15px 6px 0;color:#27710e;font-size:14px;line-height:22px}
 .aieFooter{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:40px 0 0}
 .aieFooterButton{min-width:150px;min-height:50px;padding:10px 22px;border:0;border-radius:32px;background:var(--aie-bg);box-shadow:var(--aie-raised);font-size:17px;font-weight:700;white-space:nowrap}.aieFooterButton:active{box-shadow:var(--aie-inset)}
 .aieContinue{min-width:195px;color:#27710e!important}
@@ -231,3 +233,11 @@
 .aiExtraToolsMenu .aiPaletteSwatch[aria-pressed=true]{outline:2px solid #2D4CC8;outline-offset:1px}
 .aiAppShell .aiHighlightTool[aria-expanded=true]{box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4}
 @media(max-width:600px){.aiExtraToolsMenu{gap:7px;padding:9px}.aiExtraToolsMenu .aiPaletteSwatch{min-height:24px}}
+
+/* AI rubric keyboard focus uses the neutral card border instead of a blue ring. */
+.aieRubricTrack:focus-within{outline:none}
+.aieAppShell .aieRubricRange:focus-visible{opacity:0;outline:none}
+.aieRubric:focus-within{border-color:#737c82}
+.aiFooterSaveGroup,.aieFooterSaveGroup{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap}
+.aiSaveToast,.aieSaveToast{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:7px 18px;border:1.5px solid #2A7308;border-radius:24px;color:#2A7308;background:#DFE6E9;font:600 14px/20px 'Segoe UI',Arial,sans-serif;box-shadow:-2px -2px 3px #fff,2px 2px 3px #C4C4C4;white-space:nowrap}
+@media(max-width:600px){.aiFooterSaveGroup,.aieFooterSaveGroup{gap:8px}.aiSaveToast,.aieSaveToast{min-height:34px;padding:6px 11px;font-size:12px}}

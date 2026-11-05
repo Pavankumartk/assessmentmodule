@@ -1,4 +1,5 @@
 "use client";
+import { AssessmentEditorDropdown } from "@/modules/assessments/components/common/steps/DetailsStep/DetailsStep";
 import {useEffect,useRef,useState,type ReactNode,type ChangeEvent} from "react";
 import Link from "next/link";
 import Sidebar from "@/modules/assessments/components/common/sidebar/page";
@@ -91,7 +92,7 @@ export function Toggle({label,value,onChange,help}:{label:string;value:boolean;o
 export function ActionFooter({onBack,onSave,onContinue,loading=false}:{onBack:()=>void;onSave:()=>void;onContinue:()=>void;loading?:boolean}){
  return <div className="asgn-footer"><button type="button" className="asgn-button" onClick={onBack}><AssetIcon name="arrowleft.svg"/>Back</button><div className="asgn-footer-right"><button type="button" className="asgn-button" onClick={onSave}>Save</button><button disabled={loading} type="button" className="asgn-button asgn-button-primary" onClick={onContinue}>Save &amp; Continue <AssetIcon name="arrowright.svg"/></button></div></div>;
 }
-export function Notice({errors,message}:{errors:string[];message?:string}){return <>{message&&<div role="status" className="asgn-notice">{message}</div>}{errors.length>0&&<div className="asgn-validation" role="alert"><strong>Please correct the following before continuing:</strong><ul>{errors.map((e,i)=><li key={i}>{e}</li>)}</ul></div>}</>;}
+export function Notice({errors,message}:{errors:string[];message?:string}){return <>{message&&<div role={message === "Assignment content saved successfully." ? "status" : "alert"} className={message === "Assignment content saved successfully." ? "asgn-notice asgn-notice-success" : "asgn-notice"}>{message}</div>}{errors.length>0&&<div className="asgn-validation" role="alert"><strong>Please correct the following before continuing:</strong><ul>{errors.map((e,i)=><li key={i}>{e}</li>)}</ul></div>}</>;}
 export function DateTimeRow({label,enabled,onEnabled,date,onDate,time,onTime}:{label:string;enabled:boolean;onEnabled:(v:boolean)=>void;date:string;onDate:(v:string)=>void;time:string;onTime:(v:string)=>void}){
  return <div className="asgn-datetime"><Toggle label={label} value={enabled} onChange={onEnabled}/><div className="asgn-fields-grid asgn-grid-two"><Field label="Date"><input type="date" disabled={!enabled} value={date} onChange={e=>onDate(e.target.value)}/></Field><Field label="Time"><input type="time" disabled={!enabled} value={time} onChange={e=>onTime(e.target.value)}/></Field></div></div>;
 }
@@ -106,7 +107,14 @@ function safeRichHtml(html:string){
    if(!(node instanceof Element)||blocked.has(node.tagName))return [];
    const children=Array.from(node.childNodes).flatMap(clean);
    if(!allowed.has(node.tagName))return children;
-   const el=document.createElement(node.tagName.toLowerCase());for(const child of children)el.appendChild(child);
+   const el=document.createElement(node.tagName.toLowerCase());
+   if (node.tagName === "FONT") {
+     const face=node.getAttribute("face") || ""; const size=node.getAttribute("size") || "";
+     if (["Arial","Segoe UI","Georgia","Times New Roman","Verdana"].includes(face)) el.setAttribute("face",face);
+     if (/^[1-7]$/.test(size)) el.setAttribute("size",size);
+   }
+   if (node instanceof HTMLElement && /^\d{1,2}px$/.test(node.style.fontSize)) el.style.fontSize=node.style.fontSize;
+   for(const child of children)el.appendChild(child);
    return [el];
  };
  const container=document.createElement("div");for(const node of Array.from(doc.body.childNodes).flatMap(clean))container.appendChild(node);
@@ -115,20 +123,22 @@ function safeRichHtml(html:string){
 export function RichTextField({label,value,html,onChange,onHtmlChange,placeholder}:{label:string;value:string;html?:string;onChange:(v:string)=>void;onHtmlChange?:(v:string)=>void;placeholder?:string}){
  const editor=useRef<HTMLDivElement>(null);const [font,setFont]=useState("Arial");const [size,setSize]=useState("16");
  useEffect(()=>{const el=editor.current;if(el&&document.activeElement!==el&&el.textContent!==value){if(html)el.innerHTML=safeRichHtml(html);else el.textContent=value;}},[value,html]);
- const command=(cmd:string,arg?:string)=>{editor.current?.focus();document.execCommand(cmd,false,arg);update();};
+ const selection=useRef<Range | null>(null);
+ const remember=()=>{const selected=window.getSelection();if(selected?.rangeCount&&editor.current?.contains(selected.anchorNode))selection.current=selected.getRangeAt(0).cloneRange();};
+ const command=(cmd:string,arg?:string)=>{editor.current?.focus();if(selection.current&&editor.current?.contains(selection.current.commonAncestorContainer)){const selected=window.getSelection();selected?.removeAllRanges();selected?.addRange(selection.current);}document.execCommand(cmd,false,cmd==="fontSize"?"7":arg);if(cmd==="fontSize"&&arg)editor.current?.querySelectorAll('font[size="7"]').forEach(node=>{node.removeAttribute("size");(node as HTMLElement).style.fontSize=`${arg}px`;});remember();update();};
  const update=()=>{if(!editor.current)return;onChange(editor.current.textContent||"");onHtmlChange?.(safeRichHtml(editor.current.innerHTML));};
  return <div className="asgn-rich-field"><span className="asgn-label">{label}</span><div className="asgn-rich-box">
   <div className="asgn-toolbar" role="toolbar" aria-label={`${label} formatting`}>
    <button type="button" aria-label="Undo" onMouseDown={e=>e.preventDefault()} onClick={()=>command("undo")}><AssetIcon name="undo-02.svg" size={16}/></button>
    <button type="button" aria-label="Redo" onMouseDown={e=>e.preventDefault()} onClick={()=>command("redo")}><AssetIcon name="redo.svg" size={16}/></button>
-   <select aria-label="Font" value={font} onChange={e=>{setFont(e.target.value);command("fontName",e.target.value);}}>{["Arial","Segoe UI","Georgia","Times New Roman","Verdana"].map(f=><option key={f}>{f}</option>)}</select>
-   <select aria-label="Font size" value={size} onChange={e=>{setSize(e.target.value);command("fontSize",e.target.value==="12"?"2":e.target.value==="16"?"3":e.target.value==="18"?"4":"5");}}>{["12","14","16","18","24"].map(f=><option key={f}>{f}</option>)}</select>
+   <AssessmentEditorDropdown className="mcqEditorFont" label="Font" value={font} options={["Arial", "Segoe UI", "Georgia", "Times New Roman", "Verdana"]} onOpen={remember} onChange={v=>{setFont(v);command("fontName",v);}} />
+   <AssessmentEditorDropdown className="mcqEditorSize" label="Font size" value={size} options={["12", "14", "16", "18", "24"]} onOpen={remember} onChange={v=>{setSize(v);command("fontSize",v);}} />
    <button type="button" aria-label="Bold" onMouseDown={e=>e.preventDefault()} onClick={()=>command("bold")}><b>B</b></button>
    <button type="button" aria-label="Italic" onMouseDown={e=>e.preventDefault()} onClick={()=>command("italic")}><i>I</i></button>
    <button type="button" aria-label="Underline" onMouseDown={e=>e.preventDefault()} onClick={()=>command("underline")}><u>U</u></button>
    <button type="button" aria-label="Bulleted list" onMouseDown={e=>e.preventDefault()} onClick={()=>command("insertUnorderedList")}><AssetIcon name="dot.svg" size={17}/></button>
    <button type="button" aria-label="Align center" onMouseDown={e=>e.preventDefault()} onClick={()=>command("justifyCenter")}><AssetIcon name="text-centerline-center-top.svg" size={17}/></button>
-  </div><div ref={editor} className="asgn-rich-editable" contentEditable role="textbox" aria-label={label} aria-multiline="true" data-placeholder={placeholder||"Type here..."} suppressContentEditableWarning onInput={update} onBlur={update} onPaste={e=>{e.preventDefault();document.execCommand("insertText",false,e.clipboardData.getData("text/plain"));update();}}/>
+  </div><div ref={editor} className="asgn-rich-editable" contentEditable role="textbox" aria-label={label} aria-multiline="true" data-placeholder={placeholder||"Type here..."} suppressContentEditableWarning onKeyUp={remember} onMouseUp={remember} onInput={update} onBlur={()=>{remember();update();}} onPaste={e=>{e.preventDefault();document.execCommand("insertText",false,e.clipboardData.getData("text/plain"));update();}}/>
  </div></div>;
 }
 

@@ -480,7 +480,7 @@ export function AssessmentMCQViewer({ questions: suppliedQuestions, assessmentId
               <button className={`mqv-flag-button ${progress.flagged.includes(current.id) ? "is-flagged" : ""}`} type="button" disabled={isLocked} aria-pressed={progress.flagged.includes(current.id)} onClick={toggleFlag}><AssetIcon name="flag.svg" size={20}/>{progress.flagged.includes(current.id) ? "Remove flag" : "Flag for review"}</button>
             </div>
             <div className="mqv-bottom-actions">
-              <button type="button" className="mqv-pill mqv-previous" disabled={progress.current === 0} onClick={() => navigate(progress.current - 1)}><AssetIcon name="arrowleft.svg" size={20}/>Previous</button>
+              {progress.current > 0 && <button type="button" className="mqv-pill mqv-previous" disabled={progress.current === 0} onClick={() => navigate(progress.current - 1)}><AssetIcon name="arrowleft.svg" size={20}/>Previous</button>}
               {progress.current === questions.length - 1 ? <button type="button" className="mqv-pill mqv-next" disabled={isLocked} onClick={() => setConfirmSubmit(true)}>Submit <AssetIcon name="arrowrightg.svg" size={20}/></button> : <button type="button" className="mqv-pill mqv-next" onClick={() => navigate(progress.current + 1)}>Next <AssetIcon name="arrowright.svg" size={20}/></button>}
             </div>
           </article>

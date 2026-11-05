@@ -1,3 +1,4 @@
+import {maySubmitCurrentAttempt,nextAttemptCount} from "@/modules/assessments/components/learner/learner-assessment-data";
 /** Shared MCQ-compatible result and retry storage for the four supplied Image-Based viewers. */
 import { assessmentStorage, getActiveAssessmentId, getAssessment, updateAssessment } from "@/modules/assessments/storage/assessment-storage";
 import type { ReleasePolicy } from "@/modules/assessments/components/viewer/result-release";
@@ -91,6 +92,7 @@ export function saveImageViewerSubmission(input: {
   secondsRemaining: number;
   retry: boolean;
 }): boolean {
+  if (!maySubmitCurrentAttempt()) return false;
   const totalMarks = input.questions.reduce((sum,q) => sum + q.points, 0);
   const earnedMarks = input.questions.reduce((sum,q) => sum + q.earnedMarks, 0);
   const formatted = input.questions.map(q => ({
@@ -129,6 +131,8 @@ export function saveImageViewerSubmission(input: {
       assessmentStorage.setItem("viewerRetryResult", JSON.stringify(result));
     } else {
       assessmentStorage.setItem("viewerAssessmentResult", JSON.stringify(result));
+    }
+    {
       const stored = assessmentStorage.getItem("viewerAttempts");
       let attempts: unknown = [];
       try { attempts = JSON.parse(stored || "[]"); } catch { /* Empty previous attempts. */ }
@@ -137,7 +141,7 @@ export function saveImageViewerSubmission(input: {
       assessmentStorage.setItem("viewerAttemptDraft", JSON.stringify({finished:true}));
       const id = getActiveAssessmentId();
       const assessment = id ? getAssessment(id) : undefined;
-      if (assessment) updateAssessment({attemptCount: (assessment.attemptCount || 0) + 1});
+      if (assessment) updateAssessment({attemptCount: nextAttemptCount(next.length)});
     }
     return true;
   } catch { return false; }

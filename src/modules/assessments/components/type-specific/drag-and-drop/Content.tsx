@@ -65,9 +65,26 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
       lastHtml.current = next;
     }
   }, [editorId, value, html]);
+  const charLimit = /(?:explanation|hint)/i.test(editorId) ? 250 : undefined;
+  const allowedText = (text: string) => {
+    const el = editor.current;
+    if (!el || charLimit === undefined) return text;
+    const selection = window.getSelection();
+    const selected = selection?.anchorNode && selection.focusNode && el.contains(selection.anchorNode) && el.contains(selection.focusNode) ? selection.toString().length : 0;
+    const current = (el.innerText || el.textContent || "").replace(/\u00a0/g, " ").length;
+    return text.slice(0, Math.max(0, charLimit - current + selected));
+  };
   const notify = () => {
     const el = editor.current;
     if (!el) return;
+    const plain = (el.innerText || el.textContent || "").replace(/\u00a0/g, " ");
+    if (charLimit !== undefined && plain.length > charLimit && plain.length > value.length) {
+      el.innerHTML = lastHtml.current ?? "";
+      const range = document.createRange(); range.selectNodeContents(el); range.collapse(false);
+      const selection = window.getSelection(); selection?.removeAllRanges(); selection?.addRange(range);
+      onError("This field allows a maximum of 250 characters.");
+      return;
+    }
     lastHtml.current = el.innerHTML;
     onHtmlChange(el.innerHTML);
     onChange((el.innerText || el.textContent || "").replace(/\u00a0/g, " "));
@@ -134,7 +151,6 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
       {button("text-centerline-center-top.svg", "Bulleted list", () => command("insertUnorderedList"))}
       {button("image.svg", "Insert image", () => { setFileKind("image"); if (fileInput.current) { fileInput.current.accept="image/*"; fileInput.current.value=""; fileInput.current.click(); } })}
       {button("attachment.svg", "Attach file", () => { setFileKind("attachment"); if (fileInput.current) { fileInput.current.accept=""; fileInput.current.value=""; fileInput.current.click(); } })}
-      <div className="dragcRichMenuRoot"><button type="button" aria-label="Special characters" title="Special characters" aria-expanded={menu === "symbols"} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={e => openFormatMenu("symbols", e.currentTarget)}><Icon name="more-vertical.svg" size={18}/></button></div>
     </div>
     {menu && typeof document !== "undefined" && createPortal(
       <div ref={floatingMenu} className={`dragcFloatingFormatMenu ${menu === "symbols" ? "dragcFloatingSymbols" : ""}`}
@@ -154,7 +170,8 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
       </div>, document.body)}
     <input ref={fileInput} type="file" hidden onChange={e => { const f=e.target.files?.[0]; if (f) void addFile(f); }}/>
     <div ref={editor} id={editorId} role="textbox" aria-label={placeholder} aria-multiline="true" contentEditable suppressContentEditableWarning data-placeholder={placeholder}
-      className="dragcRichEditable" onInput={notify} onKeyUp={remember} onMouseUp={remember} onFocus={remember} onPaste={e => { e.preventDefault(); const text=e.clipboardData.getData("text/plain"); document.execCommand("insertText", false, text); notify(); }}/>
+      className="dragcRichEditable" onInput={notify} onBeforeInput={e => { const input = e.nativeEvent as InputEvent; if (input.data && allowedText(input.data) !== input.data) e.preventDefault(); }} onKeyUp={remember} onMouseUp={remember} onFocus={remember} onPaste={e => { e.preventDefault(); const text=allowedText(e.clipboardData.getData("text/plain")); if (text) document.execCommand("insertText", false, text); notify(); }}/>
+    <small className="assessmentEditorCounter" aria-live="polite">{value.length}/250</small>
   </div>;
 }
 // Drag & Drop / Match the Following content. The existing layout and editor are reused.
@@ -174,7 +191,7 @@ const positiveInt = (v: unknown, fallback: number) => { const n = Number(v); ret
 const nonnegative = (v: unknown, fallback: number) => { const n = Number(v); return v !== null && v !== undefined && v !== "" && Number.isFinite(n) && n >= 0 ? n : fallback; };
 const newChoice = (index: number): DragChoice => ({ id: `choice-${index}`, text: "", kind: "Text", role: "Correct" });
 const newQuestion = (points = 1): DragQuestion => ({
-  type: "Drag & Drop", text: "", points: String(points), difficulty: "Medium", category: "", bloom: "",
+  type: "Drag & Drop", text: "", points: String(points), difficulty:"", category: "", bloom: "",
   mandatory: true, items: Array.from({ length: 4 }, (_, i) => newChoice(i)), mapping: {},
   shuffle: true, zoneWidth: "110", grading: "Equal Marks", negative: "NA", partialCredit: true,
   minZero: true, allowMove: true, zoneMarks: {}, scoreOverrides: {}, graderInfo: "", feedbackFull: "",
@@ -284,8 +301,8 @@ function QuestionTypeDropdown({ value, onChange }: { value: string; onChange: (v
   }, [open]);
   const label = value === "MCQ" ? "Multiple Choice Question (MCQ)" : value === "Fill in the Blanks" ? "Fill in the Blank" : value;
   const normalized = search.trim().toLowerCase();
-  return <div className="dragcSelectRoot dragcTypeRoot" ref={root}>
-    <button type="button" className="dragcSelectTrigger" aria-label="Question Type" aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? "dragcQuestionTypeList" : undefined} onClick={() => setOpen(previous => !previous)}>
+  return <div className="dragcSelectRoot dragcTypeRoot" ref={root} onPointerLeave={event => { if (event.pointerType === "mouse") window.setTimeout(() => { if (root.current && !root.current.matches(":hover")) setOpen(false); }, 300); }}>
+    <button type="button" className="dragcSelectTrigger" aria-label="Question Type" disabled aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? "dragcQuestionTypeList" : undefined} onClick={() => setOpen(previous => !previous)}>
       <span>{label || "Select Question Type"}</span><Icon name="arrow-down-01.svg" size={20} className={open ? "dragcRotated" : ""}/>
     </button>
     {open && <div id="dragcQuestionTypeList" className="dragcTypeDropdown">
@@ -312,7 +329,7 @@ function NeumoSelect({ value, options, onChange, placeholder }: { value: string;
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => { if (!open) return; const outside = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) setOpen(false); }; const escape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); }; document.addEventListener("pointerdown", outside); document.addEventListener("keydown", escape); return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); }; }, [open]);
-  return <div className="dragcSelectRoot" ref={root}><button type="button" className="dragcSelectTrigger" aria-expanded={open} onClick={() => setOpen(v => !v)}><span>{value || placeholder || "Select"}</span><Icon name="arrow-down-01.svg" size={20} /></button>{open && <div className="dragcSelectList" role="radiogroup">{options.map(option => <button key={option} type="button" role="radio" aria-checked={value === option} className="dragcSelectItem" onClick={() => { onChange(option); setOpen(false); }}>{value === option ? <SelectedCheck/> : <span className="dragcOptionRadio"/>}<span>{option}</span></button>)}</div>}</div>;
+  return <div className="dragcSelectRoot" ref={root} onPointerLeave={event => { if (event.pointerType === "mouse") window.setTimeout(() => { if (root.current && !root.current.matches(":hover")) setOpen(false); }, 300); }}><button type="button" className="dragcSelectTrigger" aria-expanded={open} onClick={() => setOpen(v => !v)}><span>{value || placeholder || "Select"}</span><Icon name="arrow-down-01.svg" size={20} /></button>{open && <div className="dragcSelectList" role="radiogroup">{options.map(option => <button key={option} type="button" role="radio" aria-checked={value === option} className="dragcSelectItem" onClick={() => { onChange(option); setOpen(false); }}>{value === option ? <SelectedCheck/> : <span className="dragcOptionRadio"/>}<span>{option}</span></button>)}</div>}</div>;
 }
 
 
@@ -347,7 +364,7 @@ function MappingSelect({ items, value, usedIds, onChange }: {
   const selectedIndex = items.findIndex(item => item.id === value);
   const selected = selectedIndex >= 0 ? choiceName(items[selectedIndex], selectedIndex) : "Select correct drag item";
   const choices = items.map((item, index) => ({ item, index })).filter(({ item }) => item.role === "Correct");
-  return <div className="dragcSelectRoot dragcDDMappingSelect" ref={root}>
+  return <div className="dragcSelectRoot dragcDDMappingSelect" ref={root} onPointerLeave={event => { if (event.pointerType === "mouse") window.setTimeout(() => { if (root.current && !root.current.matches(":hover")) setOpen(false); }, 300); }}>
     <button type="button" className="dragcSelectTrigger" aria-label="Choose correct drag item" aria-expanded={open}
       aria-haspopup="listbox" onClick={() => setOpen(previous => !previous)}>
       <span>{selected}</span><Icon name="arrow-down-01.svg" size={20} className={open ? "dragcRotated" : ""}/>
@@ -379,7 +396,7 @@ function DragPanel({ title, icon, open, onToggle, children, subtitle }: {
   return <section className={`dragcDDPanel ${open ? "is-open" : ""}`}>
     <button type="button" className="dragcAnswerExpand dragcDDPanelHead" aria-expanded={open} aria-label={`${title}: ${open ? "collapse" : "expand"}`} onClick={onToggle}>
       <span className="dragcDDPanelHeading"><span className="dragcDDPanelIcon"><Icon name={icon} size={19}/></span><strong>{title}</strong></span>
-      {subtitle && <small className="dragcDDPanelCount">{subtitle}</small>}
+      {subtitle && !/^\d+\s*\/\s*\d+/.test(subtitle) && <small className="dragcDDPanelCount">{subtitle}</small>}
       <Icon name="arrow-down-01.svg" size={20} className={open ? "dragcRotated" : ""}/>
     </button>
     {open && <div className="dragcDDPanelBody">{children}</div>}
@@ -401,9 +418,9 @@ function QuestionTextWithZones({text, q, learner, answers, onSelectZone}: {
       aria-label={`Zone ${zone}: ${label}`} style={{minWidth:`${q.zoneWidth}px`}}>{label}</button>;
   })}</p>;
 }
-function DragPreview({ questions, active, setActive, tags, readyAll, onBack, onEdit, onContinue }: {
+function DragPreview({ questions, active, setActive, tags, readyAll, onBack, onEdit, onContinue, saving }: {
  questions:DragQuestion[]; active:number; setActive:(v:number)=>void; tags:string[]; readyAll:boolean;
- onBack:()=>void; onEdit:(i:number)=>void; onContinue:()=>void;
+ onBack:()=>void; onEdit:(i:number)=>void; onContinue:()=>void; saving:boolean;
 }) {
   const [filter,setFilter]=useState("All Questions");
   const [filterOpen,setFilterOpen]=useState(false);
@@ -461,7 +478,7 @@ function DragPreview({ questions, active, setActive, tags, readyAll, onBack, onE
         <div className="dragcPreviewPanel"><button type="button" className="dragcPreviewSectionHead" aria-expanded={expanded.feedback} onClick={()=>toggle("feedback")}>Feedback and Learning <Icon name="arrow-down-01.svg" size={18} className={expanded.feedback?"dragcRotated":""}/></button>{expanded.feedback && <div className="dragcPreviewLearning">{[["Full Marks",q.feedbackFull,"checkmark-circle.svg"],["Partial Marks",q.feedbackPartial,"alert.svg"],["Zero Marks",q.feedbackZero,"cancel-circle.svg"],["Explanation",q.explanation,"assignments.svg"],["Hint",q.hint,"idea.svg"]].map(([title,value,icon])=><section key={title}><h4><Icon name={icon} size={18}/>{title}</h4><p>{value || "No content entered."}</p></section>)}</div>}</div>
         <div className="dragcPreviewPanel"><button type="button" className="dragcPreviewSectionHead" aria-expanded={expanded.settings} onClick={()=>toggle("settings")}>Question Settings <Icon name="arrow-down-01.svg" size={18} className={expanded.settings?"dragcRotated":""}/></button>{expanded.settings && <div className="dragcPreviewSettings">{[["Difficulty",q.difficulty,"target.svg"],["Bloom’s Taxonomy",q.bloom||"Not selected","brain.svg"],["Category",q.category||"Not selected","folder.svg"],["Tags",tags.join(", ")||"No tags","tag.svg"],["Mandatory",q.mandatory?"YES":"NO","circle-check.svg"]].map(([title,value,icon])=><div key={title}><span>{title}</span><strong><Icon name={icon} size={18}/>{value}</strong></div>)}</div>}</div></>}
         {shown.length>1 && <nav className="dragcTrueFalsePreviewPaging"><button type="button" disabled={currentIndex===shown[0].index} onClick={()=>navTo(-1)}>Previous Question</button><span>Question {shown.findIndex(x=>x.index===currentIndex)+1} of {shown.length}</span><button type="button" disabled={currentIndex===shown[shown.length-1].index} onClick={()=>navTo(1)}>Next Question</button></nav>}
-        <div className="dragcPreviewBottom"><button type="button" onClick={onBack}>Back to Question</button><button type="button" className="dragcPreviewSave" onClick={onContinue}>Save &amp; Continue</button></div>
+        <div className="dragcPreviewBottom"><button type="button" onClick={onBack}>Back to Question</button>{saving && <span className="dragcSaveSuccessToast" role="status">Successfully saved</span>}</div>
       </article> : <div className="dragcPreviewEmpty"><p>No questions match this filter.</p><button type="button" onClick={onBack}>Back to Question</button></div>}
     </div>
   </div>;
@@ -482,9 +499,12 @@ function QuestionBuilder({ questions, setQuestions, mcqValues, onExit }: {
   const [tagInput,setTagInput]=useState("");
   const [addingTag,setAddingTag]=useState(false);
   const [richHtml,setRichHtml]=useState<Record<string,string>>({});
+  const [draftReady,setDraftReady]=useState(false);
   const [notice,setNotice]=useState("");
   const [saveSuccess,setSaveSuccess]=useState(false);
   const [isSaving,setIsSaving]=useState(false);
+  const saveTimer = useRef<number | null>(null);
+  useEffect(() => () => { if (saveTimer.current) window.clearTimeout(saveTimer.current); }, []);
   const [numberScrollProgress,setNumberScrollProgress]=useState(0);
   const numberScrollRef=useRef<HTMLDivElement>(null);
   const question=questions[active] || newQuestion(mcqValues.marksPerQuestion);
@@ -510,10 +530,13 @@ function QuestionBuilder({ questions, setQuestions, mcqValues, onExit }: {
   useEffect(()=>{
     try {
       const saved=JSON.parse(assessmentStorage.getItem("dragDropContentDraft")||"{}");
+      if(Number.isInteger(saved.active))setActive(Math.max(0,Math.min(questions.length-1,saved.active)));
       if(saved.richHtml && typeof saved.richHtml==="object") setRichHtml(saved.richHtml);
       if(Array.isArray(saved.tags)) setTags(saved.tags.filter((t:unknown):t is string=>typeof t==="string"));
     } catch { /* Keep the editable draft if old storage cannot be read. */ }
+    setDraftReady(true);
   },[]);
+  useEffect(()=>{if(!draftReady)return;try{assessmentStorage.setItem("dragDropContentDraft",JSON.stringify({questions,tags,richHtml,active}));}catch{setNotice("Could not save this draft in your browser.");}},[draftReady,questions,tags,richHtml,active]);
   const saveAndContinue=()=>{
     if(isSaving)return;
     setShowValidation(true);
@@ -532,7 +555,7 @@ function QuestionBuilder({ questions, setQuestions, mcqValues, onExit }: {
       setNotice("");
       setIsSaving(true);
       updateAssessment({questions:questions.length,marks:questions.reduce((n,q)=>n+Number(q.points||0),0)});
-      router.push("/assessments/create/evaluation");
+      saveTimer.current = window.setTimeout(() => { setSaveSuccess(false); setIsSaving(false); router.push("/assessments/create/evaluation"); }, 3000);
     } catch {
       setSaveSuccess(false);
       setIsSaving(false);
@@ -558,12 +581,18 @@ function QuestionBuilder({ questions, setQuestions, mcqValues, onExit }: {
   const removeChoice=(id:string)=>{if(question.items.length<=2)return;const mapping=Object.fromEntries(Object.entries(question.mapping).filter(([,value])=>value!==id));update({items:question.items.filter(c=>c.id!==id),mapping});};
   const totalZoneMarks=zones.reduce((s,z)=>s+getZoneMarks(question,z),0);
   const addQuestion=()=>{jump(active+1);setAddOpen(false);setSections({question:false,items:false,mapping:false,grading:false,feedback:false});};
-  if(previewing) return <DragPreview questions={questions} active={active} setActive={setActive} tags={tags} readyAll={isReady}
+  if(previewing) return <DragPreview questions={questions} active={active} setActive={setActive} tags={tags} readyAll={isReady} saving={isSaving}
     onBack={()=>setPreviewing(false)} onEdit={index=>{jump(index);setPreviewing(false);setSections(old=>({...old,question:true,items:true}));}} onContinue={saveAndContinue}/>;
   return <div className="dragcBuilder">
     <div className="dragcBuilderTop"><nav className="dragcBuilderCrumb" aria-label="Question breadcrumb"><Link href="/assessments">Assessment</Link><Icon name="arrowrightdouble.svg"/><button type="button" onClick={onExit}>Create Assessment</button><Icon name="arrowrightdouble.svg"/><strong>Create Questions</strong></nav><div className="dragcBuilderWelcome"><Icon name="ai-sparkles.svg" size={30}/><div><h2>Let&apos;s Get Started! Institute?</h2><p>Let&apos;s Build A Great Question.</p></div></div></div>
     <div className={`dragcBuilderGrid ${active===0&&!questions.slice(1).some(q=>q.text.trim())?"dragcFirstQuestion":""}`}>
       <section className="dragcBuilderMain">
+        <div className="assessmentCreatorQuestionHeading"><strong>Question {active + 1} of {mcqValues.questionCount}</strong></div>
+        <nav className="assessmentCreatorNavigator" aria-label="Question navigation">
+          <button type="button" className="assessmentCreatorArrow" aria-label="Previous question" disabled={active === 0} onClick={()=>jump(active - 1)}><Icon name="arrowleft.svg" size={20}/></button>
+          <div className="assessmentCreatorNumbers">{Array.from({length:mcqValues.questionCount},(_,index)=>{const done=!!questions[index] && isComplete(questions[index]);return <button key={index} type="button" className={`assessmentCreatorNumber ${done ? "is-complete" : index === active ? "is-active" : "is-empty"}`} aria-current={index===active?"step":undefined} aria-label={`Question ${index+1}, ${done?"complete":"incomplete"}`} onClick={()=>jump(index)}><strong>{index+1}</strong><span className="assessmentCreatorStatus">{done?"✓":""}</span><small>DD</small></button>})}</div>
+          <button type="button" className="assessmentCreatorArrow" aria-label="Next question" disabled={active >= mcqValues.questionCount - 1} onClick={()=>jump(active + 1)}><Icon name="arrowright.svg" size={20}/></button>
+        </nav>
         <div className="dragcQuestionForm dragcDDQuestionForm">
           <div className="dragcBuilderField"><label>Question Type</label><QuestionTypeDropdown value="Drag & Drop" onChange={v=>{if(v==="Drag & Drop" || v==="Match the Following"){update({type:"Drag & Drop"});setNotice("");}else{setNotice(`${v} is a different assessment type. Drag & Drop remains selected on this page.`);}}}/></div>
           <DragPanel title="Question and Drop Zone" icon="chart-01.svg" open={sections.question} onToggle={()=>toggle("question")}>
@@ -601,14 +630,14 @@ function QuestionBuilder({ questions, setQuestions, mcqValues, onExit }: {
             {([["Explanation","explanation","assignments.svg","Explain the correct mapping..."],["Hint","hint","idea.svg","Write a hint..."]] as const).map(([label,key,icon,placeholder])=><div key={key} className="dragcDDFeedbackSubpanel">
               <button type="button" className="dragcDDFeedbackSubhead" aria-expanded={feedbackSubsections[key]} onClick={()=>setFeedbackSubsections(old=>({...old,[key]:!old[key]}))}>
                 <span className="dragcDDPanelHeading"><span className="dragcDDPanelIcon"><Icon name={icon} size={18}/></span><strong>{label}</strong></span>
-                <small>{question[key].length}/250</small><Icon name="arrow-down-01.svg" size={18} className={feedbackSubsections[key]?"dragcRotated":""}/>
+                <Icon name="arrow-down-01.svg" size={18} className={feedbackSubsections[key]?"dragcRotated":""}/>
               </button>
               {feedbackSubsections[key] && <div className="dragcDDFeedbackSubbody"><div className="dragcEditorSurface">{richEditor(`dragc-dd-${key}-${active}`,question[key],v=>update({[key]:v}),placeholder)}</div>{key==="hint" && <div className="dragcHintChecks"><label><input type="checkbox" checked={question.showHint} onChange={e=>update({showHint:e.target.checked})}/>Show hint before answering</label><label><input type="checkbox" checked={question.allowHint} onChange={e=>update({allowHint:e.target.checked})}/>Allow learner to request hint</label></div>}</div>}
             </div>)}
           </DragPanel>
           {showValidation && dragDropErrors(question).length>0 && <div className="dragcValidationErrors" role="alert">{dragDropErrors(question).map(text=><p key={text}>{text}</p>)}</div>}
         </div>
-        <div className="dragcBuilderBottom"><button type="button" className="dragcBuilderAction dragcSubmitQuestion" onClick={addQuestion}><Icon name="plus.svg" size={20}/>Add Questions</button><div className="dragcBuilderArrows"><button type="button" className="dragcRoundNav" aria-label="Previous" onClick={()=>jump(active-1)}><Icon name="arrowleft.svg"/></button><button type="button" className="dragcRoundNav" aria-label="Next" onClick={()=>jump(active+1)}><Icon name="arrowright.svg"/></button></div></div>
+        <div className="dragcBuilderBottom"><button type="button" className="dragcBuilderAction dragcSubmitQuestion" onClick={addQuestion}><Icon name="plus.svg" size={20}/>Add Questions</button><div className="dragcBuilderArrows"><button type="button" className="dragcRoundNav" aria-label="Previous" disabled={active===0} onClick={()=>jump(active-1)}><Icon name="arrowleft.svg"/></button><button type="button" className="dragcRoundNav" aria-label="Next" disabled={active>=mcqValues.questionCount-1} onClick={()=>jump(active+1)}><Icon name="arrowright.svg"/></button></div></div>
       </section>
       <aside className="dragcBuilderAside"><section className="dragcAsideSection"><h3>Question Settings</h3>
         <div className="dragcBuilderField"><label htmlFor="dragcPoints">Points</label><div className="dragcPointsControl"><input id="dragcPoints" type="number" min="0" step="1" value={question.points} onChange={e=>update({points:e.target.value})}/><div className="dragcPointsSteppers"><button type="button" aria-label="Increase points" onClick={()=>update({points:String((Number(question.points)||0)+1)})}><Icon name="arrow-down-01.svg" size={14} className="dragcArrowUp"/></button><button type="button" aria-label="Decrease points" onClick={()=>update({points:String(Math.max(0,(Number(question.points)||0)-1))})}><Icon name="arrow-down-01.svg" size={14}/></button></div></div></div>
@@ -618,13 +647,14 @@ function QuestionBuilder({ questions, setQuestions, mcqValues, onExit }: {
       </section></aside>
     </div>
     {notice && <p className="dragcBuilderNotice dragcValidationError" role="status">{notice}</p>}
-    <div className="dragcBuilderPageFooter"><button type="button" className="dragcFooterPill" onClick={()=>{setPreviewing(true);setNotice("");}}>Preview Questions</button><div className="dragcSaveContinueGroup">{saveSuccess && <span className="dragcSaveSuccessToast" role="status">Successfully saved</span>}<button type="button" className="dragcFooterPill dragcFooterContinue" disabled={isSaving} onClick={saveAndContinue}>Save &amp; Continue</button></div></div>
+    <div className="dragcBuilderPageFooter"><button type="button" className="dragcFooterPill" disabled={isSaving} onClick={onExit}>Back</button><button type="button" className="dragcFooterPill" onClick={()=>{setPreviewing(true);setNotice("");}}>Preview Questions</button><div className="dragcSaveContinueGroup">{saveSuccess && <span className="dragcSaveSuccessToast" role="status">Successfully saved</span>}<button type="button" className="dragcFooterPill dragcFooterContinue" disabled={isSaving} onClick={saveAndContinue}>Save &amp; Continue</button></div></div>
   </div>;
 }
 export default function DragDropContentPage() {
   const router=useRouter();
   const [mcqValues,setMcqValues]=useState<MCQDetailsValues>(DEFAULT_VALUES);
   const [questions,setQuestions]=useState<DragQuestion[]>([newQuestion()]);
+  const [pageReady,setPageReady]=useState(false);
   useEffect(()=>{
     try {
       const detailsRaw=assessmentStorage.getItem("dragDropAssessmentDraft") || assessmentStorage.getItem("dragdropAssessmentDraft");
@@ -638,6 +668,7 @@ export default function DragDropContentPage() {
       const saved=Array.isArray(content.questions)?content.questions:[];
       setQuestions(Array.from({length:questionCount},(_,i)=>saved[i]?{...newQuestion(marksPerQuestion),...saved[i],type:"Drag & Drop",items:Array.isArray(saved[i].items)?saved[i].items:[],mapping:saved[i].mapping||{}}:newQuestion(marksPerQuestion)));
     } catch {setQuestions(Array.from({length:DEFAULT_VALUES.questionCount},()=>newQuestion()));}
+    setPageReady(true);
   },[]);
-  return <main className="dragcAppShell"><div className="dragcLayout"><Sidebar/><section className="dragcMainContent"><div className="dragcHeader"><Header/></div><div className="dragcScrollArea"><div className="dragcPageContent"><QuestionBuilder questions={questions} setQuestions={setQuestions} mcqValues={mcqValues} onExit={()=>router.push("/assessments/create/details")}/></div></div></section></div></main>;
+  return <main className="dragcAppShell"><div className="dragcLayout"><Sidebar/><section className="dragcMainContent"><div className="dragcHeader"><Header/></div><div className="dragcScrollArea"><div className="dragcPageContent">{pageReady && <QuestionBuilder questions={questions} setQuestions={setQuestions} mcqValues={mcqValues} onExit={()=>router.push("/assessments/create/details")}/>}</div></div></section></div></main>;
 }

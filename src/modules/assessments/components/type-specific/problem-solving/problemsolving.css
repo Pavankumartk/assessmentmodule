@@ -3709,3 +3709,13 @@
   .problemSolvingCreator .psPreview .psPreviewStep small{font-size:11px}
   .problemSolvingCreator .psPreview .psPreviewRule{gap:10px}
 }
+
+/* Display an empty circle until the question is complete. */
+.problemSolvingCreator .mcqcMatchBuilder .mcqcQuestionNumber i{opacity:1!important;width:13px;height:13px;box-sizing:border-box;border:1.5px solid currentColor;background:transparent!important;}
+.problemSolvingCreator .mcqcMatchBuilder .mcqcQuestionNumber.is-complete i{border-color:#2A7308;background:#2A7308!important;}
+.problemSolvingCreator .mcqcMatchBuilder .mcqcQuestionNumber.is-complete i::after{content:'✓';position:absolute;inset:0;color:#fff;font:700 10px/12px Arial,sans-serif;text-align:center;}
+
+.mcqcBuilder .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}
+.mcqcBuilder .mcqcNumberStatus.is-pending{background:#2D4CC8!important;border:0!important;color:#fff!important}
+
+.problemSolvingCreator .mcqcMatchBuilder .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}.problemSolvingCreator .mcqcMatchBuilder .mcqcQuestionNumber:not(.is-complete) i{background:#2D4CC8!important;border:0}

@@ -13,8 +13,8 @@ export type ReleasePolicy = {
   message: string;
 };
 type Settings = Record<string, unknown>;
-function read(key: string): Settings {
-  try { const parsed: unknown = JSON.parse(assessmentStorage.getItem(key) || "{}"); return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed as Settings : {}; }
+function read(key: string, assessmentId?: string): Settings {
+  try { const raw = assessmentId && typeof window !== "undefined" ? localStorage.getItem(`neurolxp.assessments.draft.v1.${assessmentId}.${key}`) : assessmentStorage.getItem(key); const parsed: unknown = JSON.parse(raw || "{}"); return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed as Settings : {}; }
   catch { return {}; }
 }
 function truthy(value: unknown, defaultValue: boolean) {
@@ -40,10 +40,12 @@ function formatDate(raw: string): string {
  *  "Manually" and "After Grading" stay blocked until an actual release workflow exists.
  *  "After Closing" stays blocked unless a real closing timestamp was saved.
  */
-export function getTextResultRelease(type: TextMode | "fill-in-the-blanks", pendingCount = 0, now = Date.now()): ReleasePolicy {
-  const data = type === "one-word"
-    ? {...read("oneWordEvaluationDraft"), ...read("neurolxp-one-word-evaluation")}
-    : type === "fill-in-the-blanks" ? read("fillBlanksEvaluationDraft") : type === "long-answer" ? read("longAnswerEvaluationDraft") : read("shortAnswerEvaluationDraft");
+export function getTextResultRelease(type: TextMode | "fill-in-the-blanks", pendingCount = 0, now = Date.now(), assessmentId?: string): ReleasePolicy {
+  const common = read("mcqAssessmentEvaluationDraft", assessmentId);
+  const specific = type === "one-word"
+    ? {...read("oneWordEvaluationDraft", assessmentId), ...read("neurolxp-one-word-evaluation", assessmentId)}
+    : type === "fill-in-the-blanks" ? read("fillBlanksEvaluationDraft", assessmentId) : type === "long-answer" ? read("longAnswerEvaluationDraft", assessmentId) : read("shortAnswerEvaluationDraft", assessmentId);
+  const data = {...common, ...specific};
   const choice = String(pick(data, "resultAvailable", "reviewAvailability", "resultAvailability", "resultReleaseMode") ?? "Immediately").trim().toLowerCase();
   const enabled = truthy(pick(data, "showResult", "showResults", "resultAfter", "showResultAfterSubmission"), true);
   let mode: ReleaseMode = "immediate";

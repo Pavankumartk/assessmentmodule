@@ -17,9 +17,13 @@ import MemoryViewer from "@/modules/assessments/components/type-specific/memory-
 import Screen from "@/modules/assessments/components/viewer/AssessmentViewer/AssessmentViewer";
 import ShortViewer from "@/modules/assessments/components/type-specific/short-answer/Viewer";
 import OneViewer from "@/modules/assessments/components/type-specific/one-word/Viewer";
+import FillViewer from "@/modules/assessments/components/type-specific/fill-in-the-blanks/Viewer";
+import DragViewer from "@/modules/assessments/components/type-specific/drag-and-drop/Viewer";
+import LongViewer from "@/modules/assessments/components/type-specific/long-answer/Viewer";
+import TrueFalseViewer from "@/modules/assessments/components/type-specific/true-false/Viewer";
+import { learnerAssessmentData } from "@/modules/assessments/components/learner/learner-assessment-data";
 
 import {
-  assessmentStorage,
   setActiveAssessmentId,
   getAssessment,
 } from "@/modules/assessments/storage/assessment-storage";
@@ -77,6 +81,10 @@ export default function PageClient() {
     }
 
     setActiveAssessmentId(assessmentId);
+    if (!isPreview && !learnerAssessmentData(record).canStart) {
+      router.replace(`/learner?selected=${encodeURIComponent(assessmentId)}`);
+      return;
+    }
     if (record.typeCode === "image-based" && !isPreview) {
       const params = new URLSearchParams(window.location.search);
       const instructionKey = `neurolxp.imageViewer.instructions.${assessmentId}`;
@@ -115,16 +123,6 @@ export default function PageClient() {
     } else {
       setHotspotInstructionsNeeded(false);
     }
-    // A learner's completed Hotspot attempt must not open again unless retry was explicitly requested.
-    if (record.typeCode === "clickable-hotspot" && !isPreview) {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("retry") !== "wrong") {
-        try {
-          const stored = JSON.parse(assessmentStorage.getItem("viewerAttemptDraft") || "{}");
-          if (stored.finished) { router.replace("/learner"); return; }
-        } catch { /* Invalid legacy attempt state: continue normally. */ }
-      }
-    }
     setReady(true);
   }, [assessmentId, isPreview, router]);
 
@@ -133,7 +131,7 @@ export default function PageClient() {
     : null;
 
   const Viewer =
-     (type === "ai-interviews-and-quizzes" || type === "ai-interview" || type === "ai-interviews" || type === "ai-interviews-quizzes" || type === "ai-interviews-and-quizes" || type === "ai-assessment") ? AIInterviewViewer : (type === "problem-solving-challenge" || type === "problem-solving") ? ProblemSolvingViewer : type === "assignment" ? AssignmentViewer : type === "clickable-hotspot"
+     (type === "ai-interviews-and-quizzes" || type === "ai-interview" || type === "ai-interviews" || type === "ai-interviews-quizzes" || type === "ai-interviews-and-quizes" || type === "ai-assessment" || type === "ai-viva") ? AIInterviewViewer : (type === "problem-solving-challenge" || type === "problem-solving") ? ProblemSolvingViewer : type === "assignment" ? AssignmentViewer : type === "clickable-hotspot"
       ? ClickableHotspotViewer
       : type === "image-based"
       ? ImageBasedViewer
@@ -143,6 +141,14 @@ export default function PageClient() {
       ? ConnectDotsViewer
       : type === "memory-game"
       ? MemoryViewer
+      : type === "fill-in-the-blanks"
+        ? FillViewer
+      : type === "drag-and-drop"
+        ? DragViewer
+      : type === "long-answer"
+        ? LongViewer
+      : type === "true-false"
+        ? TrueFalseViewer
       : type === "short-answer"
         ? ShortViewer
         : type === "one-word"

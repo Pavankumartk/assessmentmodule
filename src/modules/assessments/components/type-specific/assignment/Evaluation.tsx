@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { AssignmentShell, Field, Notice, Toggle } from "./AssignmentUI";
 import {
@@ -57,6 +57,10 @@ export default function AssignmentEvaluationStep() {
   const [ready, setReady] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [message, setMessage] = useState("");
+  const [saving, setSaving] = useState(false);
+  const saveTimer = useRef<number | null>(null);
+  useEffect(() => () => { if (saveTimer.current !== null) window.clearTimeout(saveTimer.current); }, []);
+  useEffect(() => { if (message !== "Evaluation settings saved.") return; const timer = window.setTimeout(() => setMessage(""), 3000); return () => window.clearTimeout(timer); }, [message]);
 
   useEffect(() => { setData(readAssignment(EVALUATION_KEY, defaultEvaluation)); setReady(true); }, []);
   useEffect(() => {
@@ -98,13 +102,14 @@ export default function AssignmentEvaluationStep() {
   };
 
   const continueToReview = () => {
+    if (saving) return;
     const validationErrors = validateEvaluation(data);
     setErrors(validationErrors);
     if (validationErrors.length) {
       document.querySelector<HTMLElement>(".asgn-evaluation-shell .asgn-main")?.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    if (persist()) router.push("/assessments/create/review");
+    if (persist()) { setMessage(""); setSaving(true); saveTimer.current = window.setTimeout(() => { setSaving(false); router.push("/assessments/create/review"); }, 3000); }
   };
   const passPercentage = data.maxGrade > 0 ? (data.passGrade / data.maxGrade) * 100 : 0;
 
@@ -224,7 +229,7 @@ export default function AssignmentEvaluationStep() {
           <button type="button" className="asgn-eval-footer-button" onClick={() => router.push("/assessments/create/content")}>Back</button>
           <div className="asgn-eval-footer-actions">
             <button type="button" className="asgn-eval-footer-button" onClick={persist}>Save</button>
-            <button type="button" className="asgn-eval-footer-button is-continue" onClick={continueToReview}>Continue</button>
+            {saving && <span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}<button type="button" className="asgn-eval-footer-button is-continue" disabled={saving} onClick={continueToReview}>Continue</button>
           </div>
         </div>
       </div>

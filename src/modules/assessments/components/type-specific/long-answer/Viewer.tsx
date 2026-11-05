@@ -1,8 +1,10 @@
 "use client";
+import {maySubmitCurrentAttempt,nextAttemptCount} from "@/modules/assessments/components/learner/learner-assessment-data";
 import {demoDashboardPath} from "@/modules/assessments/auth/demo-auth";
 
 import { assessmentStorage, updateAssessment, publishAssessment, viewerPath, resultPath } from "@/modules/assessments/storage/assessment-storage";
 
+import { creatorInstructionLines } from "@/modules/assessments/components/viewer/instruction-text";
 import ViewerInstructions from "@/modules/assessments/components/viewer/ViewerInstructions";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,14 +21,14 @@ import {makeTextResult} from "@/modules/assessments/components/viewer/text-asses
 // Only the NEW result-state assets have empty paths for your own icons.
 const ICONS = "/assets/viewericons/";
 const NEW_RESULT_ICON_PATHS = {
-  resultCheck: "",
-  celebration: "/assets/viewericons/correct-confetti.png",
+  resultCheck: "/assets/viewericons/checkmark-circle.svg",
+  celebration: "/assets/viewericons/blast.png",
   partyPopper: "/assets/viewericons/party-popper.png",
   happyEmoji: "",
-  resultWrong: "",
+  resultWrong: "/assets/viewericons/cancel-circle.svg",
   sadEmoji: "",
 } as const;
-const defaultInstructions = ["Select one answer per question", "Each correct answer carries 1 Mark", "Timer starts when you begin", "You can flag questions for review", "You can change answers before Final Submission", "The test auto-submits when time is up."];
+const defaultInstructions = ["Write your answer for each question", "Each question carries its configured marks", "Timer starts when you begin", "You can flag questions for review", "You can change answers before Final Submission", "The test auto-submits when time is up."];
 
 type ViewerDetails = { title: string; type: string; totalQuestions: string; totalMarks: string; totalTime: string; passingScore: string; negativeMarking: string; instructions: string[] };
 type AssessmentQuestion = { answerPlaceholder?:string;maxCharacters?:number;type: string; text: string; options: string[]; correct: number; bloom: string; hint: string; allowHint: boolean; points: number; expectedAnswer?: string; explanation?: string };
@@ -57,6 +59,7 @@ export default function ViewerPage() {
   const [notes,setNotes] = useState("");
   const [calc,setCalc] = useState("");
   const [secondsLeft,setSecondsLeft] = useState(3600);
+  const [expiresAt,setExpiresAt] = useState(0);
   const [finished,setFinished] = useState(false);
   const [submitOpen,setSubmitOpen] = useState(false);
   const [submittedPopupOpen,setSubmittedPopupOpen] = useState(false);
@@ -70,7 +73,7 @@ export default function ViewerPage() {
       assessmentStorage.setItem("longAnswerViewerCurrentQuestion", String(current));
       assessmentStorage.setItem("longAnswerViewerReturnState", JSON.stringify({
         started, accepted, current, longAnswers, checked, answerCorrect,
-        flagged, skipped, hintOpen, secondsLeft, finished
+        flagged, skipped, hintOpen, secondsLeft, expiresAt, finished
       }));
     } catch { /* Navigate even if browser storage is unavailable. */ }
     router.push(path);
@@ -92,8 +95,8 @@ export default function ViewerPage() {
       setSecondsLeft(Math.max(60,Math.round((/hour/i.test(duration)?minutes*60:minutes)*60)));
       const negative = firstValue(draft,["negativeMarkingValue","negativeMarking"],"-0.25");
       const passing = firstValue(draft,["passingScore","passingMarks"],"60");
-      const rawInstructions = firstValue(draft,["instructions"],"");
-      setDetails({ title:firstValue(draft,["assessmentTitle","assessmentName","title"],initialDetails.title), type:"Long Answer", totalQuestions:available.length?String(available.length):"1", totalMarks:firstValue(draft,["totalMarks"],available.length?String(available.reduce((n,q)=>n+q.points,0)):"20"), totalTime:/minute|hour/i.test(duration)?duration:`${duration} Minutes`, passingScore:passing.includes("%")?passing:`${passing}%`, negativeMarking:/wrong|per/i.test(negative)?negative:`${negative} Per Wrong Answers`, instructions:rawInstructions?rawInstructions.split(/\r?\n/).map(s=>s.trim()).filter(Boolean):defaultInstructions });
+      const creatorInstructions = creatorInstructionLines(draft.instructions, draft.descriptionInstructions);
+      setDetails({ title:firstValue(draft,["assessmentTitle","assessmentName","title"],initialDetails.title), type:"Long Answer", totalQuestions:available.length?String(available.length):"1", totalMarks:firstValue(draft,["totalMarks"],available.length?String(available.reduce((n,q)=>n+q.points,0)):"20"), totalTime:/minute|hour/i.test(duration)?duration:`${duration} Minutes`, passingScore:passing.includes("%")?passing:`${passing}%`, negativeMarking:/wrong|per/i.test(negative)?negative:`${negative} Per Wrong Answers`, instructions:creatorInstructions.length ? creatorInstructions : defaultInstructions });
     } catch { /* Keep the reference preview when no session draft exists. */ }
   },[]);
   // Returning from Calculator, Scratch Pad or Formula Sheet restores this assessment.
@@ -101,12 +104,11 @@ export default function ViewerPage() {
     try {
       const stored = assessmentStorage.getItem("longAnswerViewerReturnState");
       if (!stored) return;
-      assessmentStorage.removeItem("longAnswerViewerReturnState");
       const state = JSON.parse(stored) as {
         started?: boolean; accepted?: boolean; current?: number;
         longAnswers?: Record<number,string>; checked?: Record<number,boolean>;
         answerCorrect?: Record<number,boolean>; flagged?: number[];
-        skipped?: number[]; hintOpen?: boolean; secondsLeft?: number;
+        skipped?: number[]; hintOpen?: boolean; secondsLeft?: number; expiresAt?: number;
         finished?: boolean;
       };
       if (!state.started) return;
@@ -120,7 +122,8 @@ export default function ViewerPage() {
       setFlagged(state.flagged ?? []);
       setSkipped(state.skipped ?? []);
       setHintOpen(Boolean(state.hintOpen));
-      if (typeof state.secondsLeft === "number") setSecondsLeft(state.secondsLeft);
+      if (typeof state.expiresAt === "number" && state.expiresAt > 0) {setExpiresAt(state.expiresAt);setSecondsLeft(Math.max(0,Math.ceil((state.expiresAt-Date.now())/1000)));}
+      else if (typeof state.secondsLeft === "number") setSecondsLeft(state.secondsLeft);
       setFinished(Boolean(state.finished));
     } catch { /* Keep original Long Answer behavior if the saved state is invalid. */ }
   }, []);
@@ -142,8 +145,10 @@ export default function ViewerPage() {
       setChecked({});setAnswerCorrect({});setSkipped([]);setFlagged([]);setHintOpen(false);setSubmittedPopupOpen(false);
     } catch { /* Keep the ordinary Viewer available for malformed retry data. */ }
   }, []);
-  useEffect(()=>{ if (!started || finished || secondsLeft <= 0) return; const timer=window.setInterval(()=>setSecondsLeft(s=>Math.max(0,s-1)),1000); return ()=>window.clearInterval(timer); },[started,finished,secondsLeft]);
+  useEffect(()=>{if(!started || finished)return;if(!expiresAt){setExpiresAt(Date.now()+secondsLeft*1000);return;}const tick=()=>setSecondsLeft(Math.max(0,Math.ceil((expiresAt-Date.now())/1000)));tick();const timer=window.setInterval(tick,1000);return()=>window.clearInterval(timer);},[started,finished,expiresAt]);
+  useEffect(()=>{if(!started || finished || !expiresAt || new URLSearchParams(window.location.search).get("preview")==="true")return;try{assessmentStorage.setItem("longAnswerViewerReturnState",JSON.stringify({started,accepted,current,answers,longAnswers,checked,answerCorrect,flagged,skipped,hintOpen,secondsLeft,expiresAt,finished:false}));}catch{}},[started,accepted,current,answers,longAnswers,checked,answerCorrect,flagged,skipped,hintOpen,secondsLeft,expiresAt,finished]);
   const submitAssessment = () => {
+    if (!maySubmitCurrentAttempt()) { router.replace("/learner"); return; }
     if (finished) return;
     const isPreview = new URLSearchParams(window.location.search).get("preview") === "true";
     const isRetry = new URLSearchParams(window.location.search).get("retry") === "wrong";
@@ -163,11 +168,12 @@ export default function ViewerPage() {
         const previous = JSON.parse(assessmentStorage.getItem("viewerAttempts") || "[]");
         const attempts = [...(Array.isArray(previous)?previous:[]),result];
         assessmentStorage.setItem("viewerAttempts",JSON.stringify(attempts));
-        updateAssessment({attemptCount:attempts.length});
+        updateAssessment({attemptCount:nextAttemptCount(attempts.length)});
       }
     } catch { /* Submission remains visible even if browser quota has been exceeded. */ }
     setSubmittedScore(result.scorePercent);setPendingCount(result.pendingCount);
     setResultRelease(getTextResultRelease("long-answer",result.pendingCount));
+    if (!isPreview) assessmentStorage.removeItem("longAnswerViewerReturnState");
     setSubmitOpen(false);setFinished(true);setSubmittedPopupOpen(!isPreview);
   };
   useEffect(()=>{if(started && secondsLeft===0 && !finished) submitAssessment();},[started,secondsLeft,finished]);
@@ -222,13 +228,13 @@ export default function ViewerPage() {
 `}</style>
       <div className="viewerExamTop"><nav className="viewerBreadcrumb" aria-label="Breadcrumb"><Link href={demoDashboardPath()}>Dashboard</Link><Icon name="arrow-right-double.svg" size={20}/><Link href={demoDashboardPath()}>Assessment</Link><Icon name="arrow-right-double.svg" size={20}/><strong>{details.title}</strong></nav><Stopwatch seconds={secondsLeft}/></div>
       <div className="viewerPageHeading viewerExamHeading"><h1>{details.title}</h1></div>
-      {finished ? <section className="viewerExamCard viewerExamFinished"><h2>Assessment submitted</h2><p>{answered} of {total} questions answered.</p><p>{!resultRelease || resultRelease.mode !== "immediate" ? "Your submission was saved. Result release is controlled by your instructor." : pendingCount ? "Some responses are awaiting grading." : resultRelease.showScore && submittedScore !== null ? `Score: ${submittedScore}%` : "Your assessment was submitted successfully."}</p><button className="viewerExamButton" onClick={()=>{setFinished(false);setSubmitOpen(false);setStarted(false);setAccepted(false);setAnswers({});setLongAnswers({});setChecked({});setAnswerCorrect({});setFlagged([]);setSkipped([]);setCurrent(0);}}>Return to instructions</button></section> : <div className="viewerExamGrid"><section className="viewerExamCard viewerQuestionCard viewerLongAnswer">
+      {finished ? <section className="viewerExamCard viewerExamFinished"><h2>Assessment submitted</h2><p>{answered} of {total} questions answered.</p><p>{!resultRelease || resultRelease.mode !== "immediate" ? "Your submission was saved. Result release is controlled by your instructor." : pendingCount ? "Some responses are awaiting grading." : resultRelease.showScore && submittedScore !== null ? `Score: ${submittedScore}%` : "Your assessment was submitted successfully."}</p><button className="viewerExamButton" onClick={()=>router.push("/learner")}>Return to assessments</button></section> : <div className="viewerExamGrid"><section className="viewerExamCard viewerQuestionCard viewerLongAnswer">
         <div className="viewerProgressLabel"><strong>{shortMode ? current+1 : answered}<span>/{total}</span></strong>{shortMode && <strong>{question?.points || 5} Marks</strong>}</div><div className="viewerProgressRow"><div className="viewerProgressTrack"><span style={{width:`${progress}%`}}/></div><strong>{progress}%</strong></div>
         <div className="viewerQuestionHeading"><h2>Question {current+1}</h2><p>{question?.text || "No question has been created for this position yet."}</p></div>
         {shortMode ? <div className="viewerShortResponse"><div className="viewerShortCount"><span>{longAnswers[current]?.length || 0}/{question?.maxCharacters||5000}</span></div>{checked[current] ? <div className={`viewerAnswerFeedback ${answerCorrect[current] ? "viewerAnswerFeedback--correct" : "viewerAnswerFeedback--incorrect"}`} role="status"><div className="viewerFeedbackTitle"><span aria-hidden="true">{<ResultIcon name={answerCorrect[current] ? "resultCheck" : "resultWrong"} size={24} />}</span>{answerCorrect[current] ? "Correct" : "Incorrect"}</div><p>{question?.expectedAnswer || "Your answer has been submitted for review."}</p></div> : <textarea maxLength={question?.maxCharacters||5000} aria-label="Long answer" placeholder={question?.answerPlaceholder||"Write your detailed long answer here..."} value={longAnswers[current] || ""} onChange={e=>setLongAnswers(old=>({...old,[current]:e.target.value}))}/>}</div> : <div className="viewerAnswerList">{question?.options.map((option,i) => {const selected=answers[current]===i;const revealed=Boolean(checked[current]); const correct=revealed && i===question.correct;const incorrect=revealed && selected && i!==question.correct;return <button key={i} type="button" disabled={revealed} className={`viewerAnswer ${selected?"isSelected":""} ${correct?"isCorrect":""} ${incorrect?"isIncorrect":""}`} onClick={()=>setAnswers(old=>({...old,[current]:i}))}><span className="viewerAnswerRadio" aria-hidden="true"/><span>{String.fromCharCode(65+i)}. {option}</span>{correct && <span className="viewerCorrectMark"><Icon name="checkmark-circle-02.svg" size={21}/></span>}</button>;})}</div>}
         {showHint && <section className="viewerHintBox"><button type="button" className="viewerHintToggle" aria-expanded={hintOpen} onClick={()=>setHintOpen(s=>!s)}><span className="viewerHintTitle"><span className="viewerHintIcon"><Icon name="idea-01.svg" size={25}/></span>Hint</span><span className="viewerHintEye"><Icon name="view.svg" size={20}/></span></button>{hintOpen && <p>{question?.hint}</p>}</section>}
         <div className="viewerQuestionSettings"><div><label>Bloom’s Taxonomy</label><span className="viewerBloomValue">{question?.bloom||"Not specified"}</span></div><button type="button" className={`viewerFlagButton ${flagged.includes(current)?"isFlagged":""}`} onClick={toggleFlag}><Icon name="flag-03.svg" size={22}/>{flagged.includes(current)?"Remove flag":"Flag for review"}</button></div>
-        <div className="viewerExamActions"><button type="button" className="viewerExamButton" onClick={()=>{if(current===0){setStarted(false);setHintOpen(false);setTool(null);}else{goTo(current-1);}}}><Icon name="arrow-left-02.svg"/>Previous</button><button type="button" className="viewerExamButton viewerNext" onClick={()=> current===total-1?setSubmitOpen(true):goTo(Math.min(total-1,current+1))}>{current===total-1?"Submit":"Next"}<Icon name="arrowrightg.svg"/></button></div>
+        <div className="viewerExamActions">{current > 0 && <button type="button" className="viewerExamButton" onClick={()=>goTo(current-1)}><Icon name="arrow-left-02.svg"/>Previous</button>}<button type="button" className="viewerExamButton viewerNext" onClick={()=> current===total-1?setSubmitOpen(true):goTo(Math.min(total-1,current+1))}>{current===total-1?"Submit":"Next"}<Icon name="arrowrightg.svg"/></button></div>
       </section><aside className={`viewerExamCard viewerNavigator ${shortMode && checked[current] ? "viewerNavigator--result" : ""}`}>{shortMode && checked[current] ? <div className="viewerResultPanel" role="status" aria-live="polite">{answerCorrect[current] && <div className="viewerConfetti" aria-hidden="true"><ResultIcon name="celebration" size={300} /></div>}<div className={`viewerResultCheck ${answerCorrect[current] ? "" : "viewerResultCheck--review"}`}>{<ResultIcon name={answerCorrect[current] ? "resultCheck" : "resultWrong"} size={32} />}</div><h2>{answerCorrect[current] ? <>Correct ! <ResultIcon name="partyPopper" size={26} /></> : "Not Quit !"}</h2><div className="viewerResultAnswers"><p>Your Answer : <strong>{longAnswers[current]}</strong></p><p>Correct Answer : <strong>{question?.expectedAnswer || "Requires manual grading"}</strong></p></div><div className={`viewerResultWhy ${answerCorrect[current] ? "" : "viewerResultWhy--wrong"}`}><h3>Why ?</h3><p>{question?.explanation || (answerCorrect[current] ? "Your answer matches the expected concept." : "Compare your response with the reference answer above.")}</p><div className={`viewerHappyEmoji ${answerCorrect[current] ? "" : "viewerSadEmoji"}`} aria-label={answerCorrect[current] ? "Happy smiling face" : "Sad face"} role="img">{answerCorrect[current] ? <><span className="viewerEmojiEye viewerEmojiEye--left"><b/></span><span className="viewerEmojiEye viewerEmojiEye--right"><b/></span><span className="viewerEmojiMouth"/></> : <><span className="viewerSadBrow viewerSadBrow--left"/><span className="viewerSadBrow viewerSadBrow--right"/><span className="viewerSadEye viewerSadEye--left"><b/></span><span className="viewerSadEye viewerSadEye--right"><b/></span><span className="viewerSadMouth"/></>}</div></div></div> : <><h2>Question Navigator</h2><div className="viewerQuestionTiles">{Array.from({length:total},(_,i)=>{ const state = current===i?"current":flagged.includes(i)?"flagged":Boolean(longAnswers[i]?.trim())?"answered":skipped.includes(i)?"skipped":"remaining";return <button type="button" key={i} className={`viewerQuestionTile is-${state}`} onClick={()=>goTo(i)} aria-current={current===i?"step":undefined}>{i+1}</button>})}</div>
       <div className="viewerStatusRows"><div><Icon name="checkmark-circle-02.svg"/><span>Answered</span><strong>{String(answered).padStart(2,"0")}</strong></div><div><span className="viewerRemainingCircle"/><span>Remaining</span><strong>{String(remaining).padStart(2,"0")}</strong></div><div><Icon name="flag-03.svg"/><span>Flagged</span><strong>{String(flagged.length).padStart(2,"0")}</strong></div></div><h2 className="viewerToolsHeading">Tools</h2><div className="viewerToolsList"><button type="button" onClick={()=>setTool("scratchpad")}><Icon name="sticky-note.svg"/>Scratch Pad <Icon name="arrowupright.svg" size={18}/></button><button type="button" onClick={()=>setTool("calculator")}><Icon name="calculator.svg"/>Calculator <Icon name="arrowup.svg" size={18}/></button><button type="button" onClick={()=>setTool("formula")}><Icon name="sigma.svg"/>Formula Sheet <Icon name="arrowupg.svg" size={18}/></button></div>
       {tool && <div className="viewerToolPanel"><div className="viewerToolPanelTop"><strong>{tool==="scratchpad"?"Scratch Pad":tool==="calculator"?"Calculator":"Formula Sheet"}</strong><button type="button" onClick={()=>setTool(null)} aria-label="Close tool">×</button></div>{tool==="scratchpad"?<textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Write notes here..." rows={5}/>:tool==="calculator"?<div><input value={calc} onChange={e=>setCalc(e.target.value.replace(/[^0-9+*/().\- ]/g,""))} placeholder="Enter arithmetic expression"/><p>{calcResult}</p><button onClick={()=>setCalc("")}>Clear</button></div>:<p>No formula sheet was supplied with the saved assessment.</p>}</div>}</>}</aside></div>}

@@ -595,3 +595,6 @@
     overflow-x:auto;
   }
 }
+
+/* Successful saves use the existing green confirmation; errors remain red. */
+.evaluationSaveMessage:not(.evaluationSaveError){color:#2A7308!important;border-color:#2A7308!important;}

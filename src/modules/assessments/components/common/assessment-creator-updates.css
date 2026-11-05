@@ -1,0 +1,43 @@
+/* Character counts stay within the editor they describe. */
+.assessment-variant :is(.mcqcRichEditorRoot,.fillqcRichEditorRoot,.tfqcRichEditorRoot,.dragcRichEditorRoot,.saRich,.mcqcOWEditor,.ibqRich,.assessmentEditorInput,.mcqcEditorSurface:has(>textarea)){position:relative}
+.assessment-variant .assessmentEditorCounter{position:absolute;right:12px;bottom:5px;z-index:1;pointer-events:none;color:#6b7280;font:400 11px/16px "Segoe UI",Arial,sans-serif}
+.assessment-variant :is(.mcqcRichEditable,.fillqcRichEditable,.tfqcRichEditable,.dragcRichEditable,.ibqRichInput){padding-bottom:27px!important}
+.assessment-variant :is(.saRich,.mcqcOWEditor,.assessmentEditorInput,.mcqcEditorSurface) > textarea{padding-bottom:27px!important}
+.assessment-variant .assessmentEditorInput{display:block}
+
+/* Native checkboxes retain their keyboard and label behaviour. */
+.assessment-variant input[type="checkbox"]:not(.saCheck input):not(.viewerAgreement input):not(.ibqHintNative):not(.aiCheck input){appearance:none;-webkit-appearance:none;display:inline-grid;place-items:center;vertical-align:middle;flex:0 0 24px;width:24px;height:24px;min-width:24px;min-height:24px;margin:0;border:0;border-radius:4px;background:#DFE6E9;box-shadow:-2px -2px 3px #fff,2px 2px 3px #c4c4c4;cursor:pointer}
+.assessment-variant input[type="checkbox"]:not(.saCheck input):not(.viewerAgreement input):not(.ibqHintNative):not(.aiCheck input):checked::after{content:'✓';display:grid;place-items:center;width:16px;height:16px;border-radius:3px;background:#2D4CC8;color:#fff;font:700 13px/16px "Segoe UI",Arial,sans-serif}
+.assessment-variant input[type="checkbox"]:focus-visible{outline:2px solid #2D4CC8;outline-offset:2px}
+.assessment-variant .saCheckBox,.assessment-variant .ibqHintSquare{display:grid;place-items:center;width:24px;height:24px;border-radius:4px;background:#DFE6E9;box-shadow:-2px -2px 3px #fff,2px 2px 3px #c4c4c4}
+.assessment-variant .saCheck input:checked + .saCheckBox::after,.assessment-variant .ibqHintNative:checked + .ibqHintSquare::after{content:'✓';display:grid;place-items:center;width:16px;height:16px;border-radius:3px;background:#2D4CC8;color:#fff;font:700 13px/16px "Segoe UI",Arial,sans-serif}
+.assessment-variant .saCheckBox img{display:none}
+
+/* Numbered question navigation uses the existing MCQ colours and controls. */
+.assessment-variant .assessmentCreatorQuestionHeading{margin:0 0 16px;font:600 16px "Segoe UI",Arial,sans-serif;color:#374151}
+.assessment-variant .assessmentCreatorNavigator{display:flex;align-items:center;justify-content:center;gap:12px;min-width:0;margin:0 0 22px}
+.assessment-variant .assessmentCreatorNumbers{display:flex;justify-content:safe center;gap:10px;min-width:0;overflow-x:auto;padding:5px}
+.assessment-variant .assessmentCreatorArrow{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border:0;border-radius:50%;background:#DFE6E9;box-shadow:-3px -3px 5px #fff,3px 3px 5px #c4c4c4;cursor:pointer}
+.assessment-variant .assessmentCreatorArrow:disabled{opacity:.45;cursor:not-allowed}
+.assessment-variant .assessmentCreatorNumber{position:relative;display:flex;flex:0 0 62px;min-height:50px;flex-direction:column;align-items:center;justify-content:center;border:1px solid #2D4CC8;border-radius:4px;background:#DFE6E9;box-shadow:-2px -2px 3px #fff,2px 2px 4px #aeb5b9;color:#2D4CC8;cursor:pointer}
+.assessment-variant .assessmentCreatorNumber.is-active{background:#d7e0fc}.assessment-variant .assessmentCreatorNumber.is-complete{border-color:#2A7308;color:#2A7308}
+.assessment-variant .assessmentCreatorNumber small{font-size:11px;line-height:14px}
+.assessment-variant .assessmentCreatorStatus{position:absolute;right:3px;top:3px;display:grid;place-items:center;width:12px;height:12px;border-radius:50%;background:#2D4CC8;color:white;font:700 10px/1 "Segoe UI",sans-serif}
+.assessment-variant .assessmentCreatorNumber.is-complete .assessmentCreatorStatus{background:#2A7308}
+.assessment-variant .ibqApp .ibqHintNative:checked + .ibqHintSquare::after{content:'✓';display:grid;place-items:center;width:16px;height:16px;background:#2D4CC8;box-shadow:none;color:#fff;font:700 13px/16px "Segoe UI",Arial,sans-serif}
+
+/* Fixed question type fields have no dropdown action. */
+.assessment-variant button[aria-label="Question Type"] > img,
+.assessment-variant .memFigmaReadOnly > img,
+.assessment-variant .ibqStaticSelect > svg,
+.assessment-variant .ibqStaticSelect > img{display:none}
+
+/* Feedback editors use the same inset surface as the surrounding fields. */
+.assessment-variant :is(.saFeedback-0,.saFeedback-1,.saFeedback-2,.la-feedback--full,.la-feedback--partial,.la-feedback--zero,.mcqcDDFeedbackField,.dragcDDFeedbackField,.ibqRichFull,.ibqRichPartial,.ibqRichZero) :is([contenteditable="true"],textarea){background:#DFE6E9}
+.assessment-variant .saFeedback-0 :is([contenteditable="true"],textarea),.assessment-variant .la-feedback--full [contenteditable="true"],.assessment-variant #ow-correctFeedback{color:#2A7308}
+.assessment-variant .saFeedback-1 :is([contenteditable="true"],textarea),.assessment-variant .la-feedback--partial [contenteditable="true"]{color:#C05512}
+.assessment-variant .saFeedback-2 :is([contenteditable="true"],textarea),.assessment-variant .la-feedback--zero [contenteditable="true"],.assessment-variant #ow-wrongFeedback{color:#A91E2C}
+.assessment-variant :is(#ow-correctFeedback,#ow-wrongFeedback){background:#DFE6E9}
+.assessment-variant :is(.dragcDDFeedbackfeedbackFull,.mcqcDDFeedbackfeedbackFull) [contenteditable="true"]{color:#2A7308}
+.assessment-variant :is(.dragcDDFeedbackfeedbackPartial,.mcqcDDFeedbackfeedbackPartial) [contenteditable="true"]{color:#C05512}
+.assessment-variant :is(.dragcDDFeedbackfeedbackZero,.mcqcDDFeedbackfeedbackZero) [contenteditable="true"]{color:#A91E2C}

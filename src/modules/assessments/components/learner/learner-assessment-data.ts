@@ -1,4 +1,6 @@
 import type {StoredAssessment} from "@/modules/assessments/storage/assessment-storage";
+import {getActiveAssessmentId, getAssessment} from "@/modules/assessments/storage/assessment-storage";
+import {getAssessmentAdapter} from "@/modules/assessments/config/component-registry";
 
 export type LearnerStatus = "Live" | "Upcoming" | "Completed";
 export type LearnerAttempt = {
@@ -20,6 +22,8 @@ export type LearnerAssessment = {
   passingScore: string;
   negativeMarking: string;
   maxAttempts: number | null;
+  attemptLimitLabel: string;
+  attemptsUsed: number;
   attempts: LearnerAttempt[];
   startAt: Date | null;
   endAt: Date | null;
@@ -37,10 +41,11 @@ function storedJson(id: string, key: string): unknown {
   catch { return null; }
 }
 function draftFor(record: StoredAssessment): Draft {
-  const key = record.typeCode === "short-answer" ? "shortAnswerAssessmentDraft"
-    : record.typeCode === "one-word" ? "oneWordAssessmentDraft" : "mcqAssessmentDraft";
+  const key = getAssessmentAdapter(record.typeCode)?.draftKeys.details ?? "mcqAssessmentDraft";
   const saved = storedJson(record.id, key);
-  return saved && typeof saved === "object" && !Array.isArray(saved) ? saved as Draft : {};
+  const details = saved && typeof saved === "object" && !Array.isArray(saved) ? saved as Draft : {};
+  const assignment = record.typeCode === "assignment" ? storedJson(record.id, "assignmentDetailsDraft") : null;
+  return assignment && typeof assignment === "object" && !Array.isArray(assignment) ? {...details, ...assignment as Draft} : details;
 }
 function stringValue(value: unknown): string { return typeof value === "string" ? value.trim() : typeof value === "number" ? String(value) : ""; }
 function positiveNumber(value: unknown): number | null {
@@ -68,13 +73,21 @@ export function learnerAssessmentData(record: StoredAssessment, now = new Date()
   const useEnd = toggles.availableUntil !== false;
   const startAt = useStart ? dateTime(draft.availableFromDate ?? draft.availableFrom, draft.availableFromTime) : null;
   const endAt = useEnd ? dateTime(draft.availableUntilDate ?? draft.availableUntil, draft.availableUntilTime) : null;
-  const attemptsRaw = storedJson(record.id, "viewerAttempts");
+  const attemptsRaw = storedJson(record.id, record.typeCode === "fill-in-the-blanks" ? "fillViewerAttempts" : "viewerAttempts");
   const attempts = Array.isArray(attemptsRaw) ? attemptsRaw.filter(a => a && typeof a === "object") as LearnerAttempt[] : [];
   const taken = Math.max(attempts.length, Number(record.attemptCount) || 0);
-  const maxAttempts = positiveNumber(draft.attempts);
+  const adapter = getAssessmentAdapter(record.typeCode);
+  const evaluationRaw = storedJson(record.id, adapter?.draftKeys.evaluation ?? "mcqAssessmentEvaluationDraft");
+  const legacyAiRaw = adapter?.questionMode === "ai-interview" ? storedJson(record.id, "mcqAssessmentEvaluationDraft") : null;
+  const legacyAi = legacyAiRaw && typeof legacyAiRaw === "object" && !Array.isArray(legacyAiRaw) ? legacyAiRaw as Draft : {};
+  const evaluation = { ...legacyAi, ...(evaluationRaw && typeof evaluationRaw === "object" && !Array.isArray(evaluationRaw) ? evaluationRaw as Draft : {}) };
+  const dropdown = evaluation.dropdownSettings && typeof evaluation.dropdownSettings === "object" && !Array.isArray(evaluation.dropdownSettings) ? evaluation.dropdownSettings as Draft : {};
+  const limitValue = [draft.attempts, draft.allowedAttempts, draft.attemptsAllowed, draft.maxAttempts, draft.numberOfAttempts, dropdown.maximumAttempts, evaluation.maxAttempts, evaluation.maximumAttempts, evaluation.attemptsAllowed].find(value => value !== undefined && value !== null && String(value).trim() !== "");
+  const maxAttempts = positiveNumber(limitValue);
+  const attemptLimitLabel = maxAttempts !== null ? String(maxAttempts) : /^unlimited$/i.test(stringValue(limitValue)) ? "Unlimited" : "Not specified";
   const duration = positiveNumber(draft.duration)
     ?? positiveNumber(stringValue(draft.timeLimit).match(/\d+/)?.[0]);
-  const score = stringValue(draft.passingScore || draft.passingMarks);
+  const score = stringValue(draft.passingScore || draft.passingMarks || (adapter?.questionMode === "ai-interview" ? evaluation.passingScore : ""));
   const negativeMarking = draft.negativeMarking === false ? "No" : stringValue(draft.negativeMarkingValue) || "Not specified";
   const scheduled = record.status === "Scheduled";
   const completed = Boolean((endAt && now > endAt) || (maxAttempts !== null && taken >= maxAttempts));
@@ -90,7 +103,7 @@ export function learnerAssessmentData(record: StoredAssessment, now = new Date()
     totalQuestions: Number(record.questions) || positiveNumber(draft.questionCount) || 0,
     totalMarks: Number(record.marks) || positiveNumber(draft.totalMarks) || 0,
     duration, passingScore: score ? score.includes("%") ? score : `${score}%` : "Not specified",
-    negativeMarking, maxAttempts, attempts, startAt, endAt, schedule,
+    negativeMarking, maxAttempts, attemptLimitLabel, attemptsUsed:taken, attempts, startAt, endAt, schedule,
     mode: "Online" + (duration ? ", timed" : ""), canStart: status === "Live" && record.status === "Published",
   };
 }
@@ -102,4 +115,18 @@ export function learnerAssessmentsForTenant(records: StoredAssessment[], tenantI
       const order = {Live:0,Upcoming:1,Completed:2};
       return order[a.status] - order[b.status] || (a.endAt?.getTime() ?? Number.MAX_SAFE_INTEGER) - (b.endAt?.getTime() ?? Number.MAX_SAFE_INTEGER);
     });
+}
+
+export function maySubmitCurrentAttempt(): boolean {
+  if (typeof window === "undefined") return false;
+  if (new URLSearchParams(window.location.search).get("preview") === "true") return true;
+  const record = getAssessment(getActiveAssessmentId() || "");
+  if (!record || record.status !== "Published") return false;
+  const data = learnerAssessmentData(record);
+  return data.maxAttempts === null || data.attemptsUsed < data.maxAttempts;
+}
+
+export function nextAttemptCount(historyLength: number = 0): number {
+  const record = getAssessment(getActiveAssessmentId() || "");
+  return Math.max(historyLength, (Number(record?.attemptCount) || 0) + 1);
 }

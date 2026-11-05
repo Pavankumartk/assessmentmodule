@@ -1,7 +1,43 @@
 /** Visible catalogue and client-persisted metadata. Working UI adapters live in component-registry.ts. */
 export type AssessmentTypeGroup = {heading:string;items:string[]};
 export type AssessmentTypeDefinition = { code:string; label:string; category:string; implemented:boolean };
+
+// Example options until the institution's own department and programme catalogue is connected.
+export const ASSESSMENT_DEPARTMENTS = ["All Departments", "Computer Science", "Information Technology", "Artificial Intelligence and Data Science", "Electronics and Communication", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Mathematics", "Physics", "Chemistry", "Biology", "Commerce", "Business Administration", "Humanities", "English", "Health Sciences", "Other"];
+export const ASSESSMENT_PROGRAMS = ["B.Tech Computer Science", "B.Tech Information Technology", "B.Tech Artificial Intelligence and Data Science", "B.Tech Electronics and Communication", "B.Tech Electrical Engineering", "B.Tech Mechanical Engineering", "B.Tech Civil Engineering", "M.Tech", "BCA", "MCA", "B.Sc", "M.Sc", "B.Com", "M.Com", "BBA", "MBA", "BA", "MA", "Diploma", "Certificate", "Other"];
+
+// Example modules for the courses currently offered by the assessment form.
+// Replace these entries with the institution's course catalogue when connected.
+const COURSE_MODULE_TOPICS: Record<string, string[][]> = {
+ "Java Development": [["Java Fundamentals", "Java Basics", "Variables and Data Types"], ["Object-Oriented Programming", "Classes and Objects", "Inheritance and Interfaces"], ["Collections and Exceptions", "Collections", "Exception Handling"]],
+ "Python Programming": [["Programming Fundamentals", "Syntax and Variables", "Conditions and Loops"], ["Functions and Data Structures", "Functions", "Lists and Dictionaries"], ["Working with Data", "Files", "Error Handling"]],
+ "Data Structures & Algorithms": [["Data Structure Basics", "Arrays", "Linked Lists"], ["Linear Data Structures", "Stacks", "Queues"], ["Algorithms", "Searching", "Sorting"]],
+ "Machine Learning": [["Machine Learning Basics", "Core Concepts", "Preparing Data"], ["Supervised Learning", "Classification", "Regression"], ["Model Evaluation", "Evaluation Metrics", "Model Improvement"]],
+ "Cybersecurity": [["Security Fundamentals", "Security Concepts", "Common Threats"], ["Network Security", "Network Protection", "Access Controls"], ["Security Practices", "Incident Response", "Risk Management"]],
+ "Cloud Computing": [["Cloud Fundamentals", "Cloud Concepts", "Service Models"], ["Cloud Infrastructure", "Compute", "Storage and Networking"], ["Cloud Operations", "Security", "Monitoring"]],
+ "Project Management": [["Project Fundamentals", "Project Lifecycle", "Project Roles"], ["Planning", "Scope and Scheduling", "Resources and Budget"], ["Delivery", "Risk Management", "Monitoring Progress"]],
+ "Leadership & Management": [["Leadership Fundamentals", "Leadership Styles", "Team Goals"], ["Managing Teams", "Delegation", "Feedback"], ["Decision Making", "Problem Solving", "Change Management"]],
+ "Employee Onboarding": [["Welcome and Orientation", "Organization Overview", "Workplace Expectations"], ["Policies and Tools", "Company Policies", "Workplace Tools"], ["Role Preparation", "Role Responsibilities", "Getting Support"]],
+ "Workplace Safety": [["Safety Fundamentals", "Workplace Hazards", "Safety Procedures"], ["Emergency Preparedness", "Emergency Response", "Reporting Incidents"], ["Safe Work Practices", "Protective Equipment", "Risk Prevention"]],
+ "Communication Skills": [["Communication Fundamentals", "Effective Communication", "Active Listening"], ["Workplace Communication", "Written Communication", "Speaking Skills"], ["Collaboration", "Feedback", "Conflict Resolution"]],
+};
+
+export function getCourseModuleGroups(course: string): { heading: string; items: string[] }[] {
+ if (course === "Artificial Intelligence") return [
+  {heading:"MODULE 1 — Introduction to AI",items:["Unit 1.1 — What is Artificial Intelligence?","Unit 1.2 — History of AI","Unit 1.3 — AI Types & Applications","Unit 1.4 — AI Ethics & Responsible AI"]},
+  {heading:"MODULE 2 — Machine Learning Basics",items:["Unit 2.1 — ML Fundamentals","Unit 2.2 — Supervised Learning","Unit 2.3 — Unsupervised Learning","Unit 2.4 — Model Evaluation"]},
+  {heading:"MODULE 3 — AI Fundamentals",items:["Unit 3.1 — AI Concepts","Unit 3.2 — AI Problem Solving","Unit 3.3 — Search & Decision Making","Unit 3.4 — Knowledge Representation","Unit 3.5 — AI Reasoning"]},
+  {heading:"MODULE 4 — Neural Networks",items:["Unit 4.1 — Neural Network Basics","Unit 4.2 — Neurons & Activation Functions","Unit 4.3 — Training Neural Networks","Unit 4.4 — Deep Learning"]},
+  {heading:"MODULE 5 — Generative AI",items:["Unit 5.1 — Generative AI Basics","Unit 5.2 — Large Language Models","Unit 5.3 — Prompt Engineering","Unit 5.4 — AI Content Generation","Unit 5.5 — Generative AI Safety"]},
+  {heading:"MODULE 6 — AI Applications",items:["Unit 6.1 — AI in Business","Unit 6.2 — AI in Healthcare","Unit 6.3 — AI in Education","Unit 6.4 — Real-World AI Case Studies"]},
+ ];
+ return (COURSE_MODULE_TOPICS[course] || []).map(([heading,...units], index) => ({
+  heading:`MODULE ${index + 1} — ${heading}`,
+  items:units.map((unit, unitIndex) => `Unit ${index + 1}.${unitIndex + 1} — ${unit}`),
+ }));
+}
 export const DEFAULT_ASSESSMENT_TYPES: AssessmentTypeDefinition[] = [
+  {code:"ai-viva",label:"AI Viva",category:"AI-Powered Assessments",implemented:true},
   {code:"ai-interview",label:"AI Interview",category:"Practical Assessments",implemented:true},
   {code:"problem-solving-challenge",label:"Problem-Solving Challenge",category:"Practical Assessments",implemented:true},
 

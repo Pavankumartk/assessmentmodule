@@ -65,14 +65,25 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
       lastHtml.current = next;
     }
   }, [editorId, value, html]);
+  const allowedText = (text: string) => {
+    const el = editor.current;
+    if (!el || maxChars === undefined) return text;
+    const selection = window.getSelection();
+    const selected = selection?.anchorNode && selection.focusNode && el.contains(selection.anchorNode) && el.contains(selection.focusNode) ? selection.toString().length : 0;
+    const current = (el.innerText || el.textContent || "").replace(/\u00a0/g, " ").length;
+    return text.slice(0, Math.max(0, maxChars - current + selected));
+  };
   const notify = () => {
     const el = editor.current;
     if (!el) return;
     let plain = (el.innerText || el.textContent || "").replace(/\u00a0/g, " ");
     let clipped = plain;
-    if (maxChars !== undefined && clipped.length > maxChars) {
-      clipped = clipped.slice(0, maxChars);
+    if (maxChars !== undefined && clipped.length > maxChars && clipped.length > value.length) {
+      el.innerHTML = lastHtml.current ?? "";
+      const range = document.createRange(); range.selectNodeContents(el); range.collapse(false);
+      const selection = window.getSelection(); selection?.removeAllRanges(); selection?.addRange(range);
       onError(`This field allows a maximum of ${maxChars} characters.`);
+      return;
     }
     if (maxWords !== undefined) {
       const words = clipped.match(/\S+/g) ?? [];
@@ -158,7 +169,6 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
       {button("text-centerline-center-top.svg", "Bulleted list", () => command("insertUnorderedList"))}
       {button("image.svg", "Insert image", () => { setFileKind("image"); if (fileInput.current) { fileInput.current.accept="image/*"; fileInput.current.value=""; fileInput.current.click(); } })}
       {button("attachment.svg", "Attach file", () => { setFileKind("attachment"); if (fileInput.current) { fileInput.current.accept=""; fileInput.current.value=""; fileInput.current.click(); } })}
-      <div className="mcqcRichMenuRoot"><button type="button" aria-label="Special characters" title="Special characters" aria-expanded={menu === "symbols"} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={e => openFormatMenu("symbols", e.currentTarget)}><Icon name="more-vertical.svg" size={18}/></button></div>
     </div>
     {menu && typeof document !== "undefined" && createPortal(
       <div ref={floatingMenu} className={`mcqcFloatingFormatMenu ${menu === "symbols" ? "mcqcFloatingSymbols" : ""}`}
@@ -178,7 +188,8 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
       </div>, document.body)}
     <input ref={fileInput} type="file" hidden onChange={e => { const f=e.target.files?.[0]; if (f) void addFile(f); }}/>
     <div ref={editor} id={editorId} role="textbox" aria-label={placeholder} aria-multiline="true" contentEditable suppressContentEditableWarning data-placeholder={placeholder}
-      className="mcqcRichEditable" onInput={notify} onKeyUp={remember} onMouseUp={remember} onFocus={remember} onPaste={e => { e.preventDefault(); const text=e.clipboardData.getData("text/plain"); document.execCommand("insertText", false, text); notify(); }}/>
+      className="mcqcRichEditable" onInput={notify} onBeforeInput={e => { const input = e.nativeEvent as InputEvent; if (input.data && allowedText(input.data) !== input.data) e.preventDefault(); }} onKeyUp={remember} onMouseUp={remember} onFocus={remember} onPaste={e => { e.preventDefault(); const text=allowedText(e.clipboardData.getData("text/plain")); if (text) document.execCommand("insertText", false, text); notify(); }}/>
+    {maxChars !== undefined && <small className="assessmentEditorCounter" aria-live="polite">{Array.from(value).length}/{maxChars}</small>}
   </div>;
 }
 
@@ -209,8 +220,8 @@ function QuestionTypeDropdown({ value, onChange }: { value: string; onChange: (v
   }, [open]);
   const label = value === "MCQ" ? "Multiple Choice Question (MCQ)" : value === "Fill in the Blanks" ? "Fill in the Blank" : value;
   const normalized = search.trim().toLowerCase();
-  return <div className="mcqcSelectRoot mcqcTypeRoot" ref={root}>
-    <button type="button" className="mcqcSelectTrigger" aria-label="Question Type" aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? "mcqcQuestionTypeList" : undefined} onClick={() => setOpen(previous => !previous)}>
+  return <div className="mcqcSelectRoot mcqcTypeRoot" ref={root} onPointerLeave={event => { if (event.pointerType === "mouse") window.setTimeout(() => { if (root.current && !root.current.matches(":hover")) setOpen(false); }, 300); }}>
+    <button type="button" className="mcqcSelectTrigger" aria-label="Question Type" disabled aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? "mcqcQuestionTypeList" : undefined} onClick={() => setOpen(previous => !previous)}>
       <span>{label || "Select Question Type"}</span><Icon name="arrow-down-01.svg" size={20} className={open ? "mcqcRotated" : ""}/>
     </button>
     {open && <div id="mcqcQuestionTypeList" className="mcqcTypeDropdown">
@@ -237,7 +248,7 @@ function NeumoSelect({ value, options, onChange, placeholder }: { value: string;
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => { if (!open) return; const outside = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) setOpen(false); }; const escape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); }; document.addEventListener("pointerdown", outside); document.addEventListener("keydown", escape); return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); }; }, [open]);
-  return <div className="mcqcSelectRoot" ref={root}><button type="button" className="mcqcSelectTrigger" aria-expanded={open} onClick={() => setOpen(v => !v)}><span>{value || placeholder || "Select"}</span><Icon name="arrow-down-01.svg" size={20} /></button>{open && <div className="mcqcSelectList" role="radiogroup">{options.map(option => <button key={option} type="button" role="radio" aria-checked={value === option} className="mcqcSelectItem" onClick={() => { onChange(option); setOpen(false); }}>{value === option ? <SelectedCheck/> : <span className="mcqcOptionRadio"/>}<span>{option}</span></button>)}</div>}</div>;
+  return <div className="mcqcSelectRoot" ref={root} onPointerLeave={event => { if (event.pointerType === "mouse") window.setTimeout(() => { if (root.current && !root.current.matches(":hover")) setOpen(false); }, 300); }}><button type="button" className="mcqcSelectTrigger" aria-expanded={open} onClick={() => setOpen(v => !v)}><span>{value || placeholder || "Select"}</span><Icon name="arrow-down-01.svg" size={20} /></button>{open && <div className="mcqcSelectList" role="radiogroup">{options.map(option => <button key={option} type="button" role="radio" aria-checked={value === option} className="mcqcSelectItem" onClick={() => { onChange(option); setOpen(false); }}>{value === option ? <SelectedCheck/> : <span className="mcqcOptionRadio"/>}<span>{option}</span></button>)}</div>}</div>;
 }
 
 
@@ -296,7 +307,7 @@ function DragPanel({ title, icon, open, onToggle, children, subtitle }: {
   return <section className={`mcqcDDPanel ${open ? "is-open" : ""}`}>
     <button type="button" className="mcqcAnswerExpand mcqcDDPanelHead" aria-expanded={open} aria-label={`${title}: ${open ? "collapse" : "expand"}`} onClick={onToggle}>
       <span className="mcqcDDPanelHeading"><span className="mcqcDDPanelIcon"><Icon name={icon} size={19}/></span><strong>{title}</strong></span>
-      {subtitle && <small className="mcqcDDPanelCount">{subtitle}</small>}
+      {subtitle && !/^\d+\s*\/\s*\d+/.test(subtitle) && <small className="mcqcDDPanelCount">{subtitle}</small>}
       <Icon name="arrow-down-01.svg" size={20} className={open ? "mcqcRotated" : ""}/>
     </button>
     {open && <div className="mcqcDDPanelBody">{children}</div>}
@@ -327,7 +338,7 @@ const nonnegativeNumber = (value:unknown, fallback:number) => { const n=Number(v
 const pairId = () => `pair-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
 const newPair = ():MatchPair => ({id:pairId(),term:"",description:"",marks:""});
 const newQuestion = (points=1):MatchQuestion => ({
-  type:"Match the Following",text:"",points:String(points),difficulty:"Medium",category:"",bloom:"",mandatory:true,
+  type:"Match the Following",text:"",points:String(points),difficulty:"",category:"",bloom:"",mandatory:true,
   columnA:"Term",columnB:"Description",answerStyle:"Dropdown",shuffle:true,
   pairs:Array.from({length:4},newPair),extras:[],extraEnabled:true,
   grading:"Equal Marks",negative:"NA",partialCredit:true,minZero:true,allowMove:true,scoreOverrides:{},
@@ -368,8 +379,8 @@ const matchErrors = (q:MatchQuestion):string[] => {
     if(q[key].length>250) errors.push("Each feedback field is limited to 250 characters.");
   }
   if(!q.explanation.trim()) errors.push("Enter an explanation for the matching question.");
-  if(wordCount(q.explanation)>250) errors.push("Explanation must be 250 words or fewer.");
-  if(wordCount(q.hint)>250) errors.push("Hint must be 250 words or fewer.");
+  if(q.explanation.length>250) errors.push("Explanation must be 250 characters or fewer.");
+  if(q.hint.length>250) errors.push("Hint must be 250 characters or fewer.");
   if((q.showHint||q.allowHint)&&!q.hint.trim()) errors.push("Write the hint before enabling it for learners.");
   if(!(Number(q.points)>0)||!Number.isFinite(Number(q.points))) errors.push("Points must be a valid number greater than zero.");
   if(q.negative!=="NA"&&(!Number.isFinite(Number(q.negative))||Number(q.negative)<0)) errors.push("Choose valid negative marking.");
@@ -422,8 +433,8 @@ function saveContent(questions:MatchQuestion[], tags:string[],richHtml:Record<st
 function PreviewSectionIcon({ name }: {name:string}) {
   return <span className="mcqcMatchPreviewHeadIcon"><Icon name={name} size={19}/></span>;
 }
-function MatchPreview({questions,active,tags,readyAll,onBack,onEdit,onContinue}:{
-  questions:MatchQuestion[]; active:number;tags:string[];readyAll:boolean;onBack:()=>void;onEdit:(index:number)=>void;onContinue:()=>void;
+function MatchPreview({questions,active,tags,readyAll,onBack,onEdit,onContinue,saving}:{
+  questions:MatchQuestion[]; active:number;tags:string[];readyAll:boolean;onBack:()=>void;onEdit:(index:number)=>void;onContinue:()=>void;saving:boolean;
 }){
   const [filter,setFilter]=useState("All Questions");
   const [learner,setLearner]=useState(false);
@@ -452,7 +463,7 @@ function MatchPreview({questions,active,tags,readyAll,onBack,onEdit,onContinue}:
         <div className="mcqcPreviewMeta"><span>Match the Following: {q.points} Points</span><span>Status: <b className={isComplete(q)?"mcqcGreen":"mcqcOrange"}>{isComplete(q)?"Complete":"Incomplete"}</b></span><button type="button" onClick={()=>onEdit(index)}><Icon name="edit.svg" size={16}/>Edit</button></div>
         <div className="mcqcPreviewPanel"><h3>Question {index+1}</h3><p>{q.text||"Write your question."}</p></div>
         <div className="mcqcPreviewPanel mcqcMatchPreviewPairs">
-          <button type="button" className="mcqcPreviewSectionHead" aria-expanded={expanded.pairs} onClick={()=>toggle("pairs")}><span className="mcqcMatchPreviewTitle"><PreviewSectionIcon name="grip-vertical.svg"/>Matching Pairs (Each row is one correct match)</span><Icon name="arrow-down-01.svg" size={18} className={expanded.pairs?"mcqcRotated":""}/></button>
+          <button type="button" className="mcqcPreviewSectionHead" aria-expanded={expanded.pairs} onClick={()=>toggle("pairs")}><span className="mcqcMatchPreviewTitle"><PreviewSectionIcon name="adjust-position.svg"/>Matching Pairs (Each row is one correct match)</span><Icon name="arrow-down-01.svg" size={18} className={expanded.pairs?"mcqcRotated":""}/></button>
           {expanded.pairs&&<div className="mcqcMatchPreviewPairsBody"><div className="mcqcMatchPreviewHeading"><span>{q.columnA||"Term"}</span><span>{q.columnB||"Description"}{!learner?" - Correct match":""}</span>{!learner&&<span>Marks</span>}</div>
             {q.pairs.map((pair,row)=><div className="mcqcMatchPreviewRow" key={pair.id}>
               <div className="mcqcMatchPreviewTerm">{choiceLabel(row)}. {pair.term||"—"}</div>
@@ -479,7 +490,7 @@ function MatchPreview({questions,active,tags,readyAll,onBack,onEdit,onContinue}:
         </>}
 
       </article>:<p className="mcqcBuilderNotice">No questions in this filter. Return to Create Questions to add a matching question.</p>}
-      <div className="mcqcBuilderPageFooter"><button type="button" className="mcqcFooterPill" onClick={onBack}>Back to Question</button><button type="button" className="mcqcFooterPill mcqcFooterContinue" onClick={onContinue}>Save And Continue</button></div>
+      <div className="mcqcBuilderPageFooter"><button type="button" className="mcqcFooterPill" onClick={onBack}>Back to Question</button>{saving&&<span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}</div>
     </div>
   </div>;
 }
@@ -494,12 +505,15 @@ function QuestionBuilder({questions,setQuestions,mcqValues,onPassingScoreChange,
   const [tagInput,setTagInput]=useState("");
   const [addingTag,setAddingTag]=useState(false);
   const [richHtml,setRichHtml]=useState<Record<string,string>>({});
+  const [draftReady,setDraftReady]=useState(false);
   const [extraDrafts,setExtraDrafts]=useState<Record<number,string>>({});
   const extraDraft=extraDrafts[active]??"";
   const setExtraDraft=(value:string)=>setExtraDrafts(previous=>({...previous,[active]:value}));
   const [notice,setNotice]=useState("");
   const [saveSuccess,setSaveSuccess]=useState(false);
   const [isSaving,setIsSaving]=useState(false);
+  const saveTimer = useRef<number | null>(null);
+  useEffect(() => () => { if (saveTimer.current) window.clearTimeout(saveTimer.current); }, []);
   const [extraError,setExtraError]=useState("");
   const numberScrollRef=useRef<HTMLDivElement>(null);
   const question=questions[active]||newQuestion(mcqValues.marksPerQuestion);
@@ -526,8 +540,10 @@ function QuestionBuilder({questions,setQuestions,mcqValues,onPassingScoreChange,
     setRichHtml(old=>{const next={...old};delete next[`mcqc-match-extra-${active}-${question.extras.length}`];return next;});
   };
   useEffect(()=>{
-    try{const saved=JSON.parse(assessmentStorage.getItem(CONTENT_KEY)||"{}");if(saved.richHtml&&typeof saved.richHtml==="object")setRichHtml(saved.richHtml);if(Array.isArray(saved.tags))setTags(saved.tags.filter((v:unknown):v is string=>typeof v==="string"));}catch{/*Keep current values.*/}
+    try{const saved=JSON.parse(assessmentStorage.getItem(CONTENT_KEY)||"{}");if(Number.isInteger(saved.active))setActive(Math.max(0,Math.min(questions.length-1,saved.active)));if(saved.richHtml&&typeof saved.richHtml==="object")setRichHtml(saved.richHtml);if(Array.isArray(saved.tags))setTags(saved.tags.filter((v:unknown):v is string=>typeof v==="string"));}catch{/*Keep current values.*/}
+    setDraftReady(true);
   },[]);
+  useEffect(()=>{if(!draftReady)return;try{assessmentStorage.setItem(CONTENT_KEY,JSON.stringify({questions,tags,richHtml,active,questionCount:mcqValues.questionCount}));}catch{setNotice("Could not save this draft in your browser.");}},[draftReady,questions,tags,richHtml,active,mcqValues.questionCount]);
   const saveAndContinue=()=>{
     if(isSaving)return;
     const pending=Object.entries(extraDrafts).find(([index,value])=>questions[Number(index)]?.extraEnabled&&value.trim());
@@ -542,34 +558,34 @@ function QuestionBuilder({questions,setQuestions,mcqValues,onPassingScoreChange,
     setShowValidation(true);
     const firstInvalid=questions.findIndex(q=>!isComplete(q));
     if(!isReady){jump(firstInvalid<0?0:firstInvalid);setPreviewing(false);setNotice(`Question ${firstInvalid+1}: ${matchErrors(questions[firstInvalid])[0]||"Complete the required fields."}`);setSaveSuccess(false);return;}
-    try{saveContent(questions,tags,richHtml,mcqValues);setSaveSuccess(true);setNotice("");setIsSaving(true);router.push("/assessments/create/evaluation");}
+    try{saveContent(questions,tags,richHtml,mcqValues);setSaveSuccess(true);setNotice("");setIsSaving(true);saveTimer.current=window.setTimeout(()=>{setSaveSuccess(false);setIsSaving(false);router.push("/assessments/create/evaluation");},3000);}
     catch{setSaveSuccess(false);setIsSaving(false);setNotice("Could not save this draft in your browser.");}
   };
   useEffect(()=>{
     const scrollArea=document.querySelector<HTMLElement>(".mcqcScrollArea");
     if(scrollArea) scrollArea.scrollTo({top:0,behavior:"auto"});
   },[previewing]);
-  if(previewing)return <MatchPreview questions={questions} active={active} tags={tags} readyAll={isReady} onBack={()=>setPreviewing(false)} onEdit={index=>{jump(index);setPreviewing(false);setSections(s=>({...s,question:true,pairs:true}));}} onContinue={saveAndContinue}/>;
+  if(previewing)return <MatchPreview questions={questions} active={active} tags={tags} readyAll={isReady} saving={isSaving} onBack={()=>setPreviewing(false)} onEdit={index=>{jump(index);setPreviewing(false);setSections(s=>({...s,question:true,pairs:true}));}} onContinue={saveAndContinue}/>;
   return <div className="mcqcBuilder mcqcMatchBuilder">
     <div className="mcqcBuilderTop"><nav className="mcqcBuilderCrumb" aria-label="Question breadcrumb"><Link href="/assessments">Assessment</Link><Icon name="arrowrightdouble.svg"/><button type="button" onClick={onExit}>Create Assessment</button><Icon name="arrowrightdouble.svg"/><strong>Create Questions</strong></nav><div className="mcqcBuilderWelcome"><Icon name="ai-sparkles.svg" size={30}/><div><h2>Let&apos;s Get Started! Antony?</h2><p>Let&apos;s Build A Great Question.</p></div></div></div>
     <div className="mcqcBuilderGrid">
       <section className="mcqcBuilderMain">
         <div className="mcqcQuestionsHeading mcqcMatchQuestionsHeading"><div><h2>Question {active+1} of {mcqValues.questionCount}</h2><p>{mcqValues.questionCount} Question | {mcqValues.totalMarks} Marks</p></div><button type="button" className="mcqcBuilderAction mcqcTopAdd" onClick={()=>jump(active+1)} disabled={active===mcqValues.questionCount-1}><Icon name="plus.svg" size={19}/>Add</button></div>
-        <div className="mcqcNumberNavigation"><button type="button" className="mcqcRoundNav" aria-label="Scroll question numbers left" onClick={()=>scrollNumbers(-1)}><Icon name="arrowleft.svg" size={21}/></button><div className="mcqcQuestionNumbers" ref={numberScrollRef} aria-label="Question numbers">
-          {questions.slice(0,mcqValues.questionCount).map((q,i)=>{const state=i===active?"is-active":isComplete(q)?"is-complete":hasAnyData(q)?"is-partial":"";return <button type="button" key={i} className={`mcqcQuestionNumber ${state}`} aria-label={`Question ${i+1}`} aria-current={i===active?"step":undefined} onClick={()=>jump(i)}><span>{i+1}</span><small>MTF</small><i aria-hidden="true"/></button>;})}
-        </div><button type="button" className="mcqcRoundNav" aria-label="Scroll question numbers right" onClick={()=>scrollNumbers(1)}><Icon name="arrowright.svg" size={21}/></button></div>
+        <div className="mcqcNumberNavigation"><button type="button" className="mcqcRoundNav" aria-label="Previous question" disabled={active===0} onClick={()=>jump(active-1)}><Icon name="arrowleft.svg" size={21}/></button><div className="mcqcQuestionNumbers" ref={numberScrollRef} aria-label="Question numbers">
+          {questions.slice(0,mcqValues.questionCount).map((q,i)=>{const state=isComplete(q)?"is-complete":i===active?"is-active":"is-empty";return <button type="button" key={i} className={`mcqcQuestionNumber ${state}`} aria-label={`Question ${i+1}`} aria-current={i===active?"step":undefined} onClick={()=>jump(i)}><span>{i+1}</span><small>MTF</small><i aria-hidden="true"/></button>;})}
+        </div><button type="button" className="mcqcRoundNav" aria-label="Next question" disabled={active>=mcqValues.questionCount-1} onClick={()=>jump(active+1)}><Icon name="arrowright.svg" size={21}/></button></div>
         <div className="mcqcQuestionProgress"><span style={{width:`${Math.round(questionDone/Math.max(1,mcqValues.questionCount)*100)}%`}}/></div>
         <div className="mcqcQuestionForm mcqcDDQuestionForm mcqcMatchQuestionForm">
           <div className="mcqcBuilderField"><label>Question Type</label><QuestionTypeDropdown value="Match the Following" onChange={v=>{if(v!=="Match the Following")setNotice(`${v} is another assessment type. Match the Following remains selected on this page.`);else setNotice("");}}/></div>
           <DragPanel title="Question and Columns" icon="grid-view.svg" open={sections.question} onToggle={()=>toggle("question")}>
-            <div className="mcqcBuilderField mcqcWriteField"><label>Write your Question <small>{question.text.length}/250</small></label><div className="mcqcEditorSurface">{richEditor(`mcqc-match-question-${active}`,question.text,v=>update({text:v}),"Write your question...",{maxChars:250})}</div></div>
+            <div className="mcqcBuilderField mcqcWriteField"><label>Write your Question </label><div className="mcqcEditorSurface">{richEditor(`mcqc-match-question-${active}`,question.text,v=>update({text:v}),"Write your question...",{maxChars:250})}</div></div>
             <div className="mcqcMatchThree"><div className="mcqcBuilderField"><label>Column A Heading</label><NeumoSelect value={question.columnA} options={["Term","Question","Item","Concept","Name"]} onChange={v=>update({columnA:v})}/></div><div className="mcqcBuilderField"><label>Column B Heading</label><NeumoSelect value={question.columnB} options={["Description","Answer","Definition","Match","Meaning"]} onChange={v=>update({columnB:v})}/></div><div className="mcqcBuilderField"><label>Answer Style</label><NeumoSelect value={question.answerStyle} options={["Dropdown","Drag & Drop"]} onChange={v=>update({answerStyle:v})}/></div></div>
             <div className="mcqcBuilderField mcqcDDShuffleField"><label>Shuffle drag items</label><div className="mcqcDDToggleRow"><span>Shuffle drag Items</span><Switch label="Shuffle drag items" checked={question.shuffle} onChange={v=>update({shuffle:v})}/></div></div>
           </DragPanel>
-          <DragPanel title="Matching Pairs" icon="grip-vertical.svg" subtitle="Each row is one correct match" open={sections.pairs} onToggle={()=>toggle("pairs")}>
+          <DragPanel title="Matching Pairs" icon="adjust-position.svg" subtitle="Each row is one correct match" open={sections.pairs} onToggle={()=>toggle("pairs")}>
             <div className="mcqcMatchPairs">{question.pairs.map((p,i)=><div className="mcqcMatchPairRow" key={p.id}><span className="mcqcDDLetter">{choiceLabel(i)}</span><input aria-label={`Term ${choiceLabel(i)}`} placeholder={`Term ${choiceLabel(i)}`} maxLength={250} value={p.term} onChange={e=>updatePair(p.id,{term:e.target.value})}/><input aria-label={`Matching description ${choiceLabel(i)}`} placeholder="Description" maxLength={250} value={p.description} onChange={e=>updatePair(p.id,{description:e.target.value})}/><button type="button" className="mcqcIconButton mcqcDDRemoveDrag" aria-label={`Remove matching pair ${choiceLabel(i)}`} onClick={()=>removePair(p.id)} disabled={question.pairs.length<=2}><Icon name="cancel-circle.svg" size={16}/></button></div>)}</div>
             <div className="mcqcMatchPairActions"><button type="button" className="mcqcBuilderAction mcqcDDAddSmall" onClick={addPair}><Icon name="plus.svg" size={16}/><span>Add Pairs</span></button><small>{question.pairs.length} Pairs</small></div>
-            <div className="mcqcMatchExtras"><div className="mcqcDDToggleRow"><span>Extra Answers (Distractors) Optional</span><Switch checked={question.extraEnabled} onChange={v=>update({extraEnabled:v})} label="Extra answers enabled"/></div>{question.extraEnabled&&<><div className="mcqcMatchExtraEditor"><div className="mcqcMatchExtraCounter">{extraDraft.length}/250</div><div className="mcqcEditorSurface">{richEditor(`mcqc-match-extra-${active}-${question.extras.length}`,extraDraft,v=>{setExtraDraft(v);setExtraError("");},"Write an extra answer...",{maxChars:250})}<div className="mcqcMatchExtraSaveRow"><button type="button" className="mcqcMatchExtraSave" onClick={saveExtraAnswer}>Save</button></div></div></div>{extraError&&<p className="mcqcValidationError" role="alert">{extraError}</p>}<div className="mcqcMatchExtraActions"><button type="button" className="mcqcBuilderAction mcqcDDAddSmall" onClick={()=>{if(extraDraft.trim())saveExtraAnswer();else document.getElementById(`mcqc-match-extra-${active}-${question.extras.length}`)?.focus();}}><Icon name="plus.svg" size={16}/><span>Add Extra Answer</span></button></div></>}
+            <div className="mcqcMatchExtras"><div className="mcqcDDToggleRow"><span>Extra Answers (Distractors) Optional</span><Switch checked={question.extraEnabled} onChange={v=>update({extraEnabled:v})} label="Extra answers enabled"/></div>{question.extraEnabled&&<><div className="mcqcMatchExtraEditor"><div className="mcqcEditorSurface">{richEditor(`mcqc-match-extra-${active}-${question.extras.length}`,extraDraft,v=>{setExtraDraft(v);setExtraError("");},"Write an extra answer...",{maxChars:250})}<div className="mcqcMatchExtraSaveRow"><button type="button" className="mcqcMatchExtraSave" onClick={saveExtraAnswer}>Save</button></div></div></div>{extraError&&<p className="mcqcValidationError" role="alert">{extraError}</p>}<div className="mcqcMatchExtraActions"><button type="button" className="mcqcBuilderAction mcqcDDAddSmall" onClick={()=>{if(extraDraft.trim())saveExtraAnswer();else document.getElementById(`mcqc-match-extra-${active}-${question.extras.length}`)?.focus();}}><Icon name="plus.svg" size={16}/><span>Add Extra Answer</span></button></div></>}
             </div>
           </DragPanel>
           <DragPanel title="Grading Method" icon="quiz.svg" open={sections.grading} onToggle={()=>toggle("grading")}>
@@ -582,8 +598,8 @@ function QuestionBuilder({questions,setQuestions,mcqValues,onPassingScoreChange,
             <div className="mcqcBuilderField"><label>Score Simulator - Outcome per Pairs</label><div className="mcqcDDScoreTable"><div className="mcqcDDScoreHead"><span>Outcome</span><span>Marks</span></div>{Array.from({length:question.pairs.length+1},(_,i)=>question.pairs.length-i).map(n=><div className="mcqcDDScoreRow" key={n}><span>{n} correct, {question.pairs.length-n} wrong</span><NeumoSelect value={displayedMarks(scoreFor(question,n))} options={Array.from({length:Math.max(1,Math.floor(Number(question.points))+1)},(_,i)=>displayedMarks(i)).reverse()} onChange={v=>update({scoreOverrides:{...question.scoreOverrides,[String(n)]:String(Number(v))}})}/></div>)}</div></div>
           </DragPanel>
           <DragPanel title="Feedback" icon="message-circle-more.svg" subtitle={`${Math.max(question.feedbackFull.length,question.feedbackPartial.length,question.feedbackZero.length)}/250`} open={sections.feedback} onToggle={()=>toggle("feedback")}>
-            {([['Full Marks','feedbackFull','Write feedback for all pairs matched...'],['Partial Marks','feedbackPartial','Write feedback for partial marks...'],['Zero Marks','feedbackZero','Write feedback for zero marks...']] as const).map(([title,key,placeholder])=><div className={`mcqcBuilderField mcqcDDFeedbackField mcqcDDFeedback${key}`} key={key}><label>{title} <small>{question[key].length}/250</small></label><div className="mcqcEditorSurface">{richEditor(`mcqc-match-${key}-${active}`,question[key],v=>update({[key]:v}),placeholder,{maxChars:250})}</div></div>)}
-            {([['Explanation','explanation','assignments.svg','Explain the correct matching pairs...'],['Hint','hint','idea.svg','Write a hint...']] as const).map(([title,key,icon,placeholder])=><div key={key} className="mcqcDDFeedbackSubpanel"><button type="button" className="mcqcDDFeedbackSubhead" aria-expanded={feedbackSubsections[key]} onClick={()=>setFeedbackSubsections(old=>({...old,[key]:!old[key]}))}><span className="mcqcDDPanelHeading"><span className="mcqcDDPanelIcon"><Icon name={icon} size={18}/></span><strong>{title}</strong></span><small>{wordCount(question[key])}/250 words</small><Icon name="arrow-down-01.svg" size={18} className={feedbackSubsections[key]?"mcqcRotated":""}/></button>{feedbackSubsections[key]&&<div className="mcqcDDFeedbackSubbody"><div className="mcqcEditorSurface">{richEditor(`mcqc-match-${key}-${active}`,question[key],v=>update({[key]:v}),placeholder,{maxWords:250})}</div>{key==="hint"&&<div className="mcqcHintChecks"><label><input type="checkbox" checked={question.showHint} onChange={e=>update({showHint:e.target.checked})}/>Show hint before answering</label><label><input type="checkbox" checked={question.allowHint} onChange={e=>update({allowHint:e.target.checked})}/>Allow learner to request hint</label></div>}</div>}</div>)}
+            {([['Full Marks','feedbackFull','Write feedback for all pairs matched...'],['Partial Marks','feedbackPartial','Write feedback for partial marks...'],['Zero Marks','feedbackZero','Write feedback for zero marks...']] as const).map(([title,key,placeholder])=><div className={`mcqcBuilderField mcqcDDFeedbackField mcqcDDFeedback${key}`} key={key}><label>{title} </label><div className="mcqcEditorSurface">{richEditor(`mcqc-match-${key}-${active}`,question[key],v=>update({[key]:v}),placeholder,{maxChars:250})}</div></div>)}
+            {([['Explanation','explanation','assignments.svg','Explain the correct matching pairs...'],['Hint','hint','idea.svg','Write a hint...']] as const).map(([title,key,icon,placeholder])=><div key={key} className="mcqcDDFeedbackSubpanel"><button type="button" className="mcqcDDFeedbackSubhead" aria-expanded={feedbackSubsections[key]} onClick={()=>setFeedbackSubsections(old=>({...old,[key]:!old[key]}))}><span className="mcqcDDPanelHeading"><span className="mcqcDDPanelIcon"><Icon name={icon} size={18}/></span><strong>{title}</strong></span><Icon name="arrow-down-01.svg" size={18} className={feedbackSubsections[key]?"mcqcRotated":""}/></button>{feedbackSubsections[key]&&<div className="mcqcDDFeedbackSubbody"><div className="mcqcEditorSurface">{richEditor(`mcqc-match-${key}-${active}`,question[key],v=>update({[key]:v}),placeholder,{maxChars:250})}</div>{key==="hint"&&<div className="mcqcHintChecks"><label><input type="checkbox" checked={question.showHint} onChange={e=>update({showHint:e.target.checked})}/>Show hint before answering</label><label><input type="checkbox" checked={question.allowHint} onChange={e=>update({allowHint:e.target.checked})}/>Allow learner to request hint</label></div>}</div>}</div>)}
           </DragPanel>
           {showValidation&&matchErrors(question).length>0&&<div className="mcqcValidationErrors" role="alert">{matchErrors(question).map(err=><p key={err}>{err}</p>)}</div>}
         </div>
@@ -599,19 +615,21 @@ function QuestionBuilder({questions,setQuestions,mcqValues,onPassingScoreChange,
       </aside>
     </div>
     {notice&&<p className="mcqcBuilderNotice mcqcValidationError" role="status">{notice}</p>}
-    <div className="mcqcBuilderPageFooter"><button type="button" className="mcqcFooterPill" onClick={()=>{if(Object.entries(extraDrafts).some(([index,value])=>questions[Number(index)]?.extraEnabled&&value.trim())){setExtraError("Save each pending extra answer first.");setSections(old=>({...old,pairs:true}));return;}setShowValidation(true);setPreviewing(true);setNotice("");}}>Preview Questions</button><div className="mcqcSaveContinueGroup">{saveSuccess&&<span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}<button type="button" className="mcqcFooterPill mcqcFooterContinue" disabled={isSaving} onClick={saveAndContinue}>Save &amp; Continue</button></div></div>
+    <div className="mcqcBuilderPageFooter"><button type="button" className="mcqcFooterPill" disabled={isSaving} onClick={onExit}>Back</button><button type="button" className="mcqcFooterPill" onClick={()=>{if(Object.entries(extraDrafts).some(([index,value])=>questions[Number(index)]?.extraEnabled&&value.trim())){setExtraError("Save each pending extra answer first.");setSections(old=>({...old,pairs:true}));return;}setShowValidation(true);setPreviewing(true);setNotice("");}}>Preview Questions</button><div className="mcqcSaveContinueGroup">{saveSuccess&&<span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}<button type="button" className="mcqcFooterPill mcqcFooterContinue" disabled={isSaving} onClick={saveAndContinue}>Save &amp; Continue</button></div></div>
   </div>;
 }
 export default function MatchContentPage(){
   const router=useRouter();
   const [values,setValues]=useState<AssessmentValues>(DEFAULT_VALUES);
   const [questions,setQuestions]=useState<MatchQuestion[]>(()=>Array.from({length:DEFAULT_VALUES.questionCount},()=>newQuestion()));
+  const [pageReady,setPageReady]=useState(false);
   useEffect(()=>{
     const d=loadDetails();setValues(d);
     let saved:unknown[]=[];
     try{for(const key of [CONTENT_KEY,"matchTheFollowingContentDraft","matchfollowingContentDraft"]){const text=assessmentStorage.getItem(key);if(!text)continue;const parsed=JSON.parse(text);if(Array.isArray(parsed.questions)){saved=parsed.questions;break;}}}catch{/*Load a new draft.*/}
     setQuestions(Array.from({length:d.questionCount},(_,i)=>normalizeQuestion(saved[i],d.marksPerQuestion)));
+    setPageReady(true);
   },[]);
   const updatePassingScore=(score:string)=>{setValues(previous=>({...previous,passingScore:score}));try{assessmentStorage.setItem("matchFollowingPassingScore",score);}catch{/*Keep the selected value in this page.*/}};
-  return <main className="mcqcAppShell"><div className="mcqcLayout"><Sidebar/><section className="mcqcMainContent"><div className="mcqcHeader"><Header/></div><div className="mcqcScrollArea"><div className="mcqcPageContent"><QuestionBuilder questions={questions} setQuestions={setQuestions} mcqValues={values} onPassingScoreChange={updatePassingScore} onExit={()=>router.push("/assessments/create/details")}/></div></div></section></div></main>;
+  return <main className="mcqcAppShell"><div className="mcqcLayout"><Sidebar/><section className="mcqcMainContent"><div className="mcqcHeader"><Header/></div><div className="mcqcScrollArea"><div className="mcqcPageContent">{pageReady && <QuestionBuilder questions={questions} setQuestions={setQuestions} mcqValues={values} onPassingScoreChange={updatePassingScore} onExit={()=>router.push("/assessments/create/details")}/>}</div></div></section></div></main>;
 }

@@ -1,4 +1,7 @@
 "use client";
+import {maySubmitCurrentAttempt,nextAttemptCount} from "@/modules/assessments/components/learner/learner-assessment-data";
+import { creatorInstructionLines } from "@/modules/assessments/components/viewer/instruction-text";
+
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -128,22 +131,8 @@ function draftText(draft: Record<string, unknown>, keys: string[], fallback: str
 }
 
 function readInstructions(draft: Record<string, unknown>): string[] {
-  const value = draft.instructions ?? draft.descriptionInstructions;
-  if (Array.isArray(value)) {
-    const items = value.map(item => String(item ?? "").trim()).filter(Boolean);
-    if (items.length) return items;
-  }
-  if (typeof value === "string") {
-    const items = value
-      .replace(/<br\s*\/?\s*>/gi, "\n")
-      .replace(/<\/(?:p|li|div)>/gi, "\n")
-      .replace(/<[^>]*>/g, " ")
-      .split(/\r?\n/)
-      .map(item => item.replace(/\s+/g, " ").trim())
-      .filter(Boolean);
-    if (items.length) return items;
-  }
-  return DEFAULT_INSTRUCTIONS;
+  const lines = creatorInstructionLines(draft.instructions, draft.descriptionInstructions);
+  return lines.length ? lines : DEFAULT_INSTRUCTIONS;
 }
 
 export default function MemoryGameViewer({ questions: incoming, assessmentTitle, contentDraftKey = "memoryGameContentDraft" }: MemoryViewerProps) {
@@ -167,6 +156,7 @@ export default function MemoryGameViewer({ questions: incoming, assessmentTitle,
   const [submitted, setSubmitted] = useState(false);
   const [duration, setDuration] = useState(3600);
   const [secondsLeft, setSecondsLeft] = useState(3600);
+  const [expiresAt, setExpiresAt] = useState(0);
   const [peek, setPeek] = useState(false);
   const timeouts = useRef<Array<ReturnType<typeof setTimeout>>>([]);
   const [scratchNote, setScratchNote] = useState("");
@@ -219,13 +209,14 @@ export default function MemoryGameViewer({ questions: incoming, assessmentTitle,
     try {
       const savedProgress = assessmentStorage.getItem(progressKey);
       if (savedProgress && !isPreview) {
-        const data = JSON.parse(savedProgress) as { games?: Record<number, Attempt>; current?: number; flagged?: number[]; secondsLeft?: number; scratchNote?: string; assessmentStarted?: boolean };
+        const data = JSON.parse(savedProgress) as { games?: Record<number, Attempt>; current?: number; flagged?: number[]; secondsLeft?: number; expiresAt?: number; scratchNote?: string; assessmentStarted?: boolean };
         if (data.games && typeof data.games === "object") setGames(data.games);
         const gameWasStarted = Object.values(data.games || {}).some(attempt => Boolean(attempt?.started));
         setAssessmentStarted(Boolean(data.assessmentStarted || gameWasStarted));
         if (typeof data.current === "number") setCurrent(Math.min(Math.max(0, data.current), Math.max(0, chosen.length - 1)));
         if (Array.isArray(data.flagged)) setFlagged(data.flagged);
-        if (typeof data.secondsLeft === "number") setSecondsLeft(Math.max(0, data.secondsLeft));
+        if (typeof data.expiresAt === "number" && data.expiresAt > 0) { setExpiresAt(data.expiresAt); setSecondsLeft(Math.max(0,Math.ceil((data.expiresAt-Date.now())/1000))); }
+        else if (typeof data.secondsLeft === "number") setSecondsLeft(Math.max(0, data.secondsLeft));
         if (typeof data.scratchNote === "string") setScratchNote(data.scratchNote);
       }
     } catch { /* A malformed draft must not prevent a new attempt. */ }
@@ -237,17 +228,19 @@ export default function MemoryGameViewer({ questions: incoming, assessmentTitle,
     if (!ready || submitted || isPreview) return;
     try {
       assessmentStorage.setItem(progressKey, JSON.stringify({
-        current, games, flagged, secondsLeft, scratchNote, assessmentStarted,
+        current, games, flagged, secondsLeft, expiresAt, scratchNote, assessmentStarted,
       }));
     } catch { /* Storage may be disabled. */ }
-  }, [ready, submitted, isPreview, current, games, flagged, secondsLeft, scratchNote, assessmentStarted]);
+  }, [ready, submitted, isPreview, current, games, flagged, secondsLeft, expiresAt, scratchNote, assessmentStarted]);
 
   // The Figma timer starts from Start Assessment, not from the separate card-game Start button.
   useEffect(() => {
-    if (!ready || submitted || !assessmentStarted || secondsLeft <= 0) return;
-    const timer = window.setInterval(() => setSecondsLeft(s => Math.max(0, s - 1)), 1000);
+    if (!ready || submitted || !assessmentStarted) return;
+    if (!expiresAt) {setExpiresAt(Date.now()+secondsLeft*1000);return;}
+    const tick=()=>setSecondsLeft(Math.max(0,Math.ceil((expiresAt-Date.now())/1000)));tick();
+    const timer = window.setInterval(tick, 1000);
     return () => clearInterval(timer);
-  }, [ready, submitted, assessmentStarted, secondsLeft]);
+  }, [ready, submitted, assessmentStarted, expiresAt]);
   useEffect(() => {
     if (ready && secondsLeft === 0 && assessmentStarted && !submitted) setSubmitOpen(true);
   }, [ready, secondsLeft, assessmentStarted, submitted]);
@@ -290,10 +283,11 @@ export default function MemoryGameViewer({ questions: incoming, assessmentTitle,
   };
   const navigate = (to: number) => { if (to < 0 || to >= total) return; clearTimers(); updateGame(current, prev => ({ ...prev, locked: false, opened: [] })); setPeek(false); setCurrent(to); setHintVisible(false); };
   const saveToolReturn = (url: string) => {
-    try { assessmentStorage.setItem(progressKey, JSON.stringify({ current, games, flagged, secondsLeft, scratchNote, assessmentStarted })); } catch {}
+    try { assessmentStorage.setItem(progressKey, JSON.stringify({ current, games, flagged, secondsLeft, expiresAt, scratchNote, assessmentStarted })); } catch {}
     router.push(url);
   };
   const submit = () => {
+    if (!maySubmitCurrentAttempt()) { router.replace("/learner"); return; }
     const entries = questions.map((q, i) => {
       const attempt = games[i];
       const status = attempt?.result || null;
@@ -316,11 +310,11 @@ export default function MemoryGameViewer({ questions: incoming, assessmentTitle,
         } else {
           assessmentStorage.setItem("memoryGameViewerResult", JSON.stringify(data));
           assessmentStorage.setItem("viewerAssessmentResult", JSON.stringify(data));
-          const prior = JSON.parse(assessmentStorage.getItem("viewerAttempts") || "[]") as unknown;
-          const attempts = [...(Array.isArray(prior) ? prior : []), data];
-          assessmentStorage.setItem("viewerAttempts", JSON.stringify(attempts));
-          updateAssessment({ attemptCount: attempts.length });
         }
+        const prior = JSON.parse(assessmentStorage.getItem("viewerAttempts") || "[]") as unknown;
+        const attempts = [...(Array.isArray(prior) ? prior : []), data];
+        assessmentStorage.setItem("viewerAttempts", JSON.stringify(attempts));
+        updateAssessment({ attemptCount:nextAttemptCount(attempts.length) });
         assessmentStorage.removeItem(progressKey);
       } catch { /* The UI remains usable when localStorage is restricted. */ }
     }
@@ -357,7 +351,7 @@ export default function MemoryGameViewer({ questions: incoming, assessmentTitle,
     setHintVisible(false);
     try {
       if (!isPreview) assessmentStorage.setItem(progressKey, JSON.stringify({
-        current, games, flagged, secondsLeft, scratchNote, assessmentStarted: true,
+        current, games, flagged, secondsLeft, expiresAt, scratchNote, assessmentStarted: true,
       }));
     } catch { /* Keep the Start Assessment action usable when storage is restricted. */ }
   };
@@ -475,7 +469,7 @@ export default function MemoryGameViewer({ questions: incoming, assessmentTitle,
                       </button>
                     </div>
                     <div className="mgvActions">
-                      <button type="button" onClick={() => navigate(current - 1)} disabled={current === 0}>{icon("arrowleft.svg", 20)} Previous</button>
+                      {current > 0 && <button type="button" onClick={() => navigate(current - 1)} disabled={current === 0}>{icon("arrowleft.svg", 20)} Previous</button>}
                       <button type="button" onClick={checkAnswer} disabled={!game.started || game.locked || Boolean(game.result)}>Check Answer</button>
                       <button type="button" className="mgvNext" onClick={() => isLast ? setSubmitOpen(true) : navigate(current + 1)}>
                         {isLast ? "Submit" : "Next"}{icon("arrowright.svg", 20)}

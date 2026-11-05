@@ -1,4 +1,5 @@
 "use client";
+import {maySubmitCurrentAttempt,nextAttemptCount} from "@/modules/assessments/components/learner/learner-assessment-data";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
@@ -602,6 +603,7 @@ function ConnectBoard({ question, selected, disabled, onConnect }: {
 }
 
 function saveConnectDotsResult(draft:ViewerDraft, answers:Record<number,number[]>, flagged:number[], duration:number, remaining:number, retry:boolean) {
+  if (!maySubmitCurrentAttempt()) throw new Error("The allowed attempts have been used.");
   const original = (()=>{try{return JSON.parse(assessmentStorage.getItem("viewerAssessmentResult")||"{}");}catch{return {};}})();
   const questions = draft.questions.map((q,i)=>{
     const selected = answers[i] || [];
@@ -627,13 +629,13 @@ function saveConnectDotsResult(draft:ViewerDraft, answers:Record<number,number[]
     retryAttemptsUsed:retry?Number(original.retryAttemptsUsed||2):1,
     retryAttemptsAllowed:Number(original.retryAttemptsAllowed||2),retryDurationMinutes:Number(original.retryDurationMinutes||15)};
   assessmentStorage.setItem(retry?"viewerRetryResult":"viewerAssessmentResult",JSON.stringify(result));
-  if(!retry){
+  {
     const raw=assessmentStorage.getItem("viewerAttempts");let prior:unknown=[];
     try {prior=JSON.parse(raw||"[]");}catch{prior=[];}
     assessmentStorage.setItem("viewerAttempts",JSON.stringify([...(Array.isArray(prior)?prior:[]),result]));
     assessmentStorage.setItem("viewerAttemptDraft",JSON.stringify({finished:true}));
     const id=getActiveAssessmentId();const existing=id?getAssessment(id):undefined;
-    if(existing)updateAssessment({attemptCount:(existing.attemptCount||0)+1});
+    if(existing)updateAssessment({attemptCount:nextAttemptCount((Array.isArray(prior)?prior.length:0)+1)});
   }
   return result;
 }
@@ -817,8 +819,8 @@ export default function MatchFollowingViewerPage() {
                   </div>
                   {notice && <p className="viewerInlineNotice" role="status">{notice}</p>}
                   <div className="viewerExamActions">
-                    <button type="button" className="viewerExamButton" disabled={current === 0}
-                      onClick={() => goTo(current - 1)}><Icon name="arrowleft.svg" />Previous</button>
+                    {current > 0 && <button type="button" className="viewerExamButton" disabled={current === 0}
+                      onClick={() => goTo(current - 1)}><Icon name="arrowleft.svg" />Previous</button>}
                     <button type="button" className="viewerExamButton viewerNext"
                       disabled={submitted && current === total - 1}
                       onClick={() => current === total - 1 ? submit() : goTo(current + 1)}>

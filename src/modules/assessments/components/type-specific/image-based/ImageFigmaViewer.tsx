@@ -113,6 +113,7 @@ export default function ImageFigmaViewer({ mode = "image-labeling" }: { mode?: "
   const [hintOpen, setHintOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(3600);
+  const [expiresAt, setExpiresAt] = useState(0);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -124,12 +125,13 @@ export default function ImageFigmaViewer({ mode = "image-labeling" }: { mode?: "
     if (!isPreview) {
       try {
         const stored = JSON.parse(assessmentStorage.getItem(isImageViewerRetry() ? "imageBasedViewerAnswersRetry" : IMAGE_ANSWERS_KEY) || "{}") as {
-          answers?: Record<string, number | number[]>; flagged?: string[]; current?: number; visited?: string[];
+          answers?: Record<string, number | number[]>; flagged?: string[]; current?: number; visited?: string[]; expiresAt?: number;
         };
         const normalized: SavedAnswers = {};
         for (const [key, raw] of Object.entries(stored.answers || {})) {
           normalized[key] = Array.isArray(raw) ? raw.filter(n => typeof n === "number") : typeof raw === "number" ? [raw] : [];
         }
+        if (typeof stored.expiresAt === "number" && stored.expiresAt > 0) setExpiresAt(stored.expiresAt);
         setAnswers(normalized);
         setFlagged(Array.isArray(stored.flagged) ? stored.flagged : []);
         setVisited(Array.isArray(stored.visited) ? stored.visited : []);
@@ -147,16 +149,18 @@ export default function ImageFigmaViewer({ mode = "image-labeling" }: { mode?: "
   }, []);
 
   useEffect(() => {
-    if (!ready || preview) return;
-    try { assessmentStorage.setItem(isImageViewerRetry() ? "imageBasedViewerAnswersRetry" : IMAGE_ANSWERS_KEY, JSON.stringify({ answers, flagged, current, visited })); }
+    if (!ready || preview || submitted || !expiresAt) return;
+    try { assessmentStorage.setItem(isImageViewerRetry() ? "imageBasedViewerAnswersRetry" : IMAGE_ANSWERS_KEY, JSON.stringify({ answers, flagged, current, visited, expiresAt })); }
     catch { /* ignore when storage unavailable */ }
-  }, [ready, preview, answers, flagged, current, visited]);
+  }, [ready, preview, submitted, answers, flagged, current, visited, expiresAt]);
 
   useEffect(() => {
     if (!ready || preview || !questions.length) return;
-    const interval = window.setInterval(() => setSeconds(v => Math.max(0, v - 1)), 1000);
+    if (!expiresAt) {setExpiresAt(Date.now()+seconds*1000);return;}
+    const tick=()=>setSeconds(Math.max(0,Math.ceil((expiresAt-Date.now())/1000)));tick();
+    const interval = window.setInterval(tick, 1000);
     return () => window.clearInterval(interval);
-  }, [ready, preview, questions.length]);
+  }, [ready, preview, questions.length, expiresAt]);
 
   const question = questions[current];
   const choicesByQuestion = useMemo(() => Object.fromEntries(questions.map(q => [q.id, shuffledItems(q)])), [questions]);
@@ -222,6 +226,7 @@ export default function ImageFigmaViewer({ mode = "image-labeling" }: { mode?: "
         questionCount: questions.length, submittedAt: new Date().toISOString() };
       try { assessmentStorage.setItem(IMAGE_RESULT_KEY, JSON.stringify(legacy)); } catch { /* canonical saved */ }
     }
+    assessmentStorage.removeItem(isImageViewerRetry() ? "imageBasedViewerAnswersRetry" : IMAGE_ANSWERS_KEY);
     setSubmittedScore(score);
     setSubmitted(true);
     setConfirm(false);
@@ -300,7 +305,7 @@ export default function ImageFigmaViewer({ mode = "image-labeling" }: { mode?: "
             <div className="ifv-question-meta"><div className="ifv-hint"><div className="ifv-meta-title"><span className="ifv-meta-bubble">{icon("idea-01", 16)}</span><strong>Hint</strong></div>{question.hint ? <button type="button" className="ifv-hint-button" onClick={() => setHintOpen(v => !v)}>{hintOpen ? "Hide" : "Show"}</button> : <span>Not available</span>}{hintOpen && question.hint && <p className="ifv-hint-text">{stripped(question.hint)}</p>}</div><div className="ifv-bloom"><span>Bloom’s Taxonomy</span><b>{question.bloom || "Analyse"}</b></div></div>
             <button className="ifv-flag-button" type="button" onClick={() => setFlagged(prev => prev.includes(question.id) ? prev.filter(id => id !== question.id) : [...prev, question.id])}>{icon("flag", 20)} {flagged.includes(question.id) ? "Remove Flag" : "Flag for review"}</button>
             {isChecked && <div className={`ifv-check-feedback ${correctOnCheck ? "is-correct" : "is-incorrect"}`} role="status">{correctOnCheck ? "Correct answer" : !hasResponse(question, currentAnswer) ? "Please answer the question first." : "Answer checked. You can change your selection."}</div>}
-            <div className="ifv-actions"><button type="button" disabled={current === 0} onClick={() => moveTo(current - 1)}>{icon("arrowleft", 22)}Previous</button><button type="button" onClick={() => setChecked(prev => prev.includes(question.id) ? prev : [...prev, question.id])}>Check Answer</button><button type="button" onClick={() => current < questions.length - 1 ? moveTo(current + 1) : setConfirm(true)}>{current === questions.length - 1 ? "Submit" : "Next"}{icon("arrowright", 22)}</button></div>
+            <div className="ifv-actions">{current > 0 && <button type="button" disabled={current === 0} onClick={() => moveTo(current - 1)}>{icon("arrowleft", 22)}Previous</button>}<button type="button" onClick={() => setChecked(prev => prev.includes(question.id) ? prev : [...prev, question.id])}>Check Answer</button><button type="button" onClick={() => current < questions.length - 1 ? moveTo(current + 1) : setConfirm(true)}>{current === questions.length - 1 ? "Submit" : "Next"}{icon("arrowright", 22)}</button></div>
           </section>
           <aside className="ifv-side-panel" aria-label="Question navigator and tools">
             <h2>Question Navigator</h2>

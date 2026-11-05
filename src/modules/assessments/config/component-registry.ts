@@ -10,12 +10,13 @@ export interface AssessmentAdapter {
 
 /** Add another adapter here when its Creator, Viewer, evaluation and results are implemented. */
 export const ASSESSMENT_ADAPTERS: Record<string, AssessmentAdapter> = {
-  "ai-assessment": {code:"ai-assessment",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
-  "ai-interviews-and-quizes": {code:"ai-interviews-and-quizes",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
-  "ai-interviews-quizzes": {code:"ai-interviews-quizzes",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
-  "ai-interviews": {code:"ai-interviews",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
-  "ai-interview": {code:"ai-interview",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
-  "ai-interviews-and-quizzes": {code:"ai-interviews-and-quizzes",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
+  "ai-viva": {code:"ai-viva",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"aiEvaluationDraft"}},
+  "ai-assessment": {code:"ai-assessment",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"aiEvaluationDraft"}},
+  "ai-interviews-and-quizes": {code:"ai-interviews-and-quizes",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"aiEvaluationDraft"}},
+  "ai-interviews-quizzes": {code:"ai-interviews-quizzes",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"aiEvaluationDraft"}},
+  "ai-interviews": {code:"ai-interviews",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"aiEvaluationDraft"}},
+  "ai-interview": {code:"ai-interview",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"aiEvaluationDraft"}},
+  "ai-interviews-and-quizzes": {code:"ai-interviews-and-quizzes",questionMode:"ai-interview",draftKeys:{details:"mcqAssessmentDraft",content:"aiContentDraft",evaluation:"aiEvaluationDraft"}},
   "problem-solving-challenge": {code:"problem-solving-challenge",questionMode:"problem-solving",draftKeys:{details:"mcqAssessmentDraft",content:"problemSolvingContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
   "problem-solving": {code:"problem-solving",questionMode:"problem-solving",draftKeys:{details:"mcqAssessmentDraft",content:"problemSolvingContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},
   "assignment": {code:"assignment",questionMode:"assignment",draftKeys:{details:"mcqAssessmentDraft",content:"assignmentContentDraft",evaluation:"mcqAssessmentEvaluationDraft"}},

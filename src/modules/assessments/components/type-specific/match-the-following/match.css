@@ -2839,3 +2839,13 @@
 .mcqcPassingScoreMenu::-webkit-scrollbar-track{border-radius:10px;background:#DFE6E9;box-shadow:inset 2px 2px 2px #C4C4C4,inset -2px -2px 2px #FFFFFF}
 .mcqcPassingScoreMenu::-webkit-scrollbar-thumb{border:1px solid #DFE6E9;border-radius:10px;background:#A3B2BC}
 @media(max-width:600px){.mcqcAppShell .mcqcMatchBuilder .mcqcMatchAside .mcqcMatchPassingScore,.mcqcAppShell .mcqcMatchBuilder .mcqcMatchAside .mcqcPassingScoreTrigger{height:42px;min-height:42px}.mcqcPassingScoreMenu{max-width:calc(100vw - 16px)}}
+
+/* Display an empty circle until the question is complete. */
+.mcqcMatchBuilder .mcqcQuestionNumber i{opacity:1!important;width:13px;height:13px;box-sizing:border-box;border:1.5px solid currentColor;background:transparent!important;}
+.mcqcMatchBuilder .mcqcQuestionNumber.is-complete i{border-color:#2A7308;background:#2A7308!important;}
+.mcqcMatchBuilder .mcqcQuestionNumber.is-complete i::after{content:'✓';position:absolute;inset:0;color:#fff;font:700 10px/12px Arial,sans-serif;text-align:center;}
+
+.mcqcBuilder .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}
+.mcqcBuilder .mcqcNumberStatus.is-pending{background:#2D4CC8!important;border:0!important;color:#fff!important}
+
+.mcqcMatchBuilder .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}.mcqcMatchBuilder .mcqcQuestionNumber:not(.is-complete) i{background:#2D4CC8!important;border:0}

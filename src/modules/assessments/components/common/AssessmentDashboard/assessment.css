@@ -128,7 +128,7 @@
 
 .asm-assessment-name { font-weight: 600; font-size: 15px; line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.asm-assessment-meta { margin-top: 3px; font-size: 12px; white-space: nowrap; }
+.asm-assessment-meta { margin-top: 3px; font-size: 12px; white-space: normal; overflow-wrap: anywhere; }
 
 .asm-status { display: inline-flex; align-items: center; gap: 9px; font-size: 15px; line-height: 22px; font-weight: 600; white-space: nowrap; }
 
@@ -139,12 +139,13 @@
 .asm-window { display: flex; flex-direction: column; gap: 5px; white-space: nowrap; }
 
 .asm-action-cell { position: relative; text-align: center; }
+.asm-action-control { position: relative; display: inline-flex; vertical-align: middle; }
 
 .asm-action-button { border: 0; background: transparent; display: inline-flex; width: 34px; height: 34px; justify-content: center; align-items: center; border-radius: 7px; }
 
 .asm-action-button:hover { box-shadow: var(--asm-in); }
 
-.asm-action-menu { position: absolute; right: 45px; top: 15px; width: 168px; z-index: 5; padding: 7px; border-radius: 9px; box-shadow: var(--asm-out); background: var(--asm-bg); }
+.asm-action-menu { position: absolute; right: calc(100% + 8px); top: 0; width: 168px; z-index: 5; padding: 7px; border-radius: 9px; box-shadow: var(--asm-out); background: var(--asm-bg); }
 
 .asm-action-menu button { text-align: left; border: 0; background: transparent; padding: 7px; display: block; width: 100%; border-radius: 6px; font-size: 13px; color: var(--asm-ink); }
 
@@ -208,7 +209,8 @@
 
 }
 
-.assessment-page .asm-filter-options { overflow-y: auto; min-height: 0; max-height: none; padding: 6px 2px; scrollbar-width: thin; }
+.assessment-page .asm-filter-options { overflow-y: auto; overscroll-behavior-y: contain; min-height: 0; max-height: none; padding: 6px 2px; scrollbar-width: thin; }
+.assessment-page .asm-filter--type .asm-filter-group-heading { padding-right: 18px; }
 
 .assessment-page .asm-dropdown-search { flex-shrink: 0; height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-radius: 8px; background: #DFE6E9; box-shadow: inset -2px -2px 3px #FFFFFF, inset 2px 2px 4px #C4C4C4; }
 
@@ -720,19 +722,19 @@
 @media (max-width: 700px) {
   .assessment-page.asm-create-page .asm-wizard { height: 50px; max-width: none; }
   .assessment-page.asm-create-page .asm-wizard-step {
-    --asm-tip: 10px;
+    --asm-tip: clamp(8px, 3vw, 12px);
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 3px;
-    padding: 3px 2px 3px 12px;
+    padding: 3px 0;
     height: 50px;
     font-size: clamp(9px, 2.45vw, 11px);
     line-height: 13px;
     letter-spacing: 0;
     text-align: center;
   }
-  .assessment-page.asm-create-page .asm-wizard-step:first-child { padding-left: 3px; }
+  .assessment-page.asm-create-page .asm-wizard-step:first-child { padding: 3px var(--asm-tip) 3px 0; }
   .assessment-page.asm-create-page .asm-wizard-step .asm-wizard-number {
     flex: 0 0 21px;
     width: 21px;

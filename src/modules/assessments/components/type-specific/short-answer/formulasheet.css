@@ -50,3 +50,6 @@
   max-height: none !important;
   overflow: visible !important;
 }
+
+/* Formula Sheet scrolls immediately, including after client-side navigation. */
+.assessment-variant--short-answer .formulaApp{height:100dvh!important;min-height:0!important;max-height:100dvh!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain}

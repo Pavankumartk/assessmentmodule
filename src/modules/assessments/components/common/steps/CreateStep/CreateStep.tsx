@@ -14,6 +14,7 @@ export default function CreateStep({ onCancel }: { onCancel: () => void }) {
   const [popupPosition, setPopupPosition] = useState({ top: 16, left: 16 });
   const [selectedSubtype, setSelectedSubtype] = useState<Record<string, string>>({});
   const activeCardRef = useRef<HTMLButtonElement | null>(null);
+  const startingRef = useRef(false);
   const [welcomeName, setWelcomeName] = useState("there");
   const [nextNotice, setNextNotice] = useState(false);
 
@@ -102,6 +103,20 @@ export default function CreateStep({ onCancel }: { onCancel: () => void }) {
     (item.title + " " + item.subtitle).toLowerCase().includes(search.toLowerCase())
   );
 
+  const startAssessment = (label: string | undefined) => {
+    const configured = label ? findAssessmentTypeByLabel(label) : null;
+    if (!configured?.implemented || !hasAssessmentWorkflow(configured.code)) return false;
+    if (startingRef.current) return true;
+    beginAssessment(configured.code, configured.label);
+    startingRef.current = true;
+    sessionStorage.removeItem("assessment-editing-id");
+    router.push("/assessments/create/details");
+    // The selector can be restored from the router cache when the user goes back.
+    // Do not let a previous click permanently block a new selection.
+    window.setTimeout(() => { startingRef.current = false; }, 1000);
+    return true;
+  };
+
   return (
     <main className="assessment-page asm-create-page">
       <div className="asm-create-top">
@@ -164,17 +179,10 @@ export default function CreateStep({ onCancel }: { onCancel: () => void }) {
                   <button type="button" key={item} className={`asm-subtype-option ${selectedSubtype[openType] === item ? "is-selected" : ""}`}
                     role="radio" aria-checked={selectedSubtype[openType] === item}
                     onClick={() => {
-                      const configured = findAssessmentTypeByLabel(item);
-                      if (configured?.implemented && hasAssessmentWorkflow(configured.code)) {
-                        beginAssessment(configured.code, configured.label);
-                        setOpenType(null);
-                        router.push("/assessments/create/details");
-                        return;
-                      }
                       setSelectedSubtype(prev => ({ ...prev, [openType]: item }));
                       setSelected(openType);
                       setOpenType(null);
-                      setNextNotice(true);
+                      setNextNotice(!startAssessment(item));
                     }}>
                     <span className={`asm-choice-circle ${selectedSubtype[openType] === item ? "is-checked" : ""}`} aria-hidden="true" />
                     <span>{item === "Multiple Choice Question (MCQ)" ? "MCQ" : item}</span>
@@ -186,14 +194,11 @@ export default function CreateStep({ onCancel }: { onCancel: () => void }) {
         )}
       </section>
       <div className="asm-create-footer">
-        {nextNotice && <span role="status" className="asm-next-note asmValidationError">{selected ? `${selected} — ${selectedSubtype[selected] ?? ""} selected. This assessment type is not configured yet.` : "Choose an assessment type first."}</span>}
+        {nextNotice && <span role="status" className="asm-next-note asmValidationError">{selected ? "This assessment type is not available yet." : "Choose an assessment type first."}</span>}
         <button type="button" className="asm-create-footer-button" onClick={onCancel}>Cancel</button>
         <button type="button" className="asm-create-footer-button asm-create-footer-button--continue" onClick={() => {
            setOpenType(null);
-           const chosen=selectedSubtype[selected];
-           const configured=chosen?findAssessmentTypeByLabel(chosen):null;
-           if(configured?.implemented) { beginAssessment(configured.code,configured.label); router.push("/assessments/create/details"); }
-           else setNextNotice(true);
+           setNextNotice(!startAssessment(selectedSubtype[selected]));
          }}>Continue</button>
       </div>
     </main>

@@ -108,6 +108,9 @@ export default function AssessmentTextToolbarEnhancer() {
       if (current) { current.dispose(); mounted.delete(editor); }
       if (editor.closest(".assessment-more-menu,[aria-hidden=true],[hidden]") || editor.getAttribute("data-assessment-extra-tools") === "off") return;
       const toolbar = findToolbar(editor);
+      // An editor with its own toolbar already has its intended controls.
+      // Do not add another menu of duplicate formatting controls to it.
+      if (toolbar?.matches('[role="toolbar"], [class*="toolbar"], [class*="Toolbar"]')) return;
       if (toolbar?.querySelector(".assessment-more-button")) return;
       const keys = existingKeys(toolbar);
       // Older icon-only toolbars may omit titles/ARIA labels. Avoid re-adding
@@ -211,11 +214,6 @@ export default function AssessmentTextToolbarEnhancer() {
       add("super", "Superscript", "x²", () => command(editor,"superscript"));
       add("sub", "Subscript", "x₂", () => command(editor,"subscript"));
       add("clear", "Clear formatting", "Tx", () => command(editor,"removeFormat"));
-      add("symbol", "Insert special character", "Ω", () => {
-        remember(editor);
-        const text = window.prompt("Insert a symbol", "©");
-        if (text) command(editor,"insertText",text.slice(0,8));
-      });
       // Additional list style options are supplied only when not present in the original editor.
       if (!keys.has("bullets") && !keys.has("numbered")) choose("lists", "More list styles", [["","List styles"],["circle","◦ Circle"],["square","▪ Square"],["lower-alpha","a. Letters"],["upper-alpha","A. Letters"],["lower-roman","i. Roman"],["upper-roman","I. Roman"]],"", v => {
         restore(editor);

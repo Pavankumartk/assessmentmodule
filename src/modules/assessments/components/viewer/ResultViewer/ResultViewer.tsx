@@ -11,6 +11,7 @@ import Header from "../../common/header/Header";
 import "./viewresult.css";
 import {releaseForAssessment, readAssessmentResult} from "../assessment-result-bridge";
 import {getActiveAssessmentId,getAssessment} from "@/modules/assessments/storage/assessment-storage";
+import {learnerAssessmentData} from "@/modules/assessments/components/learner/learner-assessment-data";
 
 const ICONS = "/assets/viewericons/";
 
@@ -187,8 +188,10 @@ export default function ViewResultPage() {
     : "Q12 - Spent 6 minutes 20 seconds";
   const wrongQuestions = questions.filter(q => getReviewStatus(q) === "incorrect");
   const totalWrong = saved ? wrongQuestions.length : 9;
-  const retryUsed = saved?.retryAttemptsUsed ?? 1;
-  const retryAllowed = saved?.retryAttemptsAllowed ?? 2;
+  const assessmentRecord = activeId ? getAssessment(activeId) : undefined;
+  const assessmentLimits = assessmentRecord ? learnerAssessmentData(assessmentRecord) : null;
+  const retryUsed = assessmentLimits?.attemptsUsed ?? saved?.retryAttemptsUsed ?? 1;
+  const retryAllowed = assessmentLimits?.maxAttempts ?? Number.POSITIVE_INFINITY;
   const retryDuration = saved?.retryDurationMinutes ?? 15;
   const retryInstructions = [
     "Only Your incorrect questions are included",
@@ -279,7 +282,7 @@ export default function ViewResultPage() {
       setRetryNotice("No graded incorrect questions were found for retry.");
       return;
     }
-    if (retryUsed >= retryAllowed) {
+    if (assessmentRecord && !learnerAssessmentData(assessmentRecord).canStart) {
       setRetryNotice("The allowed retry attempts have been used.");
       return;
     }
@@ -350,7 +353,7 @@ export default function ViewResultPage() {
                       {!filteredReviewIndexes.length && <p className="vrDetailEmpty">No questions match this filter.</p>}
                     </div>
                   </section>
-                  {reviewQuestions[activeQuestion] ? (() => {
+                  {filteredReviewIndexes.length > 0 && filteredReviewIndexes.includes(activeQuestion) && reviewQuestions[activeQuestion] ? (() => {
                     const q = reviewQuestions[activeQuestion];
                     const status = getReviewStatus(q);
                     const isText = q.questionType === "one-word" || q.questionType === "short-answer";
@@ -374,9 +377,9 @@ export default function ViewResultPage() {
                       <div className="vrDetailInfoBox"><div className="vrDetailInfoHead"><span className="vrDetailSmallIcon vrDetailSmallIcon--yellow"><img src="/assets/viewericons/idea.svg" width={17} height={17} alt="" aria-hidden="true" /></span><strong>Hints</strong></div><p>{q.hint?.trim() || "No hint was saved for this question."}</p></div>
                       {(!release || release.showExplanation) && <div className="vrDetailInfoBox"><div className="vrDetailInfoHead"><span className="vrDetailSmallIcon vrDetailSmallIcon--purple"><img src="/assets/viewericons/filep.svg" width={17} height={17} alt="" aria-hidden="true" /></span><strong>{isText ? "Answer Review" : "Option Level Justification"}</strong></div><div className="vrDetailTableScroll"><table className="vrDetailJustification"><thead><tr><th>Option</th><th>Result</th><th>Explanation</th></tr></thead><tbody>{q.options.length ? q.options.map((option, i) => <tr key={i}><td>{String.fromCharCode(65 + i)}. {option}</td><td><span className={`vrDetailOptionPill ${i === q.correct ? "isRight" : "isWrong"}`}>{i === q.correct ? "Correct Answer" : "Wrong Answer"}</span></td><td>{q.optionExplanations?.[i] || (i === q.correct ? "Matches the correct answer" : "Does not match the correct answer")}</td></tr>) : <tr><td colSpan={3}>{isText ? (status === "pending" ? "This written response is awaiting grading." : "Written response recorded; no multiple-choice options apply.") : "No answer options saved."}</td></tr>}</tbody></table></div></div>}
                       <div className="vrDetailInfoBox"><div className="vrDetailInfoHead"><span className="vrDetailSmallIcon vrDetailSmallIcon--green"><img src="/assets/viewericons/graduation-cap.svg" width={17} height={17} alt="" aria-hidden="true" /></span><strong>Learning Insights</strong></div><div className="vrDetailTableScroll"><table className="vrDetailInsights"><thead><tr><th>Topic</th><th>Blooms Level</th><th>Skill</th><th>Difficulty</th></tr></thead><tbody><tr><td>{q.topic || "Not specified"}</td><td>{q.bloom || "Not specified"}</td><td>{q.skill || "Not specified"}</td><td>{q.difficulty || "Not specified"}</td></tr></tbody></table></div></div>
-                      <div className="vrDetailBottom"><button type="button" onClick={() => previousIndex === undefined ? backFromDetail() : setActiveQuestion(previousIndex)} className="vrDetailBack"><img src="/assets/viewericons/arrowleft.svg" width={19} height={19} alt="" aria-hidden="true" />{previousIndex === undefined ? "Back" : "Previous"}</button><button type="button" className="vrDetailNext" disabled={nextIndex === undefined} onClick={() => nextIndex !== undefined && setActiveQuestion(nextIndex)}>Next<img src="/assets/viewericons/arrowrightg.svg" width={20} height={20} alt="" aria-hidden="true" /></button></div>
+                      <div className="vrDetailBottom"><button type="button" onClick={backFromDetail} className="vrDetailBack"><img src="/assets/viewericons/arrowleft.svg" width={19} height={19} alt="" aria-hidden="true" />Back</button><div className="vrDetailPaging"><button type="button" onClick={() => previousIndex !== undefined && setActiveQuestion(previousIndex)} disabled={previousIndex === undefined} className="vrDetailPrevious"><img src="/assets/viewericons/arrowleft.svg" width={19} height={19} alt="" aria-hidden="true" />Previous</button><button type="button" className="vrDetailNext" disabled={nextIndex === undefined} onClick={() => nextIndex !== undefined && setActiveQuestion(nextIndex)}>Next<img src="/assets/viewericons/arrowrightg.svg" width={20} height={20} alt="" aria-hidden="true" /></button></div></div>
                     </section>;
-                  })() : <section className="vrDetailNoSelection">Choose a question from the navigator to view its details.</section>}
+                  })() : filteredReviewIndexes.length > 0 ? <section className="vrDetailNoSelection">Choose a question from the navigator to view its details.</section> : null}
                 </div>
               ) : isRevisionFolder ? (
                 <div className="vrRevisionPage">
@@ -418,7 +421,7 @@ export default function ViewResultPage() {
                 <h2>Your Retry</h2>
                 <div className="vrRetryMetrics">
                   <div className="vrRetryMetric vrMetricPurple"><strong>Wrong Questions</strong><span>{String(totalWrong).padStart(2,"0")}</span></div>
-                  <div className="vrRetryMetric vrMetricGreen"><strong>Retry Attempts</strong><span>{String(retryUsed).padStart(2,"0")}/{retryAllowed}</span></div>
+                  <div className="vrRetryMetric vrMetricGreen"><strong>Retry Attempts</strong><span>{String(retryUsed).padStart(2,"0")}/{Number.isFinite(retryAllowed) ? retryAllowed : "Unlimited"}</span></div>
                   <div className="vrRetryMetric vrMetricOrange"><strong>Question Remaining</strong><span>{String(totalWrong).padStart(2,"0")}</span></div>
                   <div className="vrRetryMetric vrMetricBlue"><strong>Retry Duration</strong><span>{retryDuration} Min</span></div>
                 </div>

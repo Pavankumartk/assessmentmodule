@@ -1788,3 +1788,13 @@
   .mcqcConnectBuilder .mcqcPictureFileControls{width:100%;}
   .mcqcConnectBuilder .mcqcPictureChooseFile{white-space:nowrap;}
 }
+
+/* Display an empty circle until the question is complete. */
+.mcqcBuilder .mcqcQuestionNumber i{opacity:1!important;width:13px;height:13px;box-sizing:border-box;border:1.5px solid currentColor;background:transparent!important;}
+.mcqcBuilder .mcqcQuestionNumber.is-complete i{border-color:#2A7308;background:#2A7308!important;}
+.mcqcBuilder .mcqcQuestionNumber.is-complete i::after{content:'✓';position:absolute;inset:0;color:#fff;font:700 10px/12px Arial,sans-serif;text-align:center;}
+
+.mcqcBuilder .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}
+.mcqcBuilder .mcqcNumberStatus.is-pending{background:#2D4CC8!important;border:0!important;color:#fff!important}
+
+.mcqcBuilder .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}.mcqcBuilder .mcqcQuestionNumber:not(.is-complete) i{background:#2D4CC8!important;border:0}

@@ -609,3 +609,6 @@
   box-shadow: inset -2px -2px 2px #FFFFFF, inset 2px 2px 2px #C4C4C4;
 }
 .ibqpApp :is(button,select):focus-visible { filter: brightness(.97); }
+
+.ibqpApp .mcqcSaveSuccessToast {color:#2A7308!important;border-color:#2A7308!important}
+.ibqpApp .ibqpError {color:#BC1E2D;border-color:#BC1E2D}

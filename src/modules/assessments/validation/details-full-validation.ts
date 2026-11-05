@@ -69,7 +69,7 @@ export function validateCompleteDetails(
   if (options.negativeMarking) required("negativeMarkingValue", "Negative Marking");
   required("passingScore", "Passing Score");
   if (options.gradeToPass) required("gradeToPass", "Grade to Pass");
-  required("gradeCategory", "Grade category");
+  if (options.gradeToPass) required("gradeCategory", "Grade category");
   required("roundingRule", "Rounding Rule");
   if (!errors.totalMarks && !errors.questionCount && !errors.marksPerQuestion
     && options.markingScheme === "Fixed marks per question") {

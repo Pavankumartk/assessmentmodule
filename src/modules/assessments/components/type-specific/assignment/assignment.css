@@ -568,3 +568,6 @@
   .asgn-evaluation-page .asgn-eval-table-actions{gap:10px}
 }
 @media(prefers-reduced-motion:reduce){.asgn-evaluation-page .asgn-eval-switch-list .asgn-toggle>i{transition:none}}
+.asgn-toolbar .mcqEditorFormatTrigger { display:inline-flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px; padding:2px 8px; }
+.asgn-toolbar .mcqEditorFont { min-width:110px; }
+.asgn-toolbar .mcqEditorSize { min-width:65px; }

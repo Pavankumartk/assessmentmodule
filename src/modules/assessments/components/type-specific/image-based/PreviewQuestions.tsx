@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   CheckCircle2, ChevronDown, ChevronLeft, ChevronUp,
   ClipboardList, Eye, Image as PictureIcon, Pencil, ShieldCheck,
@@ -74,6 +74,9 @@ export default function ImageBasedPreviewQuestions() {
   const [sortingAnswers,setSortingAnswers]=useState<Record<string,Record<string,string>>>({});
   const [fold, setFold] = useState<Record<Fold, boolean>>({ grading: true, feedback: true, settings: true });
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const saveTimer = useRef<number | null>(null);
+  useEffect(() => () => { if (saveTimer.current !== null) window.clearTimeout(saveTimer.current); }, []);
   const [details, setDetails] = useState({ count: 20, totalMarks: 40, title: "Image-Based Assessment", course: "", passingScore: 60 });
 
   useEffect(() => {
@@ -107,6 +110,7 @@ export default function ImageBasedPreviewQuestions() {
     router.push(CONTENT_URL);
   };
   const continueToEvaluation = () => {
+    if (saving) return;
     if (!allComplete) {
       setError(`Complete all ${details.count} Image-Based questions before continuing. Currently ${completeCount} are complete.`);
       return;
@@ -119,7 +123,8 @@ export default function ImageBasedPreviewQuestions() {
       const draft = readImageDraft();
       assessmentStorage.setItem(IMAGE_CONTENT_KEY, JSON.stringify({ ...draft, savedAt: new Date().toISOString() }));
       updateAssessment({ questions: completeCount, marks: savedMarks });
-      router.push("/assessments/create/evaluation");
+      setError(""); setSaving(true);
+      saveTimer.current = window.setTimeout(() => { setSaving(false); router.push("/assessments/create/evaluation"); }, 3000);
     } catch {
       setError("Could not save the Image-Based assessment. Return to Create Questions and save the draft.");
     }
@@ -350,7 +355,7 @@ export default function ImageBasedPreviewQuestions() {
               {error && <p className="ibqpError" role="alert">{error}</p>}
               <div className="ibqpFooter">
                 <button type="button" onClick={() => router.push(CONTENT_URL)}><ChevronLeft size={18} /> Back to Question</button>
-                <button type="button" className="ibqpContinue" onClick={continueToEvaluation}>Save And Continue</button>
+                {saving && <span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}
               </div>
             </div>
           </div>

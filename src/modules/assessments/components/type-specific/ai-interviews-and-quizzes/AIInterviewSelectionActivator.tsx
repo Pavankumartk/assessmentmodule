@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { beginAssessment } from "@/modules/assessments/storage/assessment-storage";
 
 /**
  * AI Interview ONLY: finish the existing assessment-type selection action.
@@ -40,6 +41,13 @@ export default function AIInterviewSelectionActivator() {
       // If the existing handler already navigates, this does nothing.
       pending = window.setTimeout(() => {
         if (window.location.pathname.replace(/\/$/, "") !== SELECTION_PATH) return;
+        try {
+          beginAssessment(AI_TYPE_CODE, "AI Interview");
+          sessionStorage.removeItem("assessment-editing-id");
+        } catch {
+          // Keep the selector open if a draft cannot be created.
+          return;
+        }
         router.push(`/assessments/create/details?type=${encodeURIComponent(AI_TYPE_CODE)}`);
       }, 250);
     };

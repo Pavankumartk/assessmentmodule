@@ -23,7 +23,7 @@ export default function LongAnswerSelect({value,onChange,options,placeholder="Se
   return()=>{document.removeEventListener("pointerdown",outside);document.removeEventListener("keydown",esc);};
  },[open]);
  const choice=(next:string)=>{onChange(next);setOpen(false);};
- return <div ref={root} className={`la-dropdown ${open?"is-open":""} ${className}`}>
+ return <div ref={root} className={`la-dropdown ${open?"is-open":""} ${className}`} onPointerLeave={event => { if (event.pointerType === "mouse") window.setTimeout(() => { if (root.current && !root.current.matches(":hover")) setOpen(false); }, 300); }}>
    <button type="button" className="la-dropdown-trigger" aria-label={ariaLabel||placeholder} aria-haspopup="listbox" aria-expanded={open} aria-controls={listId} onClick={()=>setOpen(v=>!v)} onKeyDown={event=>{
      if(event.key==="ArrowDown"||event.key==="ArrowUp"){
        event.preventDefault();

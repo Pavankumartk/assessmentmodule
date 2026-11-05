@@ -1,12 +1,13 @@
 "use client";
 import AIInterviewContent from "../type-specific/ai-interviews-and-quizzes/Content";
+import AIInterviewEvaluation from "../type-specific/ai-interviews-and-quizzes/Evaluation";
 import ProblemSolvingContent from "../type-specific/problem-solving/Content";
 import AssignmentEvaluationStep from "../type-specific/assignment/Evaluation";
 import AssignmentContentStep from "../type-specific/assignment/Content";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getActiveAssessmentId, getAssessment } from "../../storage/assessment-storage";
-import { hasAssessmentWorkflow } from "../../config/component-registry";
+import { assessmentStorage, getActiveAssessmentId, getAssessment } from "../../storage/assessment-storage";
+import { getAssessmentAdapter, hasAssessmentWorkflow } from "../../config/component-registry";
 import {getDemoSession} from "../../auth/demo-auth";
 import DetailsStep from "./steps/DetailsStep/DetailsStep";
 import ContentStep from "./steps/ContentStep/ContentStep";
@@ -53,12 +54,13 @@ const STEPS = {
   review: ReviewStep,
 };
 const TYPE_STEPS = {
-  "ai-assessment": {details:STEPS.details,content:AIInterviewContent,evaluation:STEPS.evaluation,review:STEPS.review},
-  "ai-interviews-and-quizes": {details:STEPS.details,content:AIInterviewContent,evaluation:STEPS.evaluation,review:STEPS.review},
-  "ai-interviews-quizzes": {details:STEPS.details,content:AIInterviewContent,evaluation:STEPS.evaluation,review:STEPS.review},
-  "ai-interviews": {details:STEPS.details,content:AIInterviewContent,evaluation:STEPS.evaluation,review:STEPS.review},
-  "ai-interview": {details:STEPS.details,content:AIInterviewContent,evaluation:STEPS.evaluation,review:STEPS.review},
-  "ai-interviews-and-quizzes": {details:STEPS.details,content:AIInterviewContent,evaluation:STEPS.evaluation,review:STEPS.review},
+  "ai-viva": {details:STEPS.details,content:AIInterviewContent,evaluation:AIInterviewEvaluation,review:STEPS.review},
+  "ai-assessment": {details:STEPS.details,content:AIInterviewContent,evaluation:AIInterviewEvaluation,review:STEPS.review},
+  "ai-interviews-and-quizes": {details:STEPS.details,content:AIInterviewContent,evaluation:AIInterviewEvaluation,review:STEPS.review},
+  "ai-interviews-quizzes": {details:STEPS.details,content:AIInterviewContent,evaluation:AIInterviewEvaluation,review:STEPS.review},
+  "ai-interviews": {details:STEPS.details,content:AIInterviewContent,evaluation:AIInterviewEvaluation,review:STEPS.review},
+  "ai-interview": {details:STEPS.details,content:AIInterviewContent,evaluation:AIInterviewEvaluation,review:STEPS.review},
+  "ai-interviews-and-quizzes": {details:STEPS.details,content:AIInterviewContent,evaluation:AIInterviewEvaluation,review:STEPS.review},
   "problem-solving-challenge": {details:STEPS.details,content:ProblemSolvingContent,evaluation:STEPS.evaluation,review:STEPS.review},
   "problem-solving": {details:STEPS.details,content:ProblemSolvingContent,evaluation:STEPS.evaluation,review:STEPS.review},
   "assignment": {details:STEPS.details,content:AssignmentContentStep,evaluation:AssignmentEvaluationStep,review:ReviewStep},
@@ -97,10 +99,15 @@ export default function AssessmentForm({ step }: { step: AssessmentFormStep }) {
     stepEvents.forEach(name => window.addEventListener(name,onWizardStep));
     return () => stepEvents.forEach(name => window.removeEventListener(name,onWizardStep));
   }, [router]);
+  useEffect(() => {
+    if (!typeCode || getAssessmentAdapter(typeCode)?.questionMode !== "ai-interview") return;
+    try { assessmentStorage.setItem("aiCreatorLastStep", step); } catch { /* Existing draft data remains available. */ }
+  }, [step, typeCode]);
   if (!typeCode) return null;
   const configured = TYPE_STEPS[typeCode as keyof typeof TYPE_STEPS];
   // Reuse the existing Figma Review page for every assessment type.
   // Keep type-specific Details, Content and Evaluation screens unchanged.
   const Screen = step === "review" ? ReviewStep : configured ? configured[step] : STEPS[step];
-  return <div className={`assessment-variant assessment-variant--${typeCode}`}>{step === "content" && typeCode !== "mcq" ? <AssessmentContentEntry typeCode={typeCode} Editor={Screen} /> : <Screen />}</div>;
+  const isAiCreator = getAssessmentAdapter(typeCode)?.questionMode === "ai-interview";
+  return <div className={`assessment-variant assessment-variant--${typeCode}${isAiCreator ? " assessment-variant--ai-creator" : ""}`}>{step === "content" ? <AssessmentContentEntry typeCode={typeCode} Editor={Screen} /> : <Screen />}</div>;
 }

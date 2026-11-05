@@ -107,7 +107,7 @@
 .assessment-variant--long-answer .mcqField{ display: flex; flex-direction: column; min-width: 0; gap: 9px; color: #374151; font-size: 15px; font-weight: 600; }
 .assessment-variant--long-answer .mcqField input, .assessment-variant--long-answer .mcqField textarea, .assessment-variant--long-answer .mcqField select{ width: 100%; min-width: 0; min-height: 44px; padding: 11px 14px; border: 0; outline: none; border-radius: 8px; background: #DFE6E9; color: #2F3547; font: 400 15px "Segoe UI","Inter",sans-serif; box-shadow: inset -3px -3px 4px #FFF, inset 3px 3px 5px #C4C4C4; }
 .assessment-variant--long-answer .mcqField textarea{ resize: vertical; }
-.assessment-variant--long-answer .mcqField input:focus-visible, .assessment-variant--long-answer .mcqField select:focus-visible, .assessment-variant--long-answer .mcqField textarea:focus-visible{ outline: 2px solid #2D4CC8; outline-offset: 2px; }
+.assessment-variant--long-answer .mcqField input:focus-visible, .assessment-variant--long-answer .mcqField select:focus-visible, .assessment-variant--long-answer .mcqField textarea:focus-visible{ outline: 2px solid #7b878d; outline-offset: 2px; }
 .assessment-variant--long-answer .mcqFooter{ display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 36px; }
 .assessment-variant--long-answer .mcqFooterRight{ display: flex; align-items: center; gap: 32px; }
 .assessment-variant--long-answer .mcqFooterButton{ min-width: 150px; height: 48px; border: 0; border-radius: 24px; padding: 0 18px; background: #DFE6E9; color: #374151; font: 700 18px "Segoe UI","Inter",sans-serif; letter-spacing: .03em; cursor: pointer; box-shadow: -4px -4px 4px #FFF, 4px 4px 8px #C4C4C4; }
@@ -456,7 +456,7 @@
 }
 .assessment-variant--long-answer .mcqNumberSteppers button:hover{ opacity: .65; }
 .assessment-variant--long-answer .mcqStepperUp{ transform: rotate(180deg); }
-.assessment-variant--long-answer .mcqNumberControl:focus-within{ outline: 2px solid #2D4CC8; outline-offset: 2px; }
+.assessment-variant--long-answer .mcqNumberControl:focus-within{ outline: none; }
 .assessment-variant--long-answer .mcqColorLetter{ font: 500 20px/1 "Segoe UI","Inter",sans-serif; }
 @media (max-width: 700px) {
   .assessment-variant--long-answer .mcqNumericField .mcqNumberControl{ height: 50px; padding-left: 14px; }
@@ -1426,7 +1426,7 @@
 @media(max-width:700px){ .assessment-variant--long-answer .mcqFooterInlineMessage{ flex:1 1 100%; order:3; margin:0; text-align:center; font-size:13px; } .assessment-variant--long-answer .mcqFooterRight{ flex:0 1 auto; } }
 
 /* Small orange-outline status pill in the existing footer, not a modal. */
-.assessment-variant--long-answer .mcqFooterSavedPill{ flex:0 1 auto; display:inline-flex; align-items:center; justify-content:center; min-height:40px; padding:7px 20px; border:1.5px solid #C05512; border-radius:24px; color:#C05512; background:#DFE6E9; font:600 14px/22px "Segoe UI","Inter",sans-serif; white-space:nowrap; box-shadow:-2px -2px 3px #FFFFFF,2px 2px 3px #C4C4C4; }
+.assessment-variant--long-answer .mcqFooterSavedPill{ flex:0 1 auto; display:inline-flex; align-items:center; justify-content:center; min-height:40px; padding:7px 20px; border:1.5px solid #2A7308; border-radius:24px; color:#2A7308; background:#DFE6E9; font:600 14px/22px "Segoe UI","Inter",sans-serif; white-space:nowrap; box-shadow:-2px -2px 3px #FFFFFF,2px 2px 3px #C4C4C4; }
 @media(max-width:700px){.assessment-variant--long-answer .mcqFooterSavedPill{flex:0 1 auto;order:3;margin:0 auto;max-width:100%;padding:7px 14px;}}
 
 /* Accommodation summary: learner's stable directory ID, five responsive columns. */
@@ -1490,6 +1490,7 @@
   gap: 12px;
   padding-inline: 14px;
 }
+.mcqPageContent .mcqAudienceFields > .mcqNotifyOnly { align-self: end; }
 .mcqPageContent .mcqNotifyOnly .mcqNotifyDescription {
   flex: 1 1 auto;
   min-width: 0;
@@ -1558,3 +1559,10 @@
   right: auto;
   width: 24px;
 }
+
+/* Category entry stays editable; Add becomes active when text is entered. */
+.mcqPageContent .mcqTagInput { flex-wrap: wrap; }
+.mcqPageContent .mcqTagInput input { flex: 1 1 110px; width: auto; min-width: 100px; background: transparent; }
+.mcqPageContent .mcqAddTag:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+
+.mcqPageContent .mcqDetailsFields button:focus-visible { outline: 2px solid #7b878d; outline-offset: 2px; }

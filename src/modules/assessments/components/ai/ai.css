@@ -774,3 +774,10 @@
     max-height:min(230px,45dvh);
   }
 }
+
+/* Warnings use red; successful saves remain green. */
+.aiPageContent .aiWarning,
+.aiPageContent .aiExtRightsWarning {color:#BC1E2D;border-color:#BC1E2D}
+.aiPageContent .aiMessage.error,
+.aiPageContent .aiExternalNotice.is-error {color:#BC1E2D}
+.aiPageContent .aiMessage:not(.error) {color:#2A7308}

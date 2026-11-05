@@ -32,6 +32,7 @@ type Settings = {
   attemptCooldown: string;
   feedbackTiming: string;
   resultAvailable: string;
+  resultReleaseDate: string;
   releaseMarks: string;
   accessControl: string;
   violationThreshold: string;
@@ -64,7 +65,7 @@ type Settings = {
 
 const initialSettings: Settings = {
   maximumAttempts: "2", scoreForResult: "Highest", attemptCooldown: "None", feedbackTiming: "After",
-  resultAvailable: "Immediately", releaseMarks: "After Grading", accessControl: "Open",
+  resultAvailable: "Immediately", resultReleaseDate: "", releaseMarks: "After Grading", accessControl: "Open",
   violationThreshold: "3", violationAction: "Warn",
   showResult: true, showScore: true, showPassFail: true, showCorrectAnswers: true,
   showAnswerFeedback: true, showExplanation: true,
@@ -99,7 +100,7 @@ function MatchingMcqDropdown({label,value,options,onSelect}:{label:string;value:
     document.addEventListener("keydown",escape);
     return()=>{document.removeEventListener("pointerdown",outside);document.removeEventListener("keydown",escape);};
   },[open]);
-  return <div className="evaluationMiniSelectWrap" ref={root}>
+  return <div className="evaluationMiniSelectWrap" ref={root} onPointerLeave={event => { if (event.pointerType === "mouse") window.setTimeout(() => { if (root.current && !root.current.matches(":hover")) setOpen(false); }, 300); }}>
     <button type="button" className="evaluationMiniSelectTrigger" aria-label={label} aria-haspopup="listbox" aria-expanded={open} onClick={()=>setOpen(v=>!v)}>
       <span>{value || `Select ${label.toLowerCase()}`}</span>
       <img src="/assets/assessmenticons/arrow-down-01.svg" alt="" width={17} height={17}/>
@@ -206,6 +207,9 @@ export default function EvaluationPage() {
   const [securityOpen, setSecurityOpen] = useState(false);
   const [settings, setSettings] = useState<Settings>(initialSettings);
   const [notice, setNotice] = useState("");
+  const [saving, setSaving] = useState(false);
+  const saveTimer = useRef<number | null>(null);
+  useEffect(() => () => { if (saveTimer.current !== null) window.clearTimeout(saveTimer.current); }, []);
   const [totalMarks, setTotalMarks] = useState(30);
   const [passingScore, setPassingScore] = useState("60%");
   const [activeFeedbackTab, setActiveFeedbackTab] = useState("");
@@ -285,6 +289,7 @@ export default function EvaluationPage() {
     } catch { setNotice("Browser storage is unavailable. Settings remain on this page."); return false; }
   }
   function continueToReview() {
+    if (saving) return;
     const percentage = Number.parseFloat(passingScore);
     if (!Number.isFinite(totalMarks) || totalMarks <= 0) {
       setNotice("Total marks must be greater than zero.");
@@ -299,7 +304,8 @@ export default function EvaluationPage() {
       return;
     }
     if (!saveDraft()) return;
-    window.dispatchEvent(new CustomEvent("one-word-step", { detail: "review" }));
+    setSaving(true);
+    saveTimer.current = window.setTimeout(() => { setSaving(false); window.dispatchEvent(new CustomEvent("one-word-step", { detail: "review" })); }, 3000);
   }
   function goToTab(section: "feedback" | "security", tab: string, target: string) {
     if (section === "feedback") { setFeedbackOpen(true); setActiveFeedbackTab(tab); }
@@ -366,6 +372,7 @@ export default function EvaluationPage() {
                   {switchRow("Show Pass/ Fail", "showPassFail")}
                   {switchRow("Show Correct Answers", "showCorrectAnswers")}
                   {selectRow("Result Available", "resultAvailable", ["Immediately", "Scheduled", "After Grading", "After Closing", "Manually", "Never"])}
+                  {settings.showResult && settings.resultAvailable === "Scheduled" && <label className="ev-setting-row"><span>Result release date and time</span><input aria-label="Result release date and time" type="datetime-local" value={settings.resultReleaseDate} onChange={event=>setSettings(old=>({...old,resultReleaseDate:event.target.value}))}/></label>}
                 </SettingCard>
                 <SettingCard id="ev-feedback" title="Answer Feedback" icon={<img src="/assets/assessmenticons/message-circle-more.svg" alt="" width={22} height={22}/>}  color="#91860C">
                   {switchRow("Show Answer Feedback", "showAnswerFeedback")}
@@ -431,7 +438,8 @@ export default function EvaluationPage() {
               <button className="ev-footer-button" type="button" onClick={() => window.dispatchEvent(new CustomEvent("one-word-step", { detail: "content" }))}>Back</button>
               <div className="ev-footer-right">
                 {notice && <span className="ev-validation-message" role="alert">{notice}</span>}
-                <button className="ev-footer-button ev-footer-continue" type="button" onClick={continueToReview}>Save &amp; Continue</button>
+                {saving && <span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}
+                <button className="ev-footer-button ev-footer-continue" type="button" disabled={saving} onClick={continueToReview}>Save &amp; Continue</button>
               </div>
             </footer>
               </div>

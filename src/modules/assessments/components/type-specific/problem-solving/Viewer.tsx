@@ -1,4 +1,7 @@
 "use client";
+import {maySubmitCurrentAttempt,nextAttemptCount} from "@/modules/assessments/components/learner/learner-assessment-data";
+import { creatorInstructionLines } from "@/modules/assessments/components/viewer/instruction-text";
+
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,7 +13,7 @@ import "@/modules/assessments/components/viewer/AssessmentViewer/viewer.css";
 import ViewerSubmitConfirm from "@/modules/assessments/components/viewer/ViewerSubmitConfirm";
 import TextSubmitSuccess from "@/modules/assessments/components/viewer/TextSubmitSuccess";
 import { releaseForAssessment } from "@/modules/assessments/components/viewer/assessment-result-bridge";
-import { assessmentStorage, getActiveAssessmentId, resultPath, viewerPath } from "@/modules/assessments/storage/assessment-storage";
+import { assessmentStorage, getActiveAssessmentId, resultPath, viewerPath, updateAssessment } from "@/modules/assessments/storage/assessment-storage";
 import { getDemoSession } from "@/modules/assessments/auth/demo-auth";
 
 // Keep the icon folder and asset filenames used by the supplied viewer.
@@ -340,8 +343,7 @@ function loadViewerDraft(): ViewerDraft {
   const maxAttempts = Math.max(1, Math.min(20, positiveNumber(details.attemptsAllowed ?? details.maxAttempts ?? details.numberOfAttempts ?? evaluation.attemptsAllowed, 2)));
   const passingRaw = firstText({...details,...evaluation}, ["passingScore", "passPercentage", "passingPercentage", "gradeToPass"], "60%");
   const passingScore = passingRaw.includes("%") ? passingRaw : `${passingRaw}%`;
-  const rawInstructions = details.instructions ?? details.instructionsToLearners ?? details.learnerInstructions ?? details.description;
-  const instructions = (Array.isArray(rawInstructions) ? rawInstructions.map(textOf) : textOf(rawInstructions).split(/[\n\r]+/)).filter(Boolean);
+  const instructions = creatorInstructionLines(details.instructions, details.descriptionInstructions, details.instructionsToLearners, details.learnerInstructions, details.description);
   const saved = questionEntries(content);
   if (!saved.length) return {title: firstText(details, ["assessmentTitle", "assessmentName", "title", "name"], "Problem Solving"),questions:[],durationSeconds:durationToSeconds(details),instructions,maxAttempts,releaseMode,releaseAt,passingScore};
   const questions = saved.flatMap((entry, index) => {
@@ -522,6 +524,7 @@ export default function ViewProblemPage() {
   }, [ready, signature, current, answers, flagged, expiresAt, submitted, attemptNumber]);
 
   const finish = useCallback((timedOut: boolean) => {
+    if (!maySubmitCurrentAttempt()) { router.replace("/learner"); return; }
     if (submitted) return;
     const allSteps = questions.flatMap((q, qi) => q.steps.map((step, si) => ({
       step,
@@ -603,6 +606,7 @@ export default function ViewProblemPage() {
       const previousAttempts = JSON.parse(assessmentStorage.getItem("viewerAttempts") || "[]");
       const attemptList: unknown[] = Array.isArray(previousAttempts) ? previousAttempts : [];
       assessmentStorage.setItem("viewerAttempts", JSON.stringify([...attemptList, sharedResult]));
+      updateAssessment({attemptCount:nextAttemptCount(attemptList.length+1)});
       assessmentStorage.setItem("viewerAttemptDraft", JSON.stringify({finished:true}));
       const history = JSON.parse(assessmentStorage.getItem(historyKey()) || "[]");
       const list: unknown[] = Array.isArray(history) ? history : [];
@@ -889,9 +893,9 @@ export default function ViewProblemPage() {
                     </div>
                     {notice && <p className="viewerInlineNotice" role="status">{notice}</p>}
                     <div className="viewerExamActions">
-                      <button type="button" className="viewerExamButton" disabled={current === 0} onClick={() => goTo(current - 1)}>
+                      {current > 0 && <button type="button" className="viewerExamButton" disabled={current === 0} onClick={() => goTo(current - 1)}>
                         <Icon name="arrowleft.svg" />Previous
-                      </button>
+                      </button>}
                       <button type="button" className="viewerExamButton viewerNext" disabled={submitted}
                         onClick={() => current === total - 1 ? submit() : goTo(current + 1)}>
                         {current === total - 1 ? "Submit" : "Next"}<Icon name="arrowrightg.svg" />

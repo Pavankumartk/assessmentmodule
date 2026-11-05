@@ -6,6 +6,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { CSSProperties, ReactNode, KeyboardEvent as ReactKeyboardEvent } from "react";
 import Sidebar from "@/modules/assessments/components/common/sidebar/page";
 import Header from "@/modules/assessments/components/common/header/Header";
+import { getAssessmentAdapter } from "@/modules/assessments/config/component-registry";
+import { assessmentStorage, getActiveAssessmentId } from "@/modules/assessments/storage/assessment-storage";
 import "./ai.css";
 
 /* Only image src icons; place the matching SVGs in public/assets/assessmenticons/. */
@@ -24,10 +26,28 @@ function Asset({ icon, size = 20, className = "" }: { icon: string; size?: numbe
 }
 
 const STORAGE = "neurolxp-ai-question-generator-draft";
-type CreatorType = "mcq" | "short-answer" | "one-word" | "fill-in-the-blanks";
+type CreatorType = string;
 const aiDraftKey = (type: CreatorType) => `${STORAGE}-${type}`;
-const typeRowKey = (type: CreatorType): TypeKey => type === "short-answer" ? "short" : type === "one-word" ? "one" : type === "fill-in-the-blanks" ? "fill" : "mcq";
-const typeLabel = (type: CreatorType) => type === "short-answer" ? "Short Answers" : type === "one-word" ? "One Word" : type === "fill-in-the-blanks" ? "Fill in the Blanks" : "MCQ";
+const TYPE_INFO: Record<string, { label: string; row: string; abbr: string }> = {
+  "single-choice": { label: "MCQ", row: "mcq", abbr: "MC" },
+  "short-answer": { label: "Short Answers", row: "short", abbr: "SA" },
+  "one-word": { label: "One Word", row: "one", abbr: "OW" },
+  "true-false": { label: "True / False", row: "tf", abbr: "TF" },
+  "fill-in-the-blanks": { label: "Fill in the Blanks", row: "fill", abbr: "FB" },
+  "long-answer": { label: "Long Answer", row: "essay", abbr: "LA" },
+  "matching": { label: "Match the Following", row: "matching", abbr: "MA" },
+  "drag-and-drop": { label: "Drag and Drop", row: "drag", abbr: "DD" },
+  "memory-game": { label: "Memory Game", row: "memory", abbr: "MG" },
+  "connect-the-dots": { label: "Connect the Dots", row: "connect", abbr: "CD" },
+  "clickable-hotspot": { label: "Clickable Hotspot", row: "hotspot", abbr: "CH" },
+  "image-based": { label: "Image Based", row: "image", abbr: "IB" },
+  "assignment": { label: "Assignment", row: "assignment", abbr: "AS" },
+  "problem-solving": { label: "Problem Solving", row: "problem", abbr: "PS" },
+  "ai-interview": { label: "AI Interview", row: "interview", abbr: "AI" },
+};
+const typeInfo = (type: CreatorType) => type === "ai-viva" ? { label: "AI Viva", row: "interview", abbr: "AI" } : TYPE_INFO[getAssessmentAdapter(type)?.questionMode || "single-choice"] || TYPE_INFO["single-choice"];
+const typeRowKey = (type: CreatorType): TypeKey => typeInfo(type).row;
+const typeLabel = (type: CreatorType) => typeInfo(type).label;
 
 const SECTIONS = [
   { id: "source", title: "Source Material", subtitle: "Choose what AI should use" },
@@ -54,8 +74,8 @@ const TYPES = [
   { key: "essay", abbr: "ES", name: "Essay", desc: "Graded Manually : A Rubric Is Drafted Too", tone: "teal", count: 1, mark: 10 },
   { key: "drag", abbr: "DD", name: "Drag and Drop in the Text", desc: "Graded Manually : A Rubric Is Drafted Too", tone: "olive", count: 0, mark: 2 },
 ] as const;
-type TypeKey = (typeof TYPES)[number]["key"];
-type TypeRow = { count: number; marks: number; configured: boolean };
+type TypeKey = string;
+type TypeRow = { count: number; marks: number | ""; configured: boolean };
 type ExternalLesson = { id: string; title: string; minutes: number; selected: boolean };
 type ExternalSource = {
   id: string; title: string; url: string; lessons: ExternalLesson[];
@@ -137,6 +157,15 @@ const DEFAULT: Settings = {
   externalPlatform: "Udemy", externalLinks: "", externalSources: SAMPLE_EXTERNAL,
   externalRead: ["Captions and Transcripts", "Slides shown on screen"], externalRights: [...EXTERNAL_RIGHTS], externalAccount: "",
 };
+// AI Interview and AI Viva drafts start without selected values or example sources.
+const emptyInterviewSettings = (): Settings => ({
+  ...DEFAULT, source:"", pageMode:"", pageRange:"", onlySource:false, saveAs:"", aiTag:false,
+  easy:0, medium:0, hard:0, thinking:[], stemLength:"", answerOptions:0, correctAnswers:"",
+  wrongRules:[], shuffleChoices:false, separateStem:false, feedbackRules:[], hintCount:"",
+  removeWrong:false, citationRules:[], rationale:false, notation:"", accessibility:[],
+  creativity:-1, qualityRules:[], reviewRules:[], recordRules:[], externalPlatform:"",
+  externalSources:[], externalRead:[], externalRights:[],
+});
 
 type ArrayField = "thinking" | "wrongRules" | "feedbackRules" | "citationRules" | "accessibility" | "qualityRules" | "reviewRules" | "recordRules";
 function Pills({ items, value, onChange, name, className = "", buttonOnly = false }: { items: readonly string[]; value: string; onChange: (v: string) => void; name: string; className?: string; buttonOnly?: boolean }) {
@@ -418,12 +447,15 @@ export default function AIPage() {
   const router = useRouter();
   const [creatorType, setCreatorType] = useState<CreatorType>("mcq");
   const [settings, setSettings] = useState<Settings>(DEFAULT);
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
   const [expanded, setExpanded] = useState<SectionId[]>([]);
   const [ready, setReady] = useState(false);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [legacySettings, setLegacySettings] = useState<Partial<Settings> | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const imageInput = useRef<HTMLInputElement>(null);
   const attachmentInput = useRef<HTMLInputElement>(null);
@@ -439,25 +471,55 @@ export default function AIPage() {
   const topicEditorRef = useRef<HTMLDivElement>(null);
   const topicImageInput = useRef<HTMLInputElement>(null);
   const topicAttachmentInput = useRef<HTMLInputElement>(null);
-  const patch = (changes: Partial<Settings>) => { setSettings(prev => ({ ...prev, ...changes })); setMessage(""); setIsError(false); };
+  const patch = (changes: Partial<Settings>) => {
+    if (isAiCreator) {
+      const next = { ...settingsRef.current, ...changes };
+      settingsRef.current = next;
+      setSettings(next);
+      try { assessmentStorage.setItem("aiGeneratorDraft", JSON.stringify(next)); }
+      catch { setIsError(true); setMessage("Could not save settings. Please check browser storage."); return; }
+    } else setSettings(prev => ({ ...prev, ...changes }));
+    setMessage(""); setIsError(false);
+  };
   const toggleSection = (section: SectionId) => setExpanded(prev => prev.includes(section) ? [] : [section]);
   const toggleList = (key: ArrayField, value: string) => patch({ [key]: settings[key].includes(value) ? settings[key].filter(item => item !== value) : [...settings[key], value] });
   const checkList = (key: ArrayField, entries: { name: string; note?: string }[]) => <div className="aiCheckboxes">{entries.map(entry => <div key={entry.name} className="aiCheckEntry"><Check checked={settings[key].includes(entry.name)} onChange={() => toggleList(key, entry.name)} note={entry.note}>{entry.name}</Check></div>)}</div>;
   const rowUpdate = (key: TypeKey, data: Partial<TypeRow>) => patch({ rows: { ...settings.rows, [key]: { ...settings.rows[key], ...data } } });
-  const totalQuestions = TYPES.reduce((sum, t) => sum + (settings.rows[t.key]?.count ?? 0), 0);
+  const selectedInfo = typeInfo(creatorType);
+  const isAiCreator = getAssessmentAdapter(creatorType)?.questionMode === "ai-interview";
+  const questionTypes: ReadonlyArray<{key: string; abbr: string; name: string; desc: string; tone: string; count: number; mark: number}> = TYPES.some(t => t.key === selectedInfo.row) ? TYPES : [...TYPES, { key: selectedInfo.row, abbr: selectedInfo.abbr, name: selectedInfo.label, desc: "Questions for this assessment", tone: "blue", count: 0, mark: 1 }];
+  const totalQuestions = questionTypes.reduce((sum, t) => sum + (settings.rows[t.key]?.count ?? 0), 0);
 
   useEffect(() => {
     try {
       const requested = new URLSearchParams(window.location.search).get("type");
-      const currentType: CreatorType = requested === "short-answer" || requested === "one-word" || requested === "fill-in-the-blanks" ? requested : "mcq";
+      const currentType: CreatorType = requested && getAssessmentAdapter(requested) ? requested : "mcq";
       setCreatorType(currentType);
       // Separate local drafts for MCQ, One Word and Short Answers. Do not mix question counts.
       const selectedKey = typeRowKey(currentType);
-      const typeDefaults: Settings = { ...DEFAULT, rows: Object.fromEntries(TYPES.map(t => [t.key, {
-        count: t.key === selectedKey ? 1 : 0, marks: t.mark, configured: false,
+      const activeTypes = TYPES.some(t => t.key === selectedKey) ? TYPES : [...TYPES, { key: selectedKey, mark: 1 }];
+      const aiCreator = getAssessmentAdapter(currentType)?.questionMode === "ai-interview";
+      const typeDefaults: Settings = { ...(aiCreator ? emptyInterviewSettings() : DEFAULT), rows: Object.fromEntries(activeTypes.map(t => [t.key, {
+        count: aiCreator ? 0 : t.key === selectedKey ? 1 : 0, marks: aiCreator ? "" : t.mark, configured: false,
       }])) as Record<TypeKey, TypeRow> };
       setSettings(typeDefaults);
-      const stored = localStorage.getItem(aiDraftKey(currentType));
+      if (aiCreator) {
+        assessmentStorage.setItem("aiCreatorLastStep", "generate");
+        const openSections = JSON.parse(assessmentStorage.getItem("aiGeneratorExpanded") || "[]");
+        if (Array.isArray(openSections)) setExpanded(openSections.filter((id): id is SectionId => SECTIONS.some(section => section.id === id)));
+      }
+      const stored = aiCreator ? assessmentStorage.getItem("aiGeneratorDraft") : localStorage.getItem(aiDraftKey(currentType));
+      const activeId = aiCreator ? getActiveAssessmentId() : null;
+      if (activeId && typeof sessionStorage !== "undefined" && sessionStorage.getItem("assessment-editing-id") === activeId && (!stored || assessmentStorage.getItem("aiGeneratorLegacyAvailable") === "1")) {
+        try {
+          const legacyRaw = localStorage.getItem(aiDraftKey(currentType));
+          const legacy = legacyRaw ? JSON.parse(legacyRaw) as Partial<Settings> : null;
+          if (legacy && typeof legacy === "object" && !Array.isArray(legacy)) {
+            setLegacySettings(legacy);
+            assessmentStorage.setItem("aiGeneratorLegacyAvailable", "1");
+          }
+        } catch { /* Keep the per-assessment draft if an older shared draft is invalid. */ }
+      }
       if (stored) {
         const result = JSON.parse(stored) as Partial<Settings>;
         if (result && typeof result === "object" && !Array.isArray(result)) {
@@ -475,7 +537,7 @@ export default function AIPage() {
             model: result.model === "Standard - Good balance of speed and quality" ? "" : (result.model ?? prev.model),
             bannedWords: result.bannedWords === "eg: Exam paper codes, Student name" ? "" : (result.bannedWords ?? prev.bannedWords),
             reviewer: result.reviewer === "DR.A.Menon ( Course Lead )" ? "" : (result.reviewer ?? prev.reviewer),
-            rows: Object.fromEntries(TYPES.map(t => [t.key, { ...prev.rows[t.key], ...(result.rows?.[t.key] || {}) }])) as Record<TypeKey, TypeRow> }));
+            rows: Object.fromEntries(activeTypes.map(t => [t.key, { ...prev.rows[t.key], ...(result.rows?.[t.key] || {}) }])) as Record<TypeKey, TypeRow> }));
         }
       }
     } catch { /* Ignore invalid stored draft. */ }
@@ -483,8 +545,15 @@ export default function AIPage() {
   }, []);
   useEffect(() => {
     if (!ready) return;
-    try { localStorage.setItem(aiDraftKey(creatorType), JSON.stringify(settings)); } catch { /* Explicit Save reports storage issues. */ }
-  }, [settings, ready]);
+    try {
+      if (isAiCreator) assessmentStorage.setItem("aiGeneratorDraft", JSON.stringify(settings));
+      else localStorage.setItem(aiDraftKey(creatorType), JSON.stringify(settings));
+    } catch { /* Explicit Save reports storage issues. */ }
+  }, [settings, ready, creatorType, isAiCreator]);
+  useEffect(() => {
+    if (!ready || !isAiCreator) return;
+    try { assessmentStorage.setItem("aiGeneratorExpanded", JSON.stringify(expanded)); } catch { /* Settings can still be saved. */ }
+  }, [expanded, ready, isAiCreator]);
   useEffect(() => {
     const element = editorRef.current;
     if (element && document.activeElement !== element && element.innerHTML !== settings.learningOutcomes) element.innerHTML = settings.learningOutcomes;
@@ -509,10 +578,22 @@ export default function AIPage() {
     }
   }, [settings.topic, settings.source, expanded]);
   const save = () => {
-    try { localStorage.setItem(aiDraftKey(creatorType), JSON.stringify(settings)); setIsError(false); setMessage("Settings saved in this browser."); return true; }
+    try { if (isAiCreator) assessmentStorage.setItem("aiGeneratorDraft", JSON.stringify(settings)); else localStorage.setItem(aiDraftKey(creatorType), JSON.stringify(settings)); setIsError(false); setMessage("Settings saved in this browser."); return true; }
     catch { setIsError(true); setMessage("Could not save settings. Please check browser storage."); return false; }
   };
+  const restoreLegacySettings = () => {
+    if (!legacySettings) return;
+    const rows = Object.fromEntries(questionTypes.map(item => [item.key, { ...settingsRef.current.rows[item.key], ...(legacySettings.rows?.[item.key] || {}) }])) as Record<TypeKey, TypeRow>;
+    const next = { ...settingsRef.current, ...legacySettings, rows };
+    try {
+      assessmentStorage.setItem("aiGeneratorDraft", JSON.stringify(next));
+      assessmentStorage.removeItem("aiGeneratorLegacyAvailable");
+      settingsRef.current = next; setSettings(next); setLegacySettings(null); setIsError(false);
+      setMessage("Earlier shared settings restored. Check that they belong to this assessment.");
+    } catch { setIsError(true); setMessage("Could not restore settings. Please check browser storage."); }
+  };
   const generate = () => {
+    if (isAiCreator && !settings.source) { setExpanded(["source"]); setMessage("Choose source material before generating questions."); setIsError(true); return; }
     if (settings.source === "Uploaded File" && !file) { setExpanded(["source"]); setMessage("Upload a file before generating questions."); setIsError(true); return; }
     if ((settings.source === "Pasted Text" && !settings.sourceText.replace(/<[^>]*>/g, "").replace(/&nbsp;/gi, " ").trim()) || (settings.source === "Topic or Syllabus" && !settings.topic.replace(/<[^>]*>/g, "").replace(/&nbsp;/gi, " ").trim()) || (settings.source === "Web Page" && !settings.url.trim())) {
       setExpanded(["source"]); setMessage("Enter source material before generating questions."); setIsError(true); return;
@@ -522,7 +603,7 @@ export default function AIPage() {
     }
     if (settings.source === "External Content" && !(settings.externalSources ?? []).some(s => !s.demo && s.lessons.some(l => l.selected))) { setExpanded(["source"]); setMessage("Add a real source URL and select its sections. Demo cards are only layout previews."); setIsError(true); return; }
     if (!totalQuestions) { setExpanded(["quantity"]); setMessage("Choose at least one question."); setIsError(true); return; }
-    if (save()) setMessage("Configuration saved. AI question generation requires connecting an AI service.");
+    if (save()) { setIsError(true); setMessage("Configuration saved. AI question generation requires connecting an AI service."); }
   };
   const upload = (selected?: File) => {
     if (!selected) return;
@@ -671,10 +752,10 @@ export default function AIPage() {
       </div>;
       case "quantity": return <div className="aiFlow aiQuantity">
         <div className="aiTotals">{totalQuestions} Questions</div>
-        <div className="aiTableScroll"><table className="aiTypeTable"><thead><tr><th>Type</th><th>How Many</th><th>Default Mark</th><th>Options</th></tr></thead><tbody>{TYPES.map(t => {
+        <div className="aiTableScroll"><table className="aiTypeTable"><thead><tr><th>Type</th><th>How Many</th><th>Default Mark</th><th>Options</th></tr></thead><tbody>{questionTypes.map(t => {
           const current = settings.rows[t.key]; return <tr key={t.key}><td><div className="aiTypeItem"><span className={`aiTypeBadge aiTone-${t.tone}`}>{t.abbr}</span><span><strong>{t.name}</strong><small>{t.desc}</small></span></div></td>
             <td><div className="aiCounter"><button type="button" aria-label={`Decrease ${t.name}`} disabled={current.count === 0} onClick={() => rowUpdate(t.key, { count: Math.max(0, current.count - 1) })}>−</button><output>{current.count}</output><button type="button" aria-label={`Increase ${t.name}`} onClick={() => rowUpdate(t.key, { count: Math.min(100, current.count + 1) })}>+</button></div></td>
-            <td><input className="aiMarks" aria-label={`${t.name} marks per question`} type="text" inputMode="numeric" pattern="[0-9]*" value={String(current.marks).padStart(2, "0")} onChange={e => { if (/^\d{0,3}$/.test(e.target.value)) rowUpdate(t.key, { marks: Math.min(100, Math.max(0, Number(e.target.value) || 0)) }); }}/></td>
+            <td><input className="aiMarks" aria-label={`${t.name} marks per question`} type="text" inputMode="numeric" pattern="[0-9]*" value={isAiCreator && current.marks === "" ? "" : String(current.marks).padStart(2, "0")} onChange={e => { if (/^\d{0,3}$/.test(e.target.value)) rowUpdate(t.key, { marks: isAiCreator && e.target.value === "" ? "" : Math.min(100, Math.max(0, Number(e.target.value) || 0)) }); }}/></td>
             <td><button type="button" className={`aiConfigure ${current.configured ? "configured" : ""}`} aria-pressed={current.configured} onClick={() => rowUpdate(t.key, { configured: !current.configured })}><span>Configure</span></button></td></tr>;
         })}</tbody></table></div>
       </div>;
@@ -689,7 +770,7 @@ export default function AIPage() {
           <Group label="Stem Length"><div className="aiInset aiStemBox"><Pills name="Stem Length" items={["Short", "Medium", "Scenario - Based"]} value={settings.stemLength} onChange={v => patch({ stemLength: v })}/></div></Group></div>
       </div>;
       case "multipleChoice": return <div className="aiFlow">
-        <Dropdown label="Answers Per Question" value={String(settings.answerOptions)} options={["2", "3", "4", "5", "6"]} onChange={v => patch({ answerOptions: Number(v) })}/>
+        <Dropdown label="Answers Per Question" value={isAiCreator && !settings.answerOptions ? "" : String(settings.answerOptions)} options={["2", "3", "4", "5", "6"]} onChange={v => patch({ answerOptions: Number(v) })}/>
         <Group label="Correct Answers"><Pills buttonOnly name="Correct Answers" items={["One only", "One or More", "Mixed"]} value={settings.correctAnswers} onChange={v => patch({ correctAnswers: v })}/></Group>
         <Group label="Wrong Answers">{checkList("wrongRules", [
           { name: "Base them on common misconceptions" }, { name: "Keep all options about the same length" }, { name: "Allow ‘All of the above’ and ‘None of the above’" }, { name: "Avoid absolutes such as always, never, only" },
@@ -717,7 +798,7 @@ export default function AIPage() {
       </div>;
       case "quality": return <div className="aiFlow">
         <NeumoDropdown label="Model" value={settings.model} options={["Standard - Good balance of speed and quality", "Advanced - Higher quality (if supported)", "Fast - Lower latency"]} onChange={v => patch({ model: v })} hint="Set by your site administrator. Advanced is available only if supported."/>
-        <Group label="Variety"><div className="aiVarietyDropdownWrap"><NeumoDropdown label="" ariaLabel="Variety preset" value={settings.creativity <= 33 ? "Focused" : settings.creativity < 67 ? "Balanced" : "Scenario-Based"} options={["Focused", "Balanced", "Scenario-Based"]} onChange={value => patch({ creativity: value === "Focused" ? 20 : value === "Balanced" ? 50 : 85 })}/></div><div className="aiInset aiVariety"><span>{settings.creativity <= 33 ? "Focused" : settings.creativity < 67 ? "Balanced" : "Scenario-Based"}</span><Range label="Variety" value={settings.creativity} color="#247c12" onChange={v => patch({ creativity: v })}/></div><p className="aiSubHint"><strong>Low:</strong> source-focused. <strong>High:</strong> scenario-focused.</p></Group>
+        <Group label="Variety"><div className="aiVarietyDropdownWrap"><NeumoDropdown label="" ariaLabel="Variety preset" value={isAiCreator && settings.creativity < 0 ? "" : settings.creativity <= 33 ? "Focused" : settings.creativity < 67 ? "Balanced" : "Scenario-Based"} options={["Focused", "Balanced", "Scenario-Based"]} onChange={value => patch({ creativity: value === "Focused" ? 20 : value === "Balanced" ? 50 : 85 })}/></div><div className="aiInset aiVariety"><span>{isAiCreator && settings.creativity < 0 ? "Select variety" : settings.creativity <= 33 ? "Focused" : settings.creativity < 67 ? "Balanced" : "Scenario-Based"}</span><Range label="Variety" value={isAiCreator ? Math.max(0,settings.creativity) : settings.creativity} color="#247c12" onChange={v => patch({ creativity: v })}/></div><p className="aiSubHint"><strong>Low:</strong> source-focused. <strong>High:</strong> scenario-focused.</p></Group>
         <Group label="Checks before review">{checkList("qualityRules", [
           { name: "Flag near-duplicates of questions already in the bank" }, { name: "Flag questions whose answer isn't supported by the source" }, { name: "Flag two options that mean the same thing" }, { name: "Flag questions that need outside knowledge" },
         ])}</Group>
@@ -732,10 +813,11 @@ export default function AIPage() {
   };
 
   return <main className="superAdminPage institutionAdminPage aiAppShell"><div className="dashboardLayout aiWorkspace"><Sidebar /><section className="mainContent aiMainContent"><div className="aiHeaderSlot"><Header /></div><div className="institutionScrollArea aiScrollArea"><div className="pageContent institutionPageContent aiPageContent">
-    <div className="aiTop"><div className="aiTopLeft"><nav className="aiBreadcrumb" aria-label="Breadcrumb"><Link href="/assessments">Assessment</Link><Asset icon={ICON.breadcrumb}/><Link href="/assessments/create/content">Create Assessment</Link><Asset icon={ICON.breadcrumb}/><strong>Generate With AI</strong></nav><div className="aiIntro"><h2>Generate Questions With AI — {typeLabel(creatorType)}</h2><p>AI drafts questions. Review and approve before adding to the bank.</p></div></div><div className="aiIdentity"><Asset icon={ICON.ai} size={36}/><div><h1>Generate With AI</h1><p>Create Questions Faster</p></div></div></div>
+    <div className="aiTop"><div className="aiTopLeft"><nav className="aiBreadcrumb" aria-label="Breadcrumb"><Link href="/assessments">Assessment</Link><Asset icon={ICON.breadcrumb}/><Link href="/assessments/create/content">Create Assessment</Link><Asset icon={ICON.breadcrumb}/><strong>Generate With AI</strong></nav><div className="aiIntro"><h2>Generate Questions With AI — {typeLabel(creatorType)}</h2><p>Configure question generation settings for this assessment.</p></div></div><div className="aiIdentity"><Asset icon={ICON.ai} size={36}/><div><h1>Generate With AI</h1><p>Create Questions Faster</p></div></div></div>
     <section className="aiPanel" aria-label="AI generation settings"><div className="aiWarning" role="note"><span className="aiWarningCircle"><Asset icon={ICON.alert} size={19}/></span><p>AI-Generated Questions Are Drafts. Review For Accuracy And Duplicates Before Publishing.</p></div>
+      {isAiCreator && legacySettings && <div className="aiWarning aiLegacySettings" role="note" style={{display:"flex",flexWrap:"wrap"}}><p>Older generator settings were shared across AI assessments. Check that they belong to this assessment before restoring them. Uploaded files must be selected again.</p><button type="button" className="aiAction" onClick={restoreLegacySettings}>Restore earlier settings</button></div>}
       <div className="aiAccordionList">{SECTIONS.map((item, index) => { const open = expanded.includes(item.id); return <section key={item.id} className={`aiAccordion ${open ? "open" : ""}`}><h2><button className="aiAccordionToggle" type="button" aria-expanded={open} aria-controls={`ai-section-${item.id}`} id={`ai-label-${item.id}`} onClick={() => toggleSection(item.id)}><span className="aiAccordionNumber">{index + 1}</span><span className="aiAccordionText"><strong>{item.title}</strong><small>{item.subtitle}</small></span><Asset icon={ICON.down} size={28} className="aiAccordionArrow"/></button></h2>{open && <div className="aiAccordionContent" id={`ai-section-${item.id}`} role="region" aria-labelledby={`ai-label-${item.id}`}>{content(item.id)}</div>}</section>; })}</div>
-      {message && <p className={`aiMessage ${isError ? "error" : ""}`} role="status">{message}</p>}
+      {message && <p className={`aiMessage ${isError ? "error" : ""}`} role={isError ? "alert" : "status"}>{message}</p>}
       <div className="aiActions"><button type="button" className="aiAction" onClick={() => router.push("/assessments/create/content")}>Cancel</button><button type="button" className="aiAction" onClick={save}>Save</button><button type="button" className="aiAction aiGenerate" onClick={generate}>Generate Questions</button></div>
     </section>
   </div></div></section></div></main>;

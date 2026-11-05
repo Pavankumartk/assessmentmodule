@@ -9,7 +9,8 @@ import "./imagesequence.css";
 import { getImageViewerBridge, imageViewerToolPath } from "../../image-viewer-bridge";
 import ImageViewerSubmitPopups from "../../ImageViewerSubmitPopups";
 import { applyImageViewerRetry, imageViewerRelease, isImageViewerRetry, saveImageViewerSubmission } from "../../image-viewer-submission";
-import { resultPath } from "@/modules/assessments/storage/assessment-storage";
+import { resultPath, getActiveAssessmentId, getAssessment } from "@/modules/assessments/storage/assessment-storage";
+import { learnerAssessmentData } from "@/modules/assessments/components/learner/learner-assessment-data";
 
 
 // Keep the exact shared viewer icon directory. The two new files are
@@ -296,18 +297,24 @@ export default function ImageSequenceViewerPage() {
   const [notice, setNotice] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const signature = useMemo(() => fingerprint(draft), [draft]);
-  const stateKey = `${SESSION_KEY}:${draft.isSample ? "preview" : signature}${isImageViewerRetry() ? ":retry" : ""}`;
+  const [attemptScope] = useState(() => { const id=getActiveAssessmentId()||"standalone"; const record=getAssessment(id); return `${id}:${record ? learnerAssessmentData(record).attemptsUsed : 0}`; });
+  const stateKey = `${SESSION_KEY}:${attemptScope}:${draft.isSample ? "preview" : signature}${isImageViewerRetry() ? ":retry" : ""}`;
 
   useEffect(() => {
     const initial = loadDraft();
     const retry = applyImageViewerRetry(initial.questions,"image-sequencing",initial.durationSeconds);
     const loaded = { ...initial, ...retry, durationSeconds: Math.max(60, Number(retry.durationSeconds ?? initial.durationSeconds) || 0) };
     const stamp = fingerprint(loaded);
-    const key = `${SESSION_KEY}:${loaded.isSample ? "preview" : stamp}${isImageViewerRetry() ? ":retry" : ""}`;
+    const key = `${SESSION_KEY}:${attemptScope}:${loaded.isSample ? "preview" : stamp}${isImageViewerRetry() ? ":retry" : ""}`;
+    const legacyKey = `${SESSION_KEY}:${loaded.isSample ? "preview" : stamp}${isImageViewerRetry() ? ":retry" : ""}`;
     const time = Date.now();
     let state: Partial<Attempt> = {};
-    try { state = JSON.parse(sessionStorage.getItem(key) || "{}"); } catch { /* Fresh attempt */ }
-    if (state.signature === stamp && state.expiresAt && state.expiresAt > time) {
+    try {
+      const current=sessionStorage.getItem(key);
+      const legacy=current ? null : JSON.parse(sessionStorage.getItem(legacyKey)||"null");
+      state=current ? JSON.parse(current) : legacy && !legacy.submitted ? legacy : {};
+    } catch { /* Fresh attempt */ }
+    if (state.signature === stamp && state.expiresAt) {
       setCurrent(Math.max(0, Math.min(state.current ?? 0, loaded.questions.length - 1)));
       setOrders(state.orders ?? {});
       // Preserve any completed checks from older saved attempts.
@@ -451,7 +458,7 @@ export default function ImageSequenceViewerPage() {
                   </div>
                   {notice && <p className="viewerInlineNotice" role="status">{notice}</p>}
                   <div className="viewerExamActions">
-                    <button type="button" className="viewerExamButton" disabled={current === 0} onClick={() => goTo(current - 1)}><Icon name="arrowleft.svg"/>Previous</button>
+                    {current > 0 && <button type="button" className="viewerExamButton" disabled={current === 0} onClick={() => goTo(current - 1)}><Icon name="arrowleft.svg"/>Previous</button>}
                     <button type="button" className="viewerExamButton viewerNext" disabled={isLocked}
                       onClick={() => current === total - 1 ? submit() : goTo(current + 1)}>
                       {current === total - 1 ? "Submit" : "Next"}<Icon name="arrowrightg.svg"/>

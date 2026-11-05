@@ -6,7 +6,8 @@ import { createPortal } from "react-dom";
 import Sidebar from "@/modules/assessments/components/common/sidebar/page";
 import Header from "@/modules/assessments/components/common/header/Header";
 import "./ai.css";
-import { assessmentStorage } from "@/modules/assessments/storage/assessment-storage";
+import { assessmentStorage, getActiveAssessmentId, getAssessment, updateAssessment } from "@/modules/assessments/storage/assessment-storage";
+import WizardStepLink from "@/modules/assessments/components/common/WizardStepLink";
 const ASSETS = "/assets/assessmenticons/";
 const STORAGE_KEY = "aiContentDraft";
 const STEPS = ["Type", "Details", "Content", "Evaluation", "Review"] as const;
@@ -22,7 +23,7 @@ const SAMPLE_QUESTIONS = [
 ];
 const ROLES = ["Software Engineer", "Frontend Developer", "Backend Developer", "Full Stack Developer", "Data Analyst", "Data Scientist", "UI/UX Designer", "Product Manager", "QA Engineer", "DevOps Engineer", "Business Analyst"];
 type AIQuestion = { id: string; html: string };
-type Draft = { assessmentType?: "ai-interview"; targetRole: string; strategy: string; difficulty: string; questionCount: number; questions: AIQuestion[]; savedAt?: string };
+type Draft = { assessmentType?: string; targetRole: string; strategy: string; difficulty: string; questionCount: number; questions: AIQuestion[]; selectedId?: string; savedAt?: string };
 const escapeHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const initialQuestions = (): AIQuestion[] => SAMPLE_QUESTIONS.map((question, index) => ({ id: `sample-${index + 1}`, html: question }));
 const makeId = () => typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `question-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -138,7 +139,7 @@ function NeumoDropdown({ id, value, options, onChange }: {
       if (itemRect.top < panelRect.top) list.scrollTop -= panelRect.top - itemRect.top + 7;
     }
   };
-  const selected = options[selectedIndex]?.label || '';
+  const selected = options.find(option => option.value === value)?.label || (id === "aiStrategy" ? "Select question strategy" : id === "aiDifficulty" ? "Select difficulty" : "Select number of questions");
   return <div className="aiFieldControl aiSelectControl aiNeumoSelect" ref={root}>
     <button ref={trigger} id={id} type="button" className="aiNeumoSelectTrigger"
       aria-haspopup="listbox" aria-expanded={open} aria-controls={id + "Options"}
@@ -457,64 +458,107 @@ function nextEvaluationPath(pathname: string): string {
 }
 export default function AIContentPage() {
   const router = useRouter();
-  const [targetRole, setTargetRole] = useState("Software Engineer");
-  const [strategy, setStrategy] = useState("Adaptive");
-  const [difficulty, setDifficulty] = useState("Adaptive");
-  const [questionCount, setQuestionCount] = useState(5);
-  const [questions, setQuestions] = useState<AIQuestion[]>(initialQuestions);
-  const [selectedId, setSelectedId] = useState("sample-1");
+  const [assessmentType, setAssessmentType] = useState("ai-interview");
+  const [targetRole, setTargetRole] = useState("");
+  const [strategy, setStrategy] = useState("");
+  const [difficulty, setDifficulty] = useState("");
+  const [questionCount, setQuestionCount] = useState(0);
+  const [questions, setQuestions] = useState<AIQuestion[]>([]);
+  const [selectedId, setSelectedId] = useState("");
   const [loaded, setLoaded] = useState(false);
   const [message, setMessage] = useState("");
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const draftRef = useRef<Draft>({ assessmentType, targetRole, strategy, difficulty, questionCount, questions, selectedId });
+  draftRef.current = { assessmentType, targetRole, strategy, difficulty, questionCount, questions, selectedId };
+  const persistDraft = (changes: Partial<Draft>) => {
+    const next = { ...draftRef.current, ...changes };
+    draftRef.current = next;
+    try { assessmentStorage.setItem(STORAGE_KEY, JSON.stringify(next)); return true; }
+    catch { setMessage("Unable to save the draft. Please check browser storage."); return false; }
+  };
+  useEffect(() => () => { if (saveTimer.current !== null) clearTimeout(saveTimer.current); }, []);
   const selectedQuestion = questions.find(question => question.id === selectedId);
   const currentIndex = Math.max(0, questions.findIndex(question => question.id === selectedId));
   useEffect(() => {
     try {
+      setAssessmentType(getAssessment(getActiveAssessmentId() || "")?.typeCode || "ai-interview");
+      assessmentStorage.setItem("aiCreatorContentEditorOpen", "1");
+      const details = JSON.parse(assessmentStorage.getItem("mcqAssessmentDraft") || "{}");
       const raw = assessmentStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const draft = JSON.parse(raw) as Draft;
-        if (typeof draft.targetRole === "string") setTargetRole(draft.targetRole);
-        if (typeof draft.strategy === "string") {
-          const legacyStrategies: Record<string, string> = { "AI generated_adaptive": "Adaptive", "AI generated_fixed": "AI-Generated", Manual: "Predefined" };
-          setStrategy(legacyStrategies[draft.strategy] || (["AI-Generated", "Adaptive", "Predefined", "Hybrid"].includes(draft.strategy) ? draft.strategy : "Adaptive"));
-        }
-        if (typeof draft.difficulty === "string") setDifficulty(draft.difficulty);
-        if (Number.isInteger(draft.questionCount) && draft.questionCount >= 1 && draft.questionCount <= 50) setQuestionCount(draft.questionCount);
-        if (Array.isArray(draft.questions)) {
-          const restored = draft.questions.filter(q => q && typeof q.id === "string" && typeof q.html === "string").slice(0, 50).map(q => ({ id: q.id, html: safeHtml(q.html) }));
-          setQuestions(restored);
-          setSelectedId(restored[0]?.id ?? "");
-        }
+      const draft: Partial<Draft> = raw ? JSON.parse(raw) : {};
+      if (typeof draft.targetRole === "string") setTargetRole(draft.targetRole);
+      if (typeof draft.strategy === "string") {
+        const legacy: Record<string,string> = {"AI generated_adaptive":"Adaptive","AI generated_fixed":"AI-Generated",Manual:"Predefined"};
+        setStrategy(legacy[draft.strategy] || (["AI-Generated","Adaptive","Predefined","Hybrid"].includes(draft.strategy) ? draft.strategy : ""));
       }
-    } catch { /* Keep screenshot defaults if a prior draft is invalid. */ }
+      if (typeof draft.difficulty === "string") setDifficulty(draft.difficulty);
+      const fromDetails = Number(details.questionCount);
+      const fromDraft = Number(draft.questionCount);
+      const restored = Array.isArray(draft.questions) ? draft.questions.filter(q=>q && typeof q.id === "string" && typeof q.html === "string").map(q=>({id:q.id,html:safeHtml(q.html)})) : [];
+      const count = Number.isSafeInteger(fromDraft) && fromDraft >= 1 && fromDraft <= 500 ? fromDraft : Number.isSafeInteger(fromDetails) && fromDetails >= 1 && fromDetails <= 500 ? fromDetails : restored.length;
+      const items = Array.from({length:Math.max(count,restored.length)},(_,index)=>restored[index] || {id:makeId(),html:""});
+      const current = items.find(question => question.id === draft.selectedId)?.id || items[0]?.id || "";
+      setQuestionCount(count); setQuestions(items); setSelectedId(current);
+      if (restored.length > count) setMessage("This draft has more saved questions than the selected count. Increase the count or remove the extra questions.");
+    } catch { setMessage("Unable to read the saved questions. Please check browser storage."); return; }
     setLoaded(true);
   }, []);
   useEffect(() => {
     if (!loaded) return;
-    try { assessmentStorage.setItem(STORAGE_KEY, JSON.stringify({ assessmentType: "ai-interview" as const, targetRole, strategy, difficulty, questionCount, questions } satisfies Draft)); }
+    try { assessmentStorage.setItem(STORAGE_KEY, JSON.stringify({ assessmentType, targetRole, strategy, difficulty, questionCount, questions, selectedId } satisfies Draft)); }
     catch { /* Explicit save shows a validation / storage error when necessary. */ }
-  }, [loaded, targetRole, strategy, difficulty, questionCount, questions]);
-  const updateQuestion = useCallback((id: string, html: string) => setQuestions(previous => previous.map(question => question.id === id ? { ...question, html } : question)), []);
-  const addQuestion = () => {
-    if (questions.length >= 50) { setMessage("The maximum is 50 questions."); return; }
-    const empty = questions.find(q => !plainText(q.html));
-    if (empty) { setSelectedId(empty.id); setMessage("Complete the empty question before adding another one."); return; }
-    const created = { id: makeId(), html: "" };
-    setQuestions(previous => [...previous, created]);
-    setQuestionCount(previous => Math.max(previous, questions.length + 1));
-    setSelectedId(created.id);
-    setMessage("New question added. Type your question in the editor above.");
+  }, [loaded, assessmentType, targetRole, strategy, difficulty, questionCount, questions, selectedId]);
+  const updateQuestion = useCallback((id: string, html: string) => {
+    const next = draftRef.current.questions.map(question => question.id === id ? { ...question, html } : question);
+    setQuestions(next);
+    persistDraft({ questions: next });
+  }, []);
+  const persistQuestionCount = (count: number) => {
+    const rawDetails = assessmentStorage.getItem("mcqAssessmentDraft");
+    const oldCount = assessmentStorage.getItem("mcqQuestionCount");
+    const details = JSON.parse(rawDetails || "{}");
+    try {
+      assessmentStorage.setItem("mcqAssessmentDraft", JSON.stringify({...details, questionCount: String(count)}));
+      assessmentStorage.setItem("mcqQuestionCount", String(count));
+      updateAssessment({questions: count});
+    } catch (error) {
+      try { if(rawDetails === null) assessmentStorage.removeItem("mcqAssessmentDraft"); else assessmentStorage.setItem("mcqAssessmentDraft",rawDetails); if(oldCount === null) assessmentStorage.removeItem("mcqQuestionCount"); else assessmentStorage.setItem("mcqQuestionCount",oldCount); } catch { /* Report the original storage error. */ }
+      throw error;
+    }
+  };
+  const changeQuestionCount = (value: string) => {
+    const count = Number(value);
+    if (!Number.isSafeInteger(count) || count < 1 || count > 500) return;
+    const removed = questions.slice(count);
+    if (removed.some(question => plainText(question.html)) && !window.confirm("Reducing the count will remove questions beyond the selected number. Continue?")) return;
+    const next = Array.from({length: count}, (_, index) => questions[index] || {id: makeId(), html: ""});
+    try {
+      persistQuestionCount(count);
+      setQuestions(next); setQuestionCount(count);
+      const nextSelectedId = next.some(question => question.id === selectedId) ? selectedId : next[0]?.id || "";
+      setSelectedId(nextSelectedId);
+      if (persistDraft({ questionCount: count, questions: next, selectedId: nextSelectedId })) setMessage("");
+    } catch { setMessage("Unable to save the question count. Please check browser storage."); }
   };
   const removeQuestion = (id: string) => {
-    const remaining = questions.filter(question => question.id !== id);
-    setQuestions(remaining);
-    setQuestionCount(Math.max(1, remaining.length));
-    if (id === selectedId) setSelectedId(remaining[0]?.id ?? "");
-    setMessage(remaining.length ? "Question removed." : "All questions removed. Add a new question to continue.");
+    if (questions.length<=1) { setMessage("At least one question is required."); return; }
+    if (!window.confirm("Remove this question? The question count will decrease.")) return;
+    const remaining = questions.filter(question=>question.id!==id);
+    try {
+      const nextCount = Math.min(questionCount, remaining.length);
+      persistQuestionCount(nextCount);
+      setQuestionCount(nextCount);
+      const nextSelectedId = id === selectedId ? remaining[0]?.id || "" : selectedId;
+      setQuestions(remaining); setSelectedId(nextSelectedId);
+      if (persistDraft({ questionCount: nextCount, questions: remaining, selectedId: nextSelectedId })) setMessage("Question removed.");
+    } catch(error) { setMessage(error instanceof Error ? error.message : "Could not remove the question."); }
   };
   const generate = async () => {
     if (!targetRole.trim()) { setMessage("Please enter a target role before generating questions."); return; }
+    if (!strategy || !difficulty) { setMessage("Select a question strategy and difficulty before generating questions."); return; }
+    if (!questionCount) { setMessage("Select the number of questions before generating questions."); return; }
     if (questions.some(q => q.html !== "" && !SAMPLE_QUESTIONS.includes(plainText(q.html))) && !window.confirm("Generating new questions will replace your existing question list. Continue?")) return;
     setGenerating(true); setMessage("");
     try {
@@ -533,11 +577,11 @@ export default function AIContentPage() {
       }).filter(q => plainText(q.html));
       if (!result.length) throw new Error("AI returned no questions");
       setQuestions(result); setSelectedId(result[0].id);
-      setMessage(`${result.length} questions generated. Review and edit them before continuing.`);
+      if (persistDraft({ questions: result, selectedId: result[0].id })) setMessage(`${result.length} questions generated. Review and edit them before continuing.`);
     } catch {
       const result = sampleForRole(targetRole, difficulty, questionCount);
       setQuestions(result); setSelectedId(result[0].id);
-      setMessage("Sample questions created locally. Connect POST /api/ai-assessment/generate to enable live AI generation.");
+      if (persistDraft({ questions: result, selectedId: result[0].id })) setMessage("Sample questions created locally. Connect POST /api/ai-assessment/generate to enable live AI generation.");
     } finally { setGenerating(false); }
   };
   const saveContinue = () => {
@@ -545,31 +589,33 @@ export default function AIContentPage() {
     if (!targetRole.trim()) { setMessage("Target Role is required."); return; }
     if (!questions.length) { setMessage("Add at least one question before continuing."); return; }
     const blank = questions.findIndex(question => !plainText(question.html));
-    if (blank >= 0) { setSelectedId(questions[blank].id); setMessage(`Question ${blank + 1} cannot be empty. Please enter its content.`); return; }
-    if (questions.length !== questionCount) { setMessage(`You selected ${questionCount} questions, but the list contains ${questions.length}. Add or generate the remaining questions, or update the number of questions.`); return; }
+    if (blank >= 0) { setSelectedId(questions[blank].id); persistDraft({ selectedId: questions[blank].id }); setMessage(`Question ${blank + 1} cannot be empty. Please enter its content.`); return; }
+    if (questions.length !== questionCount) { setMessage(`You selected ${questionCount} questions, but the list contains ${questions.length}. Update the number of questions or remove the extra questions.`); return; }
     try {
-      assessmentStorage.setItem(STORAGE_KEY, JSON.stringify({ assessmentType: "ai-interview" as const, targetRole, strategy, difficulty, questionCount, questions, savedAt: new Date().toISOString() } satisfies Draft));
+      persistQuestionCount(questionCount);
+      assessmentStorage.setItem(STORAGE_KEY, JSON.stringify({ assessmentType, targetRole, strategy, difficulty, questionCount, questions, selectedId, savedAt: new Date().toISOString() } satisfies Draft));
       setMessage(""); setSaving(true);
-      router.push(nextEvaluationPath(window.location.pathname));
+      const nextPath = nextEvaluationPath(window.location.pathname);
+      saveTimer.current = setTimeout(() => router.push(nextPath), 3000);
     } catch { setSaving(false); setMessage("Unable to save the assessment. Please check browser storage and try again."); }
   };
   return <main className="aiAppShell"><div className="aiLayout"><Sidebar /><section className="aiMainContent"><div className="aiHeader"><Header /></div><div className="aiScrollArea"><div className="aiPageContent">
-    <nav className="aiBreadcrumb" aria-label="Breadcrumb"><Link href="/Assessment">Assessment</Link><Icon name="arrowrightdouble.svg" size={20} fallback="»" /><strong>Create Assessment</strong></nav>
-    <ol className="aiWizard" aria-label="Assessment creation steps">{STEPS.map((step, index) => <li className={`aiWizardStep ${index < 2 ? "aiStepDone" : index === 2 ? "aiStepActive" : ""}`} key={step}><span className="aiStepNumber"><span>{index + 1}</span></span><span className="aiStepText">{step}</span></li>)}</ol>
-    <header className="aiPageTitle"><h1>Question Content (AI Interview)</h1><p>Define What The AI Should Ask. You Can Review And Edit Every Question.</p></header>
-    <section className="aiContentPanel" aria-label="AI Interview question content">
+    <nav className="aiBreadcrumb" aria-label="Breadcrumb"><Link href="/assessments">Assessment</Link><Icon name="arrowrightdouble.svg" size={20} fallback="»" /><Link href="/assessments/create/details">Create Assessment</Link></nav>
+    <ol className="aiWizard" aria-label="Assessment creation steps">{STEPS.map((step, index) => <li className={`aiWizardStep ${index < 2 ? "aiStepDone" : index === 2 ? "aiStepActive" : ""}`} key={step}><WizardStepLink index={index} current={2}/><span className="aiStepNumber"><span>{index + 1}</span></span><span className="aiStepText">{step}</span></li>)}</ol>
+    <header className="aiPageTitle"><h1>Question Content ({assessmentType === "ai-viva" ? "AI Viva" : "AI Interview"})</h1><p>Define What The AI Should Ask. You Can Review And Edit Every Question.</p></header>
+    <section className="aiContentPanel" aria-label={assessmentType === "ai-viva" ? "AI Viva question content" : "AI Interview question content"}>
       <div className="aiFormGrid">
-        <div className="aiField"><label htmlFor="aiTargetRole">Target Role</label><RoleSelector value={targetRole} onChange={setTargetRole} /></div>
-        <div className="aiField"><label htmlFor="aiStrategy">Question Strategy</label><NeumoDropdown id="aiStrategy" value={strategy} onChange={setStrategy} options={["AI-Generated", "Adaptive", "Predefined", "Hybrid"].map(item => ({ value: item, label: item }))} /></div>
-        <div className="aiField"><label htmlFor="aiDifficulty">Difficulty</label><NeumoDropdown id="aiDifficulty" value={difficulty} onChange={setDifficulty} options={["Adaptive", "Easy", "Medium", "Hard"].map(item => ({ value: item, label: item }))} /></div>
-        <div className="aiField"><label htmlFor="aiQuestionCount">Number of question</label><NeumoDropdown id="aiQuestionCount" value={String(questionCount)} onChange={next => setQuestionCount(Number(next))} options={Array.from({ length: 50 }, (_, index) => ({ value: String(index + 1), label: String(index + 1).padStart(2, "0") }))} /></div>
+        <div className="aiField"><label htmlFor="aiTargetRole">Target Role</label><RoleSelector value={targetRole} onChange={value => {setTargetRole(value);persistDraft({targetRole:value});}} /></div>
+        <div className="aiField"><label htmlFor="aiStrategy">Question Strategy</label><NeumoDropdown id="aiStrategy" value={strategy} onChange={value => {setStrategy(value);persistDraft({strategy:value});}} options={["AI-Generated", "Adaptive", "Predefined", "Hybrid"].map(item => ({ value: item, label: item }))} /></div>
+        <div className="aiField"><label htmlFor="aiDifficulty">Difficulty</label><NeumoDropdown id="aiDifficulty" value={difficulty} onChange={value => {setDifficulty(value);persistDraft({difficulty:value});}} options={["Adaptive", "Easy", "Medium", "Hard"].map(item => ({ value: item, label: item }))} /></div>
+        <div className="aiField"><label htmlFor="aiQuestionCount">Number of questions</label><NeumoDropdown id="aiQuestionCount" value={questionCount ? String(questionCount) : ""} onChange={changeQuestionCount} options={Array.from({length:Math.max(50,questionCount)},(_,index)=>({value:String(index+1),label:String(index+1).padStart(2,"0")}))} /></div>
       </div>
       <div className="aiQuestionsHeading"><h2>Questions</h2><button type="button" className="aiActionButton aiGenerateButton" onClick={() => void generate()} disabled={generating}>{generating ? "Generating…" : "Generate With AI"}</button></div>
-      {selectedQuestion ? <AIToolbarEditor key={selectedQuestion.id} value={selectedQuestion.html} onChange={html => updateQuestion(selectedQuestion.id, html)} questionNumber={currentIndex + 1} onError={setMessage} /> : <div className="aiNoQuestions">No questions available. Use Add Question or Generate With AI.</div>}
-      <div className="aiAddRow"><button type="button" className="aiActionButton aiAddButton" onClick={addQuestion}>Add Question</button></div>
-      <div className="aiQuestionList" aria-label="Saved questions">{questions.map((question, index) => <div className={`aiQuestionCard ${question.id === selectedId ? "aiQuestionCardActive" : ""}`} key={question.id}><button className="aiQuestionCardText" type="button" onClick={() => { setSelectedId(question.id); setMessage(""); }} aria-label={`Edit question ${index + 1}`} aria-current={question.id === selectedId ? "true" : undefined}><span>Q{index + 1}- {plainText(question.html) || "New question — click to edit"}</span></button><button className="aiQuestionRemove" type="button" aria-label={`Remove question ${index + 1}`} title="Remove question" onClick={() => removeQuestion(question.id)}><Icon name="cancel-circel.svg" size={18} fallback="×" /></button></div>)}</div>
+      {selectedQuestion ? <AIToolbarEditor key={selectedQuestion.id} value={selectedQuestion.html} onChange={html => updateQuestion(selectedQuestion.id, html)} questionNumber={currentIndex + 1} onError={setMessage} /> : <div className="aiNoQuestions">No questions available. Select the number of questions above.</div>}
+      
+      <div className="aiQuestionList" aria-label="Saved questions">{questions.map((question, index) => <div className={`aiQuestionCard ${question.id === selectedId ? "aiQuestionCardActive" : ""}`} key={question.id}><button className="aiQuestionCardText" type="button" onClick={() => { setSelectedId(question.id); if (persistDraft({selectedId:question.id})) setMessage(""); }} aria-label={`Edit question ${index + 1}`} aria-current={question.id === selectedId ? "true" : undefined}><span>Q{index + 1}- {plainText(question.html) || "New question — click to edit"}</span></button><button className="aiQuestionRemove" type="button" aria-label={`Remove question ${index + 1}`} title="Remove question" onClick={() => removeQuestion(question.id)}><Icon name="cancel-circel.svg" size={18} fallback="×" /></button></div>)}</div>
     </section>
-    {message && <p className="aiNotice" role="status">{message}</p>}
-    <footer className="aiFooter"><button type="button" className="aiFooterButton aiFooterBack" onClick={() => router.back()}>Back</button><button type="button" className="aiFooterButton aiFooterContinue" disabled={saving || generating} onClick={saveContinue}>{saving ? "Saving…" : "Save & Continue"}</button></footer>
+    {message && <p className={message === "Question removed." ? "aiNotice aiNoticeSuccess" : "aiNotice"} role={message === "Question removed." ? "status" : "alert"}>{message}</p>}
+    <footer className="aiFooter"><button type="button" className="aiFooterButton aiFooterBack" disabled={saving} onClick={() => router.back()}>Back</button><div className="aiFooterSaveGroup">{saving && <span className="aiSaveToast" role="status">Successfully saved</span>}<button type="button" className="aiFooterButton aiFooterContinue" disabled={saving || generating || !loaded} onClick={saveContinue}>{saving ? "Saving…" : "Save & Continue"}</button></div></footer>
   </div></div></section></div></main>;
 }

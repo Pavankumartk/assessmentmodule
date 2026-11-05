@@ -67,6 +67,18 @@ export function updateAssessment(values: Partial<StoredAssessment>, assessmentId
   }
   saveAssessment({...previous,...values,id:previous.id,createdAt:previous.createdAt,updatedAt:new Date().toISOString()});
 }
+export function deleteAssessment(id: string): boolean {
+  if (!canUseStorage()) return false;
+  const creator=getDemoSession(); const record=getAssessment(id);
+  if (!creator || creator.role!=="admin" || !record || (record.tenantId||"north")!==creator.tenantId) return false;
+  localStorage.setItem(LIST_KEY,JSON.stringify(getAssessments().filter(item=>item.id!==id)));
+  for (let index=localStorage.length-1;index>=0;index--) {
+    const key=localStorage.key(index);
+    if (key?.startsWith(DRAFT_PREFIX+id+".")) localStorage.removeItem(key);
+  }
+  if (getActiveAssessmentId()===id) localStorage.removeItem(ACTIVE_KEY);
+  changed();return true;
+}
 export function duplicateAssessment(id: string) {
   const previous = getAssessment(id);
   if (!previous) return null;
@@ -78,23 +90,7 @@ export function duplicateAssessment(id: string) {
   }
   return saveAssessment(copy);
 }
-
-// Keep draft copying complete for every registered creator, including its evaluation settings.
-const ADDITIONAL_WORKFLOW_DRAFT_KEYS = [
-  "aiContentDraft", "aiInterviewViewerConfig", "aiInterviewEvaluationDraft",
-  "problemSolvingContentDraft", "problemSolvingViewerState", "problemSolvingViewerResult",
-  "assignmentDetailsDraft", "assignmentContentDraft", "assignmentEvaluationDraft",
-  "clickableHotspotContentDraft",
-  "trueFalseAssessmentDraft", "trueFalseContentDraft", "trueFalseEvaluationDraft",
-  "fillBlanksAssessmentDraft", "fillBlanksContentDraft", "fillBlanksEvaluationDraft",
-  "longAnswerAssessmentDraft", "longAnswerContentDraft", "longAnswerEvaluationDraft",
-  "dragDropAssessmentDraft", "dragDropContentDraft", "dragDropEvaluationDraft",
-  "memoryGameAssessmentDraft", "memoryGameContentDraft", "memoryGameEvaluationDraft",
-  "imageBasedContentDraft", "imageBasedViewerResult", "matchFollowingContentDraft",
-  "neurolxp-one-word-evaluation", "oneWordPreviewDraft",
-] as const;
-
-export const DRAFT_KEYS = ["connectDotsContentDraft","connectDotsViewerState","mcqQuestionCount","mcqAssessmentDraft","mcqContentDraft","mcqAssessmentEvaluationDraft","viewerAssessmentResult","viewerRetryResult","viewerCurrentQuestion","viewerRetryQuestions","viewerRetryDurationMinutes","viewerScratchPads","viewerFormulaStars","viewerFlaggedQuestionIndexes","viewerBookmarkedQuestionIndexes","viewerReviewedQuestionIndexes","shortAnswerAssessmentDraft","shortAnswerContentDraft","shortAnswerEvaluationDraft","oneWordAssessmentDraft","oneWordContentDraft","oneWordPreviewDraft","oneWordEvaluationDraft","shortAnswerViewerResult","oneWordViewerResult","shortAnswerViewerScratchPads","viewerScratchPads","shortAnswerViewerFormulaStars"].concat([...ADDITIONAL_WORKFLOW_DRAFT_KEYS]);
+export const DRAFT_KEYS = ["mcqQuestionCount","mcqAssessmentDraft","mcqContentDraft","mcqAssessmentEvaluationDraft","viewerAssessmentResult","viewerRetryResult","viewerCurrentQuestion","viewerRetryQuestions","viewerRetryDurationMinutes","viewerScratchPads","viewerFormulaStars","viewerFlaggedQuestionIndexes","viewerBookmarkedQuestionIndexes","viewerReviewedQuestionIndexes","shortAnswerAssessmentDraft","shortAnswerContentDraft","shortAnswerEvaluationDraft","oneWordAssessmentDraft","oneWordContentDraft","oneWordPreviewDraft","oneWordEvaluationDraft","shortAnswerViewerResult","oneWordViewerResult","shortAnswerViewerScratchPads","viewerScratchPads","shortAnswerViewerFormulaStars"];
 /** Drop-in replacement for legacy sessionStorage usage; data is isolated by assessmentId. */
 export const assessmentStorage = {
   getItem(key:string):string|null {
@@ -124,9 +120,9 @@ export function resultPath(id = getActiveAssessmentId()): string {
 }
 
 /** Publish an assessment using its type-specific draft, without a backend. */
-export function publishAssessment(typeCode: "short-answer" | "one-word" | "long-answer") {
- const detailKey = typeCode === "one-word" ? "oneWordAssessmentDraft" : typeCode === "long-answer" ? "longAnswerAssessmentDraft" : "shortAnswerAssessmentDraft";
- const contentKey = typeCode === "one-word" ? "oneWordContentDraft" : typeCode === "long-answer" ? "longAnswerContentDraft" : "shortAnswerContentDraft";
+export function publishAssessment(typeCode: "short-answer" | "one-word") {
+ const detailKey = typeCode === "one-word" ? "oneWordAssessmentDraft" : "shortAnswerAssessmentDraft";
+ const contentKey = typeCode === "one-word" ? "oneWordContentDraft" : "shortAnswerContentDraft";
  const detail = JSON.parse(assessmentStorage.getItem(detailKey) || "{}");
  const content = JSON.parse(assessmentStorage.getItem(contentKey) || "{}");
  const questions = Array.isArray(content.questions) ? content.questions : [];

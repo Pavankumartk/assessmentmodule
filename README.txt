@@ -1,26 +1,14 @@
-IMAGE DROPDOWN VIEWER + CHECK ANSWER REMOVAL — MINIMAL CHANGES
+MINIMAL FIX: Next.js 16.4.0 CLIENT_HOOK_DYNAMIC error during production build.
 
-1) Unzip in assessment project root:
-   cd ~/Desktop/assessments/web
-   unzip -o ~/Downloads/Image_Dropdown_Check_Answer_Only_Fix.zip -d .
+Only changed file:
+src/app/assessments/[assessmentId]/details/page.tsx
 
-2) Register only Image Dropdown viewer:
-   node scripts/install-image-dropdown-viewer.cjs
+Cause: useParams() was called in the page component without a parent Suspense boundary. Fix: wrap its unchanged content with React Suspense; the original JSX, state, routes, styles, and interactions are unchanged.
 
-3) Preview exact Check Answer buttons in assessment VIEWER/PREVIEW TSX files:
-   node scripts/remove-check-answer-viewers.cjs --check
+Installation in Mac Terminal (stop npm run dev first):
+cd ~/Desktop/assessments/web
+unzip -o ~/Downloads/Assessment_Details_UseParams_Suspense_Only.zip -d .
+npm run build
+npm run dev
 
-4) Remove only those Check Answer JSX buttons:
-   node scripts/remove-check-answer-viewers.cjs --apply
-
-5) Verify & start:
-   npm run build
-   npm run dev
-
-ONLY NEW FILES plus two narrowly scoped Node scripts.
-Image Dropdown adds on-image raised Choose... selectors that match supplied Figma.
-Other assessment rendering branches, states, scores, navigation and CSS are not replaced.
-Check Answer script targets viewer/preview JSX buttons labelled Check Answer, not any other button.
-This package expects the previously supplied Image Labeling viewer files to be installed,
-so it can reuse that layout's stylesheet. It does not overwrite the Image Labeling viewer.
-If PageClient.tsx has a different structure, the installer STOPS rather than risking modifications.
+No other source file is in this ZIP.

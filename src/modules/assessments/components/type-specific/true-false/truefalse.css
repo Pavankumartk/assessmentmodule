@@ -790,3 +790,12 @@
 
 /* True / False score is sourced from Details and is read-only here. */
 .tfqcReadonlyValue {min-height:54px;display:flex;align-items:center;padding:12px 18px;border-radius:8px;box-shadow:inset 2px 2px 4px #c4c4c4,inset -2px -2px 3px #fff;color:#374151;}
+
+/* Question status reflects completion; incomplete questions use an empty circle. */
+.tfqcBuilder .tfqcNumberStatus.is-pending{display:grid;place-items:center;background:transparent!important;border:1.5px solid currentColor!important;color:inherit!important;box-sizing:border-box;opacity:1!important;}
+.tfqcBuilder .tfqcNumberStatus.is-done{display:grid;place-items:center;background:#2A7308!important;border:0!important;color:#fff!important;font:700 10px/1 Arial,sans-serif!important;opacity:1!important;}
+.tfqcBuilder .tfqcRoundNav:disabled{opacity:.45!important;cursor:not-allowed;}
+.tfqcBuilder .tfqcRoundNav:disabled .tfqcIcon{opacity:.6!important;}
+
+.tfqcBuilder .tfqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}
+.tfqcBuilder .tfqcNumberStatus.is-pending{background:#2D4CC8!important;border:0!important;color:#fff!important}

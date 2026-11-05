@@ -1,4 +1,7 @@
 "use client";
+import {maySubmitCurrentAttempt,nextAttemptCount} from "@/modules/assessments/components/learner/learner-assessment-data";
+import { creatorInstructionLines } from "@/modules/assessments/components/viewer/instruction-text";
+
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -184,14 +187,14 @@ function loadViewerDraft(): ViewerDraft {
     : Array.isArray(content.items) ? content.items : [];
   const questions = stored.map(normalizeQuestion).filter((q): q is DragQuestion => q !== null);
   if (!questions.length) return {...REFERENCE_VIEWER, title: firstText(details, ["assessmentTitle", "assessmentName", "title", "name"], "Drag & Drop")};
-  const rawInstructions=firstText(details,["instructions"],"");
+  const creatorInstructions = creatorInstructionLines(details.instructions, details.descriptionInstructions);
   return {
     title: firstText(details, ["assessmentTitle", "assessmentName", "title", "name"], "Drag & Drop"),
     questions,
     durationSeconds: durationToSeconds(details),
     passingScore: firstText(details,["passingScore","gradeToPass"],"60%"),
     negativeMarking: firstText(details,["negativeMarkingValue","negativeMarking"],"As configured"),
-    instructions: rawInstructions ? rawInstructions.split(/\r?\n/).map(s=>s.trim()).filter(Boolean) : REFERENCE_VIEWER.instructions,
+    instructions: creatorInstructions.length ? creatorInstructions : REFERENCE_VIEWER.instructions,
   };
 }
 function formatTime(seconds: number): [string, string, string] {
@@ -256,7 +259,8 @@ export default function DragDropViewerPage() {
       setAnswers(saved.answers ?? {});
       setFlagged(Array.isArray(saved.flagged) ? saved.flagged : []);
       setSkipped(Array.isArray(saved.skipped) ? saved.skipped : []);
-      setExpiresAt(saved.expiresAt || time + loaded.durationSeconds * 1000);
+      setExpiresAt(saved.expiresAt || 0);
+      setStarted(Boolean(saved.started));
     } else {
       setAnswers({});
       setCurrent(0);
@@ -271,7 +275,7 @@ export default function DragDropViewerPage() {
     if (!ready || submitted || !started) return;
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
-  }, [ready, submitted]);
+  }, [ready, submitted, started]);
 
   useEffect(()=>{
     try {
@@ -384,6 +388,7 @@ export default function DragDropViewerPage() {
     setFlagged(old => old.includes(current) ? old.filter(index => index !== current) : [...old, current]);
   };
   const submitAssessment = () => {
+    if (!maySubmitCurrentAttempt()) { router.replace("/learner"); return; }
     if(submitted) return;
     const scored = questions.map((q, index) => {
       const zones = zoneIds(q.text);
@@ -398,7 +403,7 @@ export default function DragDropViewerPage() {
     const totalMarks=questions.reduce((sum,q)=>sum+q.points,0);
     const earnedMarks=scored.reduce((sum,entry)=>sum+entry.earned,0);
     const result = {
-      title:draft.title, assessmentType:"drag-and-drop" as const,
+      attemptId:crypto.randomUUID(), submittedAt:new Date().toISOString(), title:draft.title, assessmentType:"drag-and-drop" as const,
       totalQuestions:questions.length,totalMarks,earnedMarks,
       scorePercent:totalMarks>0?Math.round(earnedMarks/totalMarks*100):0,
       correctAnswers:scored.filter(s=>s.zones.length>0&&s.matched.length===s.zones.length).length,
@@ -426,7 +431,7 @@ export default function DragDropViewerPage() {
         const previous=JSON.parse(assessmentStorage.getItem("viewerAttempts")||"[]");
         const attempts=[...(Array.isArray(previous)?previous:[]),result];
         assessmentStorage.setItem("viewerAttempts",JSON.stringify(attempts));
-        updateAssessment({attemptCount:attempts.length});
+        updateAssessment({attemptCount:nextAttemptCount(attempts.length)});
       } catch { /* Saved draft remains available even when storage quota is full. */ }
     }
     setResultScore(result.scorePercent);setSubmitOpen(false);setSubmitted(true);
@@ -458,7 +463,7 @@ export default function DragDropViewerPage() {
             {!started ? <>
               <nav className="dragvBreadcrumb" aria-label="Breadcrumb"><Link href={demoDashboardPath()}>Dashboard</Link><Icon name="arrow-right-double.svg" size={20}/><Link href="/assessments">Assessment</Link><Icon name="arrow-right-double.svg" size={20}/><strong>{draft.title}</strong></nav>
               <div className="dragvPageHeading"><h1>{draft.title}</h1><p>Drag &amp; Drop</p></div>
-              <ViewerInstructions details={{totalQuestions:String(total),totalMarks:String(questions.reduce((sum,q)=>sum+q.points,0)),totalTime:`${Math.round(draft.durationSeconds/60)} Minutes`,passingScore:draft.passingScore,negativeMarking:draft.negativeMarking,instructions:draft.instructions}} accepted={accepted} onAcceptedChange={setAccepted} onStart={()=>{setStarted(true);setCurrent(0);setExpiresAt(previous=>previous>Date.now()?previous:Date.now()+draft.durationSeconds*1000);setNow(Date.now());}} canStart={questions.length>0} unavailableMessage="No saved Drag & Drop questions are available for this assessment."/>
+              <ViewerInstructions details={{totalQuestions:String(total),totalMarks:String(questions.reduce((sum,q)=>sum+q.points,0)),totalTime:`${Math.round(draft.durationSeconds/60)} Minutes`,passingScore:draft.passingScore,negativeMarking:draft.negativeMarking,instructions:draft.instructions}} accepted={accepted} onAcceptedChange={setAccepted} onStart={()=>{setStarted(true);setCurrent(0);setExpiresAt(previous=>previous || Date.now()+draft.durationSeconds*1000);setNow(Date.now());}} canStart={questions.length>0} unavailableMessage="No saved Drag & Drop questions are available for this assessment."/>
             </> : <>
             <div className="dragvExamTop">
               <nav className="dragvBreadcrumb" aria-label="Breadcrumb">
@@ -533,8 +538,8 @@ export default function DragDropViewerPage() {
                   </div>
                   {notice && <p className="dragvInlineNotice" role="status">{notice}</p>}
                   <div className="dragvExamActions">
-                    <button type="button" className="dragvExamButton" disabled={current === 0}
-                      onClick={() => goTo(current - 1)}><Icon name="arrowleft.svg" />Previous</button>
+                    {current > 0 && <button type="button" className="dragvExamButton" disabled={current === 0}
+                      onClick={() => goTo(current - 1)}><Icon name="arrowleft.svg" />Previous</button>}
                     <button type="button" className="dragvExamButton dragvNext" disabled={submitted}
                       onClick={() => current === total - 1 ? submit() : goTo(current + 1)}>
                       {current === total - 1 ? "Submit" : "Next"}<Icon name="arrowrightg.svg" />

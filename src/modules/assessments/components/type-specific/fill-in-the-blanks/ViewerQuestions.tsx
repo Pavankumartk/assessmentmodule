@@ -1,4 +1,5 @@
 "use client";
+import {maySubmitCurrentAttempt,nextAttemptCount} from "@/modules/assessments/components/learner/learner-assessment-data";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -250,6 +251,7 @@ export default function ViewFillBlanksPage() {
   };
 
   const finishAttempt = (isTimeout = false) => {
+    if (!maySubmitCurrentAttempt()) { router.replace("/learner"); return; }
     if (submitted) return;
     const totalMarks = questions.reduce((sum, q) => sum + q.points, 0);
     const submittedAt = new Date().toISOString();
@@ -265,15 +267,13 @@ export default function ViewFillBlanksPage() {
     setSuccessOpen(!previewMode);
     setNotice(isTimeout ? "Time is up. Your assessment has been submitted." : `Assessment submitted. Score: ${score} / ${totalMarks} marks.`);
     try {
-      if(!previewMode && retryMode){
-        assessmentStorage.setItem("fillBlanksRetryResult",JSON.stringify(result));
-      }else if(!previewMode){
-        assessmentStorage.setItem("fillBlanksViewerResult", JSON.stringify(result));
+      if(!previewMode){
+        assessmentStorage.setItem(retryMode ? "fillBlanksRetryResult" : "fillBlanksViewerResult", JSON.stringify(result));
         const raw = JSON.parse(assessmentStorage.getItem("fillViewerAttempts") || "[]");
         const previous = Array.isArray(raw) ? raw : [];
         const attempts = [...previous, {attemptId: crypto.randomUUID(), submittedAt, scorePercent:result.scorePercent, earnedMarks:score, totalMarks, pendingCount:0}];
         assessmentStorage.setItem("fillViewerAttempts",JSON.stringify(attempts));
-        updateAssessment({attemptCount:attempts.length});
+        updateAssessment({attemptCount:nextAttemptCount(attempts.length)});
       }
     } catch { setNotice("Submitted. Browser storage is unavailable for saving the result."); }
   };
@@ -342,9 +342,9 @@ export default function ViewFillBlanksPage() {
                   {notice && <p className="fillViewerInlineNotice" role="status">{notice}</p>}
                   {submitted && <button type="button" className="fillViewerExamButton fillViewerNext" onClick={() => router.push(previewMode ? "/assessments/create/review" : resultPath())}>{previewMode ? "Back to Review" : "View Results"}</button>}
                   <div className="fillViewerExamActions">
-                    <button type="button" className="fillViewerExamButton" disabled={current === 0} onClick={() => goTo(current - 1)}>
+                    {current > 0 && <button type="button" className="fillViewerExamButton" disabled={current === 0} onClick={() => goTo(current - 1)}>
                       <Icon name="arrowleft.svg" />Previous
-                    </button>
+                    </button>}
                     <button type="button" className="fillViewerExamButton fillViewerNext" disabled={submitted}
                       onClick={() => current === total - 1 ? submit() : goTo(current + 1)}>
                       {current === total - 1 ? "Submit" : "Next"}<Icon name="arrowrightg.svg" />

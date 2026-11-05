@@ -1,5 +1,7 @@
 "use client";
 import WizardStepLink from "@/modules/assessments/components/common/WizardStepLink";
+import { getDemoSession } from "@/modules/assessments/auth/demo-auth";
+import { MCQRichEditor } from "@/modules/assessments/components/common/steps/ContentStep/ContentStep";
 import { assessmentStorage, updateAssessment, publishAssessment, viewerPath, resultPath } from "@/modules/assessments/storage/assessment-storage";
 
 import Image from "next/image";
@@ -60,12 +62,12 @@ function QuestionTypeDropdown({ value, onChange }: { value: string; onChange: (v
   }, [open]);
   const label = value === "MCQ" ? "Multiple Choice Question (MCQ)" : value;
   const normalized = search.trim().toLowerCase();
-  return <div className="mcqcSelectRoot mcqcTypeRoot" ref={root}>
-    <button type="button" className="mcqcSelectTrigger" aria-label="Question Type" aria-expanded={open} aria-controls="mcqcQuestionTypeList" onClick={() => setOpen(previous => !previous)}>
+  return <div className="mcqcSelectRoot mcqcTypeRoot" ref={root} onPointerLeave={event => { if (event.pointerType === "mouse") window.setTimeout(() => { if (root.current && !root.current.matches(":hover")) setOpen(false); }, 300); }}>
+    <button type="button" className="mcqcSelectTrigger" aria-label="Question Type" disabled aria-expanded={open} aria-controls="mcqcQuestionTypeList" onClick={() => setOpen(previous => !previous)}>
       <span>{label}</span><Icon name="arrow-down-01.svg" size={20} className={open ? "mcqcRotated" : ""}/>
     </button>
     {open && <div id="mcqcQuestionTypeList" className="mcqcTypeDropdown">
-      <label className="mcqcTypeSearch"><Icon name="search-02.svg" size={20}/><input autoFocus type="search" placeholder="Search assessment types..." value={search} onChange={event => setSearch(event.target.value)}/></label>
+      <label className="mcqcTypeSearch"><Icon name="search-02.svg" size={20}/><input autoFocus type="search" maxLength={250} placeholder="Search assessment types..." value={search} onChange={event => setSearch(event.target.value)}/></label>
       <div className="mcqcTypeGroups">{ASSESSMENT_TYPE_GROUPS.map(group => {
         const filtered = group.items.filter(item => item.toLowerCase().includes(normalized));
         if (normalized && !filtered.length && !group.heading.toLowerCase().includes(normalized)) return null;
@@ -89,7 +91,7 @@ function NeumoSelect({ value, options, onChange, placeholder }: { value: string;
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => { if (!open) return; const outside = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) setOpen(false); }; const escape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); }; document.addEventListener("pointerdown", outside); document.addEventListener("keydown", escape); return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); }; }, [open]);
-  return <div className="mcqcSelectRoot" ref={root}><button type="button" className="mcqcSelectTrigger" aria-expanded={open} onClick={() => setOpen(v => !v)}><span>{value || placeholder || "Select"}</span><Icon name="arrow-down-01.svg" size={20} /></button>{open && <div className="mcqcSelectList" role="radiogroup">{options.map(option => <button key={option} type="button" role="radio" aria-checked={value === option} className="mcqcSelectItem" onClick={() => { onChange(option); setOpen(false); }}><span className={`mcqcOptionRadio ${value === option ? "mcqcOptionSelected" : ""}`} /><span>{option}</span></button>)}</div>}</div>;
+  return <div className="mcqcSelectRoot" ref={root} onPointerLeave={event => { if (event.pointerType === "mouse") window.setTimeout(() => { if (root.current && !root.current.matches(":hover")) setOpen(false); }, 300); }}><button type="button" className="mcqcSelectTrigger" aria-expanded={open} onClick={() => setOpen(v => !v)}><span>{value || placeholder || "Select"}</span><Icon name="arrow-down-01.svg" size={20} /></button>{open && <div className="mcqcSelectList" role="radiogroup">{options.map(option => <button key={option} type="button" role="radio" aria-checked={value === option} className="mcqcSelectItem" onClick={() => { onChange(option); setOpen(false); }}><span className={`mcqcOptionRadio ${value === option ? "mcqcOptionSelected" : ""}`} /><span>{option}</span></button>)}</div>}</div>;
 }
 function PreviewStatus({ correct, size = 20 }: { correct: boolean; size?: number }) { return <span className={`mcqcPreviewStatusIcon ${correct ? "is-correct" : "is-wrong"}`} aria-hidden="true" />; }
 type OptionDetail = { feedback: string; explanation: string; hint: string; showHint: boolean; allowHint: boolean };
@@ -116,7 +118,7 @@ function QuestionsPreview({ questions, details, tags, onBack, onEdit, mcqValues 
         <div className="mcqcPreviewPanel"><button type="button" className="mcqcPreviewSectionHead" onClick={()=>toggle("answers")}>Answer Options <Icon name="arrow-down-01.svg" size={18} className={sections.answers?"mcqcRotated":""}/></button>{sections.answers && <div className="mcqcPreviewAnswers">{current.q.options.map((answer,i)=><div key={i} className={`mcqcPreviewAnswer ${current.q.correct===i?"correct":"incorrect"}`}><PreviewStatus correct={current.q.correct===i} size={20}/><span className="mcqcAnswerLetter">{String.fromCharCode(65+i)}</span><span className="mcqcPreviewAnswerText">{answer||`Option ${String.fromCharCode(65+i)} (empty)`}</span>{!learner && <small>{current.q.correct===i?"Correct Answer":"Wrong Answer"}</small>}</div>)}</div>}</div>
         {!learner && <div className="mcqcPreviewPanel"><button type="button" className="mcqcPreviewSectionHead" onClick={()=>toggle("learning")}>Feedback and Learning <Icon name="arrow-down-01.svg" size={18} className={sections.learning?"mcqcRotated":""}/></button>{sections.learning && <div className="mcqcPreviewLearning"><section><h4><PreviewStatus correct={true} size={20}/> Correct-answer Feedback</h4>{current.q.options.map((answer,i)=>current.q.correct===i?<div key={i} className="mcqcPreviewFeedbackItem"><button type="button" onClick={()=>setOpenFeedback(openFeedback===i?null:i)}><PreviewStatus correct={true} size={17}/>{String.fromCharCode(65+i)} — {answer||"(empty)"}<Icon name="arrow-down-01.svg" size={16}/></button>{(openFeedback===i||openFeedback===null) && <p>{detail(current.index,i).feedback || "No feedback entered."}</p>}</div>:null)}</section><section><h4><PreviewStatus correct={false} size={20}/> Wrong-answer Feedback</h4>{current.q.options.map((answer,i)=>current.q.correct!==i?<div key={i} className="mcqcPreviewFeedbackItem"><button type="button" onClick={()=>setOpenFeedback(openFeedback===i?null:i)}><PreviewStatus correct={false} size={17}/>{String.fromCharCode(65+i)} — {answer||"(empty)"}<Icon name="arrow-down-01.svg" size={16}/></button>{(openFeedback===i||openFeedback===null) && <p>{detail(current.index,i).feedback || "No feedback entered."}</p>}</div>:null)}</section><section><h4><Icon name="assignments.svg" size={20}/> Explanation</h4><p>{current.q.correct >= 0 ? detail(current.index,current.q.correct).explanation.trim() || "No explanation entered." : "No correct answer selected."}</p></section><section><h4><Icon name="idea.svg" size={20}/> Hint</h4><p>{current.q.correct >= 0 ? detail(current.index,current.q.correct).hint.trim() || "No hint entered." : "No correct answer selected."}</p></section></div>}</div>}
         {!learner && <div className="mcqcPreviewPanel"><button type="button" className="mcqcPreviewSectionHead" onClick={()=>toggle("settings")}>Question Settings <Icon name="arrow-down-01.svg" size={18} className={sections.settings?"mcqcRotated":""}/></button>{sections.settings && <div className="mcqcPreviewSettings">{[["Difficulty",current.q.difficulty,"blueview.svg"],["Bloom’s Taxonomy",current.q.bloom||"Not selected","brain.svg"],["Category",current.q.category||"Not selected","folder.svg"],["Tags",tags.join(", ")||"No tags","tag.svg"],["Mandatory",current.q.mandatory?"YES":"NO","circle-check.svg"]].map(([label,value,icon])=><div key={label}><span>{label}</span><strong><Icon name={icon} size={18}/>{value}</strong></div>)}</div>}</div>}
-        <div className="mcqcPreviewBottom"><button type="button" onClick={onBack}>Back to Question</button><button type="button" className="mcqcPreviewSave" onClick={onBack}>Save And Continue</button></div></article>:<div className="mcqcPreviewEmpty"><p>{filter==="All Questions"?"No questions have been entered yet.":`No ${filter.toLowerCase()} questions found.`}</p><button type="button" onClick={onBack}>Back to Question</button></div>}
+        <div className="mcqcPreviewBottom"><button type="button" onClick={onBack}>Back to Question</button></div></article>:<div className="mcqcPreviewEmpty"><p>{filter==="All Questions"?"No questions have been entered yet.":`No ${filter.toLowerCase()} questions found.`}</p><button type="button" onClick={onBack}>Back to Question</button></div>}
     </div>
   </div>;
 }
@@ -153,6 +155,8 @@ function QuestionBuilder({ questions, setQuestions, onExit, mcqValues }: { quest
   const [notice, setNotice] = useState("");
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const saveTimer = useRef<number | null>(null);
+  useEffect(() => () => { if (saveTimer.current) window.clearTimeout(saveTimer.current); }, []);
   const saveAndContinue = () => {
     if (isSaving) return;
     try {
@@ -160,7 +164,7 @@ function QuestionBuilder({ questions, setQuestions, onExit, mcqValues }: { quest
       setNotice("");
       setSaveSuccess(true);
       setIsSaving(true);
-      window.setTimeout(() => router.push("/assessments/create/evaluation"), 1200);
+      saveTimer.current = window.setTimeout(() => { setSaveSuccess(false); setIsSaving(false); router.push("/assessments/create/evaluation"); }, 3000);
     } catch {
       setSaveSuccess(false);
       setNotice("Could not save the questions. Please try again.");
@@ -185,7 +189,7 @@ function QuestionBuilder({ questions, setQuestions, onExit, mcqValues }: { quest
   return <div className="mcqcBuilder">
     <div className="mcqcBuilderTop"><nav className="mcqcBuilderCrumb" aria-label="Question breadcrumb"><Link href="/assessments">Assessment</Link><Icon name="arrowrightdouble.svg" /><button type="button" onClick={onExit}>Create Assessment</button><Icon name="arrowrightdouble.svg" /><strong>Create Questions</strong></nav><div className="mcqcBuilderWelcome"><Icon name="ai-sparkles.svg" size={30} /><div><h2>Let's Get Started! Antony?</h2><p>Let's Build A Great Question.</p></div></div></div>
     <div className="mcqcBuilderGrid"><section className="mcqcBuilderMain">
-      <div className="mcqcQuestionsHeading"><div><h2>Question {active + 1} of {mcqValues.questionCount}</h2><p>{mcqValues.questionCount} Questions | {mcqValues.totalMarks} Marks</p></div><div className="mcqcAddMenu"><button type="button" className="mcqcTopAdd" onClick={() => setAddOpen(v => !v)} aria-expanded={addOpen}><Icon name="plus.svg" size={20} />Add</button>{addOpen && <div className="mcqcAddMenuList" role="radiogroup">{["Create Manually", "Import From Question Bank", "Generate with AI"].map((option,index) => <button type="button" key={option} role="radio" aria-checked={index === 0} onClick={() => chooseAdd(option)}><span className={`mcqcOptionRadio ${index === 0 ? "mcqcOptionSelected" : ""}`} />{option}</button>)}</div>}</div></div>
+      <div className="mcqcQuestionsHeading"><div><h2>Question {active + 1} of {mcqValues.questionCount}</h2><p>{mcqValues.questionCount} Questions | {mcqValues.totalMarks} Marks</p></div><div className="mcqcAddMenu"><button type="button" className="mcqcTopAdd" onClick={() => setAddOpen(v => !v)} aria-expanded={addOpen}><Icon name="plus.svg" size={20} />Add</button>{addOpen && <div className="mcqcAddMenuList" role="radiogroup">{["Create Manually"].map((option,index) => <button type="button" key={option} role="radio" aria-checked={index === 0} onClick={() => chooseAdd(option)}><span className={`mcqcOptionRadio ${index === 0 ? "mcqcOptionSelected" : ""}`} />{option}</button>)}</div>}</div></div>
     <div className="mcqcTopQuestionNavigator" aria-label="Question navigation">
       <div className="mcqcNumberNavigation">
         <button type="button" className="mcqcRoundNav" aria-label="Previous question" onClick={() => setActive(n => Math.max(0,n-1))}>
@@ -216,10 +220,10 @@ function QuestionBuilder({ questions, setQuestions, onExit, mcqValues }: { quest
       <div className="mcqcQuestionForm"><div className="mcqcBuilderField"><label>Question Type</label><QuestionTypeDropdown value={item.type} onChange={v => update({ type:v })}/></div>
         <div className="mcqcBuilderField mcqcWriteField"><label htmlFor="mcqcQuestionText">Write Your Question <small>{item.text.length}/250</small></label><div className="mcqcEditorSurface">{optionToolbar("mcqcQuestionText")}<textarea id="mcqcQuestionText" maxLength={250} rows={3} placeholder="Write your question here..." value={item.text} onChange={e => update({ text: e.target.value })}/></div></div>
         <div className="mcqcBuilderField"><label>Available Options</label><div className="mcqcAnswerOptions">{item.options.map((option,index) => { const open = expandedOptions.includes(index); const detail = getDetail(index); return <div className="mcqcAnswerSection" key={index}><button type="button" className="mcqcAnswerExpand" aria-expanded={open} onClick={() => { setExpandedOptions(open ? [] : [index]); setExpandedDetail(null); }}><span>Option {String.fromCharCode(65+index)}</span><Icon name="arrow-down-01.svg" size={21} className={open ? "mcqcRotated" : ""}/></button>{open && <div className="mcqcAnswerContent"><div className="mcqcOptionSubLabel"><span>Text</span><small>{option.length}/250</small></div><div className="mcqcOptionEditor">{optionToolbar(`mcqc-opt-${active}-${index}`)}<textarea id={`mcqc-opt-${active}-${index}`} rows={3} maxLength={250} placeholder={`Enter option ${String.fromCharCode(65+index)}`} value={option} onChange={e=>setOption(index,e.target.value)}/></div><label className="mcqcCorrectOption"><input type="checkbox" checked={item.correct===index} onChange={()=>update({correct:item.correct===index?-1:index})}/>Correct Answers</label>{(["feedback","explanation","hint"] as const).map(field => { const sectionId = `${index}-${field}`; const sectionOpen = expandedDetail===sectionId; return <div className="mcqcOptionDetail" key={field}><button type="button" className="mcqcOptionDetailHead" aria-expanded={sectionOpen} onClick={()=>setExpandedDetail(sectionOpen?null:sectionId)}><span className="mcqcDetailHeading"><Icon name={field==="feedback"?"message-circle-more.svg":field==="explanation"?"assignments.svg":"idea.svg"} size={18}/>{field[0].toUpperCase()+field.slice(1)}</span><small>{detail[field].length}/250</small><Icon name="arrow-down-01.svg" size={18} className={sectionOpen?"mcqcRotated":""}/></button>{sectionOpen && <div className="mcqcOptionDetailBody">{detailEditor(index,field)}{field==="hint" && <div className="mcqcHintChecks"><label><input type="checkbox" checked={detail.showHint} onChange={e=>setDetail(index,{showHint:e.target.checked})}/>Show hint before answering</label><label><input type="checkbox" checked={detail.allowHint} onChange={e=>setDetail(index,{allowHint:e.target.checked})}/>Allow learner to request hint</label></div>}</div>}</div>; })}{item.options.length>2 && <button type="button" className="mcqcRemoveOption" onClick={()=>{ update({options:item.options.filter((_,i)=>i!==index),correct:item.correct===index?-1:item.correct>index?item.correct-1:item.correct});setExpandedOptions([]);setExpandedDetail(null); }}>Remove Option</button>}</div>}</div>; })}</div><button type="button" className="mcqcAddOptions" onClick={()=>{update({options:[...item.options,""]});setExpandedOptions([item.options.length]);setExpandedDetail(null);}}><Icon name="plus.svg" size={20}/>Add Options</button></div>
-      </div><div className="mcqcBuilderBottom"><div className="mcqcAddMenu mcqcBottomAddMenu"><button type="button" className="mcqcBuilderAction mcqcSubmitQuestion" onClick={() => { setBottomAddOpen(v => !v); setAddOpen(false); }} aria-expanded={bottomAddOpen} aria-haspopup="true"><Icon name="plus.svg" size={21}/>Add Questions</button>{bottomAddOpen && <div className="mcqcAddMenuList" role="radiogroup">{["Create Manually", "Import From Question Bank", "Generate with AI"].map((option,index) => <button type="button" key={option} role="radio" aria-checked={index === 0} onClick={() => chooseAdd(option)}><span className={`mcqcOptionRadio ${index === 0 ? "mcqcOptionSelected" : ""}`} />{option}</button>)}</div>}</div><div className="mcqcBuilderArrows"><button type="button" className="mcqcRoundNav" aria-label="Previous" onClick={() => setActive(n=>Math.max(0,n-1))}><Icon name="arrowleft.svg"/></button><button type="button" className="mcqcRoundNav" aria-label="Next" onClick={() => { if(active+1<mcqValues.questionCount)setActive(n=>n+1); }}><Icon name="arrowright.svg"/></button></div></div>
+      </div><div className="mcqcBuilderBottom"><div className="mcqcAddMenu mcqcBottomAddMenu"><button type="button" className="mcqcBuilderAction mcqcSubmitQuestion" onClick={() => { setBottomAddOpen(v => !v); setAddOpen(false); }} aria-expanded={bottomAddOpen} aria-haspopup="true"><Icon name="plus.svg" size={21}/>Add Questions</button>{bottomAddOpen && <div className="mcqcAddMenuList" role="radiogroup">{["Create Manually"].map((option,index) => <button type="button" key={option} role="radio" aria-checked={index === 0} onClick={() => chooseAdd(option)}><span className={`mcqcOptionRadio ${index === 0 ? "mcqcOptionSelected" : ""}`} />{option}</button>)}</div>}</div><div className="mcqcBuilderArrows"><button type="button" className="mcqcRoundNav" aria-label="Previous" onClick={() => setActive(n=>Math.max(0,n-1))}><Icon name="arrowleft.svg"/></button><button type="button" className="mcqcRoundNav" aria-label="Next" onClick={() => { if(active+1<mcqValues.questionCount)setActive(n=>n+1); }}><Icon name="arrowright.svg"/></button></div></div>
     </section><aside className="mcqcBuilderAside"><section className="mcqcAsideSection"><h3>Question Settings</h3><div className="mcqcBuilderField"><label htmlFor="mcqcPoints">Points</label><div className="mcqcPointsControl"><input id="mcqcPoints" type="number" min="0" step="1" value={item.points} onChange={e=>update({points:e.target.value})}/><div className="mcqcPointsSteppers"><button type="button" aria-label="Increase points" onClick={()=>update({points:String((Number(item.points)||0)+1)})}><Icon name="arrow-down-01.svg" size={14} className="mcqcArrowUp"/></button><button type="button" aria-label="Decrease points" onClick={()=>update({points:String(Math.max(0,(Number(item.points)||0)-1))})}><Icon name="arrow-down-01.svg" size={14}/></button></div></div></div><div className="mcqcBuilderField"><label>Difficulty</label><NeumoSelect value={item.difficulty} options={["Easy","Medium","Hard"]} onChange={v=>update({difficulty:v})}/></div><div className="mcqcBuilderField"><label>Category</label><NeumoSelect value={item.category} options={CATEGORIES} placeholder="Select Category" onChange={v=>update({category:v})}/></div><div className="mcqcBuilderField"><label>Bloom’s Taxonomy</label><NeumoSelect value={item.bloom} options={BLOOMS} placeholder="Select Bloom’s Level" onChange={v=>update({bloom:v})}/></div><div className="mcqcBuilderField"><label>Tag</label><div className="mcqcTagHolder"><button type="button" className="mcqcAddTag" onClick={()=>setAddingTag(v=>!v)}><Icon name="plus.svg" size={17}/>Add Tag</button>{addingTag && <input className="mcqcTagInput" aria-label="New tag" autoFocus value={tagInput} onChange={e=>setTagInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&tagInput.trim()){e.preventDefault();setTags(old=>[...old,tagInput.trim()]);setTagInput('');setAddingTag(false);}}}/>}</div><div className="mcqcTagRow">{tags.map(tag=><button type="button" key={tag} onClick={()=>setTags(old=>old.filter(v=>v!==tag))}>{tag} <span>×</span></button>)}</div></div><div className="mcqcMandatory"><span>Mandatory</span><button type="button" className={`mcqcSwitch ${item.mandatory ? 'mcqcSwitchOn' : ''}`} role="switch" aria-label="Mandatory Question" aria-checked={item.mandatory} onClick={()=>update({mandatory:!item.mandatory})}><span className="mcqcSwitchText">{item.mandatory?'ON':'OFF'}</span><span className="mcqcSwitchKnob"/></button></div><p className="mcqcAsideHint">This Question is Mandatory</p></section><section className="mcqcAsideSection mcqcBuilderSummary"><h3>Assessment Summary</h3><div className="mcqcStatGrid"><div><strong>{currentDone}/{mcqValues.questionCount}</strong><span>Questions</span></div><div><strong>{questions.reduce((n,q)=>n+(complete(q)?Number(q.points)||0:0),0)}</strong><span>Marks</span></div><div><strong>60</strong><span>Minutes</span></div></div><p>Marks per Question: {mcqValues.marksPerQuestion}</p><div className="mcqcSummaryProgress"><span style={{width:`${Math.min(100,currentDone/mcqValues.questionCount*100)}%`}}/></div><p>Target is {mcqValues.questionCount} questions · {mcqValues.totalMarks} marks. Add questions to get started.</p><div className="mcqcBuilderField"><label>Passing Score</label><NeumoSelect value="60%" options={["40%","50%","60%","70%","80%","90%"]} onChange={()=>{}}/></div></section></aside></div>
     {notice && <p className="mcqcBuilderNotice mcqcValidationError" role="alert">{notice}</p>}
-    <div className="mcqcBuilderPageFooter"><button type="button" className="mcqcFooterPill" onClick={()=>{setNotice("");setPreviewing(true);}}>Preview Questions</button><div className="mcqcSaveContinueGroup">{saveSuccess && <span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}<button type="button" className="mcqcFooterPill mcqcFooterContinue" disabled={isSaving} onClick={saveAndContinue}>Save &amp; Continue</button></div></div>
+    <div className="mcqcBuilderPageFooter"><button type="button" className="mcqcFooterPill" disabled={isSaving} onClick={onExit}>Back</button><button type="button" className="mcqcFooterPill" onClick={()=>{setNotice("");setPreviewing(true);}}>Preview Questions</button><div className="mcqcSaveContinueGroup">{saveSuccess && <span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}<button type="button" className="mcqcFooterPill mcqcFooterContinue" disabled={isSaving} onClick={saveAndContinue}>Save &amp; Continue</button></div></div>
   </div>;
 }
 
@@ -257,9 +261,9 @@ function SASelect({ value, options, onChange, label, compact = false, preview = 
     document.addEventListener("keydown", closeEscape);
     return () => { document.removeEventListener("pointerdown", closeOutside); document.removeEventListener("keydown", closeEscape); };
   }, [open]);
-  return <div ref={root} className={`saSelect saCustomSelect ${compact ? "saSelectCompact" : ""} ${preview ? "saPreviewSelect" : ""} ${open ? "saSelectOpen" : ""}`}>
+  return <div ref={root} className={`saSelect saCustomSelect ${compact ? "saSelectCompact" : ""} ${preview ? "saPreviewSelect" : ""} ${open ? "saSelectOpen" : ""}`} onPointerLeave={event => { if (event.pointerType === "mouse") window.setTimeout(() => { if (root.current && !root.current.matches(":hover")) setOpen(false); }, 300); }}>
     <button type="button" className="saSelectButton" aria-label={label} aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(previous => !previous)}>
-      <span>{value}</span><SAIcon name="arrowDown" size={compact ? 16 : 20} className={open ? "saDropdownArrowOpen" : ""}/>
+      <span>{value || `Select ${label.toLowerCase()}`}</span><SAIcon name="arrowDown" size={compact ? 16 : 20} className={open ? "saDropdownArrowOpen" : ""}/>
     </button>
     {open && <div className="saSelectPopup" role="listbox" aria-label={label}>
       {options.map(option => <button key={option} type="button" role="option" aria-selected={option === value} className={`saSelectOption ${option === value ? "saOptionActive" : ""}`} onClick={() => { onChange(option); setOpen(false); }}>
@@ -269,24 +273,23 @@ function SASelect({ value, options, onChange, label, compact = false, preview = 
   </div>;
 }
 
-function SAToolbar({ label, onAction, className = "" }: { label: string; onAction: () => void; className?: string }) {
-  const tool = (name: keyof typeof SA_ICON_PATHS, title: string) => <button type="button" aria-label={title} title={title} onClick={onAction}><SAIcon name={name} /></button>;
-  return <div className={`saMiniToolbar ${className}`} role="toolbar" aria-label={`${label} formatting`}>
-    {tool("undo", "Undo")}{tool("redo", "Redo")}
-    <button className="saToolFont" type="button" onClick={onAction}>Arial<SAIcon name="arrowDown" size={16}/></button>
-    <button className="saToolSize" type="button" onClick={onAction}>16<SAIcon name="arrowDown" size={16}/></button>
-    {tool("bold", "Bold")}{tool("italic", "Italic")}{tool("underline", "Underline")}
-    {tool("pencil", "Pencil")}{tool("highlighter", "Highlight")}{tool("pen", "Pen")}{tool("more", "More formatting")}
-  </div>;
+// Empty contenteditable elements may report a line break or zero-width marker.
+// Keep actual spaces and all user-entered text in the character count.
+function feedbackTextWithoutEmptyMarker(value: string, html?: string): string {
+  if (!value || !/^[\r\n\u200B\uFEFF]+$/.test(value)) return value;
+  if (html && html.replace(/<[^>]*>/g, "").replace(/(?:&#8203;|&#x200b;|&ZeroWidthSpace;|[\r\n\u200B\uFEFF])/gi, "") !== "") return value;
+  return "";
 }
-
-function SARichField({ value, onChange, placeholder = "", label, plain = false, tall = false }: {
-  value: string; onChange: (value: string) => void; placeholder?: string; label: string; plain?: boolean; tall?: boolean;
+function SARichField({ value, onChange, html, onHtmlChange, onError, placeholder = "", label, plain = false, tall = false }: {
+  value: string; onChange: (value: string) => void; html?: string; onHtmlChange: (html: string) => void; onError: (message: string) => void;
+  placeholder?: string; label: string; plain?: boolean; tall?: boolean;
 }) {
-  const input = useRef<HTMLTextAreaElement>(null);
+  const feedbackField = label === "Full Marks" || label === "Partial Marks" || label === "Zero Marks";
+  const latestHtml = useRef(html);
+  useEffect(() => { latestHtml.current = html; }, [html]);
+  const countedValue = feedbackField ? feedbackTextWithoutEmptyMarker(value, html) : value;
   return <div className={`saRich ${plain ? "saRichPlain" : ""} ${tall ? "saRichTall" : ""}`}>
-    <SAToolbar label={label} onAction={() => input.current?.focus()}/>
-    <textarea ref={input} aria-label={label} value={value} onChange={event => onChange(event.target.value)} placeholder={placeholder}/>
+    <MCQRichEditor editorId={`sa-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`} value={countedValue} html={html} onChange={text => onChange(feedbackField ? feedbackTextWithoutEmptyMarker(text, latestHtml.current) : text)} onHtmlChange={nextHtml => { latestHtml.current = nextHtml; onHtmlChange(nextHtml); }} onError={onError} placeholder={placeholder || label} maxLength={250} extendedToolbar />
   </div>;
 }
 function SASwitch({ label, checked, onChange }: { label: string; checked: boolean; onChange: (value: boolean) => void }) {
@@ -302,51 +305,75 @@ type SAQuestion = { text: string; points: string; difficulty: string; category: 
 type SAConfig = {
   responseFormat: string; inputSize: string; minWords: string; maxWords: string; maxChars: string; required: boolean;
   rubricOptions: boolean[]; criteria: SACriterion[]; feedback: string[]; explanation: string;
-  hintBefore: boolean; hintAfter: boolean; graderInfo: string;
+  hintBefore: boolean; hintAfter: boolean; graderInfo: string; richHtml?: Record<string, string>;
+  gradingMethod?: "Equal Marks" | "Custom"; negativeMarking?: string; partialCredit?: boolean; minimumZero?: boolean; scoreOverrides?: Record<string, string>;
 };
 const saInitialLevels = (offset: number): SALevel[] => [
-  { id: offset, title: "Excellent", points: "01", description: "Accurate and Complete" },
-  { id: offset + 1, title: "Fair", points: "00", description: "Partially correct or incomplete" },
-  { id: offset + 2, title: "Poor", points: "00", description: "Incorrect or Missing" },
+  { id: offset, title: "", points: "", description: "" },
+  { id: offset + 1, title: "", points: "", description: "" },
+  { id: offset + 2, title: "", points: "", description: "" },
 ];
 const saDefaultConfig = (): SAConfig => ({
-  responseFormat: "Plain Text", inputSize: "5", minWords: "10", maxWords: "50", maxChars: "250", required: true,
+  responseFormat: "", inputSize: "", minWords: "", maxWords: "", maxChars: "", required: true,
   rubricOptions: [true, true, true, true, true, true, false],
   criteria: [
-    { id: 1, title: "Concept accuracy", description: "Explains the idea correctly", levels: saInitialLevels(3) },
-    { id: 2, title: "Clarity and Language", description: "Clear, Concise sentences", levels: saInitialLevels(6) },
+    { id: 1, title: "", description: "", levels: saInitialLevels(3) },
+    { id: 2, title: "", description: "", levels: saInitialLevels(6) },
   ],
-  feedback: ["Great — you explained both sides of overfitting.", "Partly right — mention how it behaves on new data.", "Review the lesson on generalization."],
-  explanation: "Overfitting = low training error, high error on unseen data.", hintBefore: true, hintAfter: false,
-  graderInfo: "Accept any answer that contrasts training vs unseen data.",
+  feedback: ["", "", ""], explanation: "", hintBefore: true, hintAfter: false, graderInfo: "", richHtml: {},
 });
-function ShortAnswerExpanded({ value, update, config, onConfigChange }: {
+// Previous versions inserted this complete example into untouched drafts.
+// Only recognise the exact original example; preserve all other saved content.
+function clearLegacyExample(config: SAConfig): SAConfig {
+  if (!config || typeof config !== "object") return config;
+  const expectedFeedback = ["Great — you explained both sides of overfitting.", "Partly right — mention how it behaves on new data.", "Review the lesson on generalization."];
+  const exactExample = config.graderInfo === "Accept any answer that contrasts training vs unseen data."
+    && config.explanation === "Overfitting = low training error, high error on unseen data."
+    && Array.isArray(config.feedback) && config.feedback.length === 3 && config.feedback.every((text, index) => text === expectedFeedback[index])
+    && Array.isArray(config.criteria) && config.criteria.length === 2
+    && config.criteria[0]?.title === "Concept accuracy" && config.criteria[0]?.description === "Explains the idea correctly"
+    && config.criteria[1]?.title === "Clarity and Language" && config.criteria[1]?.description === "Clear, Concise sentences"
+    && config.criteria.every(criterion => Array.isArray(criterion.levels) && criterion.levels.length === 3 && criterion.levels.every((level, index) => level.title === ["Excellent", "Fair", "Poor"][index] && level.points === ["01", "00", "00"][index] && level.description === ["Accurate and Complete", "Partially correct or incomplete", "Incorrect or Missing"][index]))
+    && !Object.values(config.richHtml || {}).some(Boolean);
+  if (!exactExample) return config;
+  return { ...config,
+    responseFormat: config.responseFormat === "Plain Text" ? "" : config.responseFormat,
+    inputSize: config.inputSize === "5" ? "" : config.inputSize,
+    minWords: config.minWords === "10" ? "" : config.minWords,
+    maxWords: config.maxWords === "50" ? "" : config.maxWords,
+    maxChars: config.maxChars === "250" ? "" : config.maxChars,
+    criteria: config.criteria.map(criterion => ({ ...criterion, title: "", description: "", levels: criterion.levels.map(level => ({ ...level, title: "", points: "", description: "" })) })),
+    feedback: ["", "", ""], explanation: "", graderInfo: ""
+  };
+}
+function ShortAnswerExpanded({ value, update, config, onConfigChange, onError }: {
   value: SAQuestion; update: (patch: Partial<SAQuestion>) => void; config: SAConfig;
-  onConfigChange: (change: (previous: SAConfig) => SAConfig) => void;
+  onConfigChange: (change: (previous: SAConfig) => SAConfig) => void; onError: (message: string) => void;
 }) {
   const [sections, setSections] = useState<Record<string, boolean>>({ answer: true, model: true, rubric: true, feedback: true, explanation: true, hint: true });
   const { responseFormat, inputSize, minWords, maxWords, maxChars, required, rubricOptions, criteria, feedback, explanation, hintBefore, hintAfter, graderInfo } = config;
   const fieldSetter = <K extends keyof SAConfig,>(key: K) => (next: React.SetStateAction<SAConfig[K]>) =>
     onConfigChange(old => ({ ...old, [key]: typeof next === "function" ? (next as (value: SAConfig[K]) => SAConfig[K])(old[key]) : next }));
   const setResponseFormat = fieldSetter("responseFormat"), setInputSize = fieldSetter("inputSize"), setMinWords = fieldSetter("minWords"), setMaxWords = fieldSetter("maxWords"), setMaxChars = fieldSetter("maxChars"), setRequired = fieldSetter("required");
-  const setRubricOptions = fieldSetter("rubricOptions"), setCriteria = fieldSetter("criteria"), setFeedback = fieldSetter("feedback"), setExplanation = fieldSetter("explanation"), setHintBefore = fieldSetter("hintBefore"), setHintAfter = fieldSetter("hintAfter"), setGraderInfo = fieldSetter("graderInfo");
+  const setRubricOptions = fieldSetter("rubricOptions"), setCriteria = (next: React.SetStateAction<SACriterion[]>) => onConfigChange(old => ({ ...old, criteria: typeof next === "function" ? next(old.criteria) : next, scoreOverrides: {} })), setFeedback = fieldSetter("feedback"), setExplanation = fieldSetter("explanation"), setHintBefore = fieldSetter("hintBefore"), setHintAfter = fieldSetter("hintAfter"), setGraderInfo = fieldSetter("graderInfo");
+  const richProps = (key: string) => ({ html: config.richHtml?.[key], onHtmlChange: (html: string) => onConfigChange(old => ({ ...old, richHtml: { ...old.richHtml, [key]: html } })), onError });
   const nextId = useRef(Math.max(20, ...criteria.flatMap(item => [item.id + 1, ...item.levels.map(level => level.id + 1)])));
   const initialLevels = saInitialLevels;
   const toggle = (key: string) => setSections(old => ({ ...old, [key]: !old[key] }));
   const changeCriterion = (id: number, patch: Partial<SACriterion>) => setCriteria(old => old.map(item => item.id === id ? { ...item, ...patch } : item));
   const changeLevel = (criterionId: number, levelId: number, patch: Partial<SALevel>) => setCriteria(old => old.map(item => item.id === criterionId ? { ...item, levels: item.levels.map(level => level.id === levelId ? { ...level, ...patch } : level) } : item));
-  const total = criteria.reduce((sum, criterion) => sum + Math.max(0, ...criterion.levels.map(level => Number(level.points) || 0)), 0);
+  const total = criteria.reduce((sum, criterion) => sum + (Number(criterion.levels[0]?.points) || 0), 0);
   const panel = (key: string, heading: string, body: React.ReactNode, meta = "Not shown to Learners", icon: keyof typeof SA_ICON_PATHS = "edit") =>
     <section className={`saAccordion saAccordion-${key}`}>
       <button type="button" className="saAccordionTitle" onClick={() => toggle(key)} aria-expanded={!!sections[key]} aria-controls={`sa-section-${key}`}>
         <span className="saSectionHeading"><span className="saSectionIcon"><SAIcon name={icon} size={16}/></span>{heading}</span>
-        <span className="saSectionMeta">{meta}<SAIcon name="arrowDown" size={24} className={sections[key] ? "saArrowOpen" : ""}/></span>
+        <span className="saSectionMeta">{!/^\d+\s*\/\s*\d+/.test(meta) && meta}<SAIcon name="arrowDown" size={24} className={sections[key] ? "saArrowOpen" : ""}/></span>
       </button>
       <div id={`sa-section-${key}`} className="saAccordionBody" hidden={!sections[key]}>{body}</div>
     </section>;
   return <div className="mcqcShortAnswerFields saExpanded">
     {panel("answer", "Answer Box Placeholder", <>
-      <SARichField value={value.answer} onChange={text => update({ answer: text })} label="Answer box placeholder" placeholder="Type your Short answer (2-3 sentences)..." plain/>
+      <SARichField {...richProps("answer")} value={value.answer} onChange={text => update({ answer: text })} label="Answer box placeholder" placeholder="Type your Short answer (2-3 sentences)..." plain/>
       <div className="saSettingsGrid">
         <label>Response format<SASelect label="Response format" value={responseFormat} onChange={setResponseFormat} options={["Plain Text", "Rich Text"]}/></label>
         <label>Input box size (lines)<SASelect label="Input box size (lines)" value={inputSize} onChange={setInputSize} options={["3", "5", "8", "10"]}/></label>
@@ -355,50 +382,54 @@ function ShortAnswerExpanded({ value, update, config, onConfigChange }: {
         <label>Maximum Characters<SASelect label="Maximum Characters" value={maxChars} onChange={setMaxChars} options={["100", "250", "500", "1000", "2000"]}/></label>
       </div>
       <SASwitch label="Response Required" checked={required} onChange={setRequired}/>
-    </>, "180/250")}
+    </>, `${value.answer.length}/250`)}
     {panel("model", "Model Answer and Grader Information", <>
-      <div className="saLabeledField"><div className="saSmallLabel">Model Answer</div><SARichField value={value.rubric} onChange={text => update({ rubric: text })} label="Model Answer" placeholder="Overfitting happens when a model memorizes the training data, so it performs well there but fails on new data." tall/></div>
-      <div className="saLabeledField"><div className="saSmallLabel">Information for Graders</div><SARichField value={graderInfo} onChange={setGraderInfo} label="Information for Graders"/></div>
+      <div className="saLabeledField"><div className="saSmallLabel">Model Answer</div><SARichField {...richProps("modelAnswer")} value={value.rubric} onChange={text => update({ rubric: text })} label="Model Answer" placeholder="Enter the model answer..." tall/></div>
+      <div className="saLabeledField"><div className="saSmallLabel">Information for Graders</div><SARichField {...richProps("graderInfo")} value={graderInfo} onChange={setGraderInfo} label="Information for Graders"/></div>
     </>)}
     {panel("rubric", "Grading Method and Rubrics", <>
-      <div className="saCriteria">
-        {criteria.map((criterion, index) => <div className="saCriterion" key={criterion.id}>
-          <div className="saLabeledField"><div className="saSmallLabel saLabelStrong">Criterion {index + 1}</div>
-            <SASelect label={`Criterion ${index + 1}`} value={criterion.title} onChange={title => changeCriterion(criterion.id, { title })} options={["Concept accuracy", "Clarity and Language", "Completeness", "Relevance"]}/>
-          </div>
-          <div className="saLabeledField"><div className="saSmallLabel">Description</div><SARichField label={`Criterion ${index + 1} description`} value={criterion.description} onChange={description => changeCriterion(criterion.id, { description })}/></div>
-          <div className="saLevelGrid">{criterion.levels.map((level, levelIndex) => <div className="saLevel" key={level.id}>
-            <div className="saLevelTitle">Level {levelIndex + 1}<button type="button" className="saRemoveLevel" aria-label={`Remove criterion ${index + 1} level ${levelIndex + 1}`} onClick={() => changeCriterion(criterion.id, { levels: criterion.levels.filter(item => item.id !== level.id) })}><SAIcon name="remove" size={16}/></button></div>
-            <div className="saLevelFields">
-              <label>Title<SASelect compact label={`Criterion ${index + 1} level ${levelIndex + 1} title`} value={level.title} onChange={title => changeLevel(criterion.id, level.id, { title })} options={["Excellent", "Fair", "Poor"]}/></label>
-              <label>Points<SASelect compact label={`Criterion ${index + 1} level ${levelIndex + 1} points`} value={level.points} onChange={points => changeLevel(criterion.id, level.id, { points })} options={["00", "01", "02", "03", "04", "05", "10"]}/></label>
-              <label>Description<textarea aria-label={`Criterion ${index + 1} level ${levelIndex + 1} description`} value={level.description} onChange={event => changeLevel(criterion.id, level.id, { description: event.target.value })}/></label>
-            </div>
-          </div>)}</div>
-          <div className="saCriterionActions">
-            <button type="button" onClick={() => changeCriterion(criterion.id, { levels: [...criterion.levels, { id: nextId.current++, title: "Poor", points: "00", description: "" }] })}><SAIcon name="plus"/>Add Level</button>
-            <button type="button" onClick={() => setCriteria(old => old.filter(item => item.id !== criterion.id))}>Remove Criterion</button>
-          </div>
-        </div>)}
+      <div className="saCriteria">{criteria.map((criterion, index) => <div className="saCriterion" key={criterion.id}>
+        <label>Criterion {index + 1}<input className="saGradeInput" maxLength={250} value={criterion.title} onChange={e => changeCriterion(criterion.id, { title: e.target.value })} placeholder="Enter criterion"/></label>
+        {(config.gradingMethod ?? "Equal Marks") === "Custom" && <label>Criterion marks<input className="saGradeInput" type="number" min="0" step="0.5" value={criterion.levels[0]?.points ?? ""} onChange={e => { const points = e.target.value; changeCriterion(criterion.id, { levels: criterion.levels.length ? criterion.levels.map((level, i) => i === 0 ? { ...level, points } : level) : [{ id: nextId.current++, title: "Excellent", points, description: "" }] }); }}/></label>}
+        <div className="saLabeledField"><div className="saSmallLabel">Description</div><SARichField {...richProps(`criterion-${criterion.id}-description`)} label={`Criterion ${index + 1} description`} value={criterion.description} onChange={description => changeCriterion(criterion.id, { description })} /></div>
+        <div className="saLevelGrid">{criterion.levels.map((level, levelIndex) => <div className="saLevel" key={level.id}>
+          <strong className="saLevelTitle">Level {levelIndex + 1}</strong>
+          {criterion.levels.length > 1 && <button className="saRemoveLevel" type="button" aria-label={`Remove level ${levelIndex + 1}`} onClick={() => changeCriterion(criterion.id, { levels: criterion.levels.filter(item => item.id !== level.id) })}>×</button>}
+          <div className="saLevelFields"><label>Title<input className="saGradeInput" maxLength={250} value={level.title} onChange={event => changeLevel(criterion.id, level.id, { title: event.target.value })} placeholder="Enter title" /></label>
+          <label>Points<input className="saGradeInput" type="number" min="0" step="0.5" value={level.points} onChange={event => changeLevel(criterion.id, level.id, { points: event.target.value })} /></label>
+          <label>Description<textarea maxLength={250} value={level.description} onChange={event => changeLevel(criterion.id, level.id, { description: event.target.value })} placeholder="Enter description" /></label></div>
+        </div>)}</div>
+        <div className="saCriterionActions"><button type="button" onClick={() => changeCriterion(criterion.id, { levels: [...criterion.levels, { id: nextId.current++, title: "", points: "", description: "" }] })}><SAIcon name="plus" size={16}/>Add Level</button>{criteria.length > 1 && <button type="button" onClick={() => setCriteria(old => old.filter(item => item.id !== criterion.id))}>Remove Criterion</button>}</div>
+      </div>)}</div>
+      <button className="saAddCriterion" type="button" onClick={() => { const id = nextId.current; nextId.current += 4; setCriteria(old => [...old, { id, title: "", description: "", levels: initialLevels(id + 1) }]); }}><SAIcon name="plus" size={22}/><span>Add Criterion</span></button>
+      <div className="saTotal"><span>Total criterion marks</span><strong>{(config.gradingMethod ?? "Equal Marks") === "Equal Marks" ? Number(value.points || 0).toFixed(2) : total.toFixed(2)} / {value.points || "0"}</strong></div>
+      <div className="saRubricOptions"><strong>Rubric Options</strong><div className="saRubricSwitches">{["Use rubric total as question points", "Allow learners to preview the rubric", "Show criterion description to learners", "Show points per level to learners", "Allow grader to add comment per criterion", "Calculate grade with a minimum score of 0", "Hide level scores while grading"].map((label, index) => <SASwitch key={label} label={label} checked={index === 5 ? (config.minimumZero ?? Boolean(rubricOptions[index])) : Boolean(rubricOptions[index])} onChange={checked => onConfigChange(old => ({ ...old, rubricOptions: old.rubricOptions.map((item, i) => i === index ? checked : item), ...(index === 5 ? { minimumZero: checked, scoreOverrides: {} } : {}) }))}/>)}</div></div>
+      <details className="saAdvancedGrading"><summary>Grading settings</summary><div className="saAdvancedGradingBody">
+      <div className="saSettingsGrid saGradingGrid">
+        <label>Grading Method<SASelect label="Grading Method" value={config.gradingMethod ?? ""} onChange={v => onConfigChange(old => ({ ...old, gradingMethod: v as "Equal Marks" | "Custom", scoreOverrides: {} }))} options={["Equal Marks", "Custom"]}/></label>
+        <label>Points (total for Question)<input className="saGradeInput" type="number" min="0" step="0.5" value={value.points} onChange={e => { update({ points: e.target.value }); onConfigChange(old => ({ ...old, scoreOverrides: {} })); }}/></label>
+        <label>Negative Marking<SASelect label="Negative Marking" value={config.negativeMarking ?? ""} onChange={v => onConfigChange(old => ({ ...old, negativeMarking: v, scoreOverrides: {} }))} options={["NA", "0", "0.25", "0.5", "1"]}/></label>
       </div>
-      <button className="saAddCriterion" type="button" onClick={() => { const id = nextId.current; nextId.current += 4; setCriteria(old => [...old, { id, title: "Concept accuracy", description: "", levels: initialLevels(id + 1) }]); }}><SAIcon name="plus" size={22}/><span>Add Criterion</span></button>
-      <div className="saTotal"><span>Total Points From Criteria</span><strong>{total}</strong></div>
-      <div className="saRubricOptions"><div className="saSmallLabel saLabelStrong">Rubric Options</div><div className="saRubricSwitches">
-        {["Use rubric total as question points", "Allow learners to preview the rubric", "Show criterion description to learners", "Show points per level to learners", "Allow grader to add comments per criterion", "Calculate grade with maximum score of", "Hide level scores while grading"].map((label, index) =>
-          <SASwitch key={label} label={label} checked={rubricOptions[index]} onChange={checked => setRubricOptions(old => old.map((item, i) => i === index ? checked : item))}/>
-        )}
-      </div></div>
-    </>)}
+      <SASwitch label="Partial Credit" checked={config.partialCredit ?? true} onChange={checked => onConfigChange(old => ({ ...old, partialCredit: checked, scoreOverrides: {} }))}/>
+      <div className="saGradeSimulation"><strong>Score Simulator - Outcome per Criteria</strong>{Array.from({ length: criteria.length + 1 }, (_, i) => criteria.length - i).map(correct => {
+        const points = Number(value.points) || 0; const penalty = Number(config.negativeMarking) || 0;
+        const customMarks = criteria.slice(0, correct).reduce((sum, criterion) => sum + (Number(criterion.levels[0]?.points) || 0), 0);
+        const base = (config.partialCredit ?? true) ? (config.gradingMethod === "Custom" ? customMarks : points * correct / Math.max(criteria.length, 1)) : (correct === criteria.length ? points : 0);
+        const calculated = base - penalty * (criteria.length - correct); const result = (config.minimumZero ?? true) ? Math.max(0, calculated) : calculated;
+        return <div className="saGradeOutcome" key={correct}><span>{correct} correct, {criteria.length - correct} wrong</span><input className="saGradeInput" type="number" step="0.5" aria-label={`Marks for ${correct} correct criteria`} value={config.scoreOverrides?.[String(correct)] ?? (value.points ? String(Number(result.toFixed(2))) : "")} onChange={e => onConfigChange(old => ({ ...old, scoreOverrides: { ...old.scoreOverrides, [String(correct)]: e.target.value } }))}/></div>;
+      })}</div>
+      </div></details>
+    </>, "", "edit")}
     {panel("feedback", "Feedback", <>{["Full Marks", "Partial Marks", "Zero Marks"].map((label, index) => <div className={`saLabeledField saFeedback-${index}`} key={label}>
-      <div className="saSmallLabel">{label}</div><SARichField label={label} value={feedback[index]} onChange={text => setFeedback(old => old.map((item, i) => i === index ? text : item))} tall/>
-    </div>)}</>, "180/250", "feedback")}
-    {panel("explanation", "Explanation", <SARichField label="Explanation" value={explanation} onChange={setExplanation} plain/>, "180/250", "explanation")}
+      <div className="saSmallLabel">{label}</div><SARichField {...richProps(`feedback-${index}`)} label={label} value={feedback[index]} onChange={text => setFeedback(old => old.map((item, i) => i === index ? text : item))} tall/>
+    </div>)}</>, `${Math.max(...feedback.map((text, index) => feedbackTextWithoutEmptyMarker(text, config.richHtml?.[`feedback-${index}`]).length), 0)}/250 characters`, "feedback")}
+    {panel("explanation", "Explanation", <SARichField {...richProps("explanation")} label="Explanation" value={explanation} onChange={setExplanation} plain/>, `${explanation.length}/250`, "explanation")}
     {panel("hint", "Hint", <>
-      <SARichField label="Hint" value={value.hint} onChange={text => update({ hint: text })} placeholder="Think about training data versus new data." plain/>
+      <SARichField {...richProps("hint")} label="Hint" value={value.hint} onChange={text => update({ hint: text })} placeholder="Enter a hint..." plain/>
       <div className="saHintChecks">{[["Show hint before answering", hintBefore, setHintBefore], ["Allow learner to request hint", hintAfter, setHintAfter]].map(([label, checked, change]) =>
         <label className={`saCheck ${checked ? "saCheckOn" : ""}`} key={String(label)}><input type="checkbox" checked={Boolean(checked)} onChange={event => (change as (value: boolean) => void)(event.target.checked)}/><span className="saCheckBox">{checked ? <SAIcon name="checked" size={16}/> : null}</span><span>{String(label)}</span></label>
       )}</div>
-    </>, "180/250", "hint")}
+    </>, `${value.hint.length}/250`, "hint")}
   </div>;
 }
 
@@ -422,10 +453,10 @@ function SAPreviewCard({ title, icon, children, tone = "", inset = false }: {
     <div className={`sapCardText ${inset ? "sapFeedbackText" : ""}`}>{children}</div>
   </section>;
 }
-const saQuestionComplete = (question: SAQuestion) => !!question.text.trim() && question.points.trim() !== "" && Number.isFinite(Number(question.points)) && Number(question.points) >= 0;
-function ShortAnswerPreview({ questions, configs, tags, onBack, onExit, onContinue, notice }: {
+const saQuestionComplete = (question: SAQuestion) => !!question.text?.trim() && !!question.answer?.trim() && Number.isFinite(Number(question.points)) && Number(question.points) > 0 && !!question.category?.trim() && !!question.bloom?.trim();
+function ShortAnswerPreview({ questions, configs, tags, onBack, onExit, onContinue, notice, saving }: {
   questions: SAQuestion[]; configs: Record<number, SAConfig>; tags: string[]; onBack: (index?: number) => void;
-  onExit: () => void; onContinue: () => void; notice: string;
+  onExit: () => void; onContinue: () => void; notice: string; saving: boolean;
 }) {
   const [filter, setFilter] = useState("All Questions");
   const [learner, setLearner] = useState(false);
@@ -471,14 +502,7 @@ function ShortAnswerPreview({ questions, configs, tags, onBack, onExit, onContin
                 <div><dt>Required</dt><dd>{config.required ? "YES" : "NO"}</dd></div>
               </dl>
               <SAPreviewCard title="Model Answer" icon="modelAnswer"><p>{question.rubric || "No model answer provided."}</p></SAPreviewCard>
-              <section className="sapCard sapRubric"><h3><span className="sapRoundIcon"><SAIcon name="modelAnswer" size={20}/></span>Grading – Rubric</h3>
-                <div className="sapRubricRows" role="table" aria-label={`Question ${index + 1} grading rubric`}>
-                  {config.criteria.length ? config.criteria.map(criterion => <div className="sapRubricRow" role="row" key={criterion.id} style={{ gridTemplateColumns: `minmax(0, .95fr) repeat(${Math.max(1, criterion.levels.length)}, minmax(0, 1fr))` }}>
-                    <div role="rowheader"><strong>{criterion.title}</strong><p>{criterion.description}</p></div>
-                    {criterion.levels.map(level => <div role="cell" key={level.id} className={`sapLevel-${level.title.toLowerCase()}`}><strong>{level.title} -{Number(level.points) || 0}</strong><p>{level.description}</p></div>)}
-                  </div>) : <p className="sapEmptyRubric">No grading criteria added.</p>}
-                </div>
-              </section>
+              <section className="sapCard sapRubric"><h3>Grading Method</h3><p>{config.gradingMethod ?? "Equal Marks"} · {question.points || "0"} points · Negative marking: {config.negativeMarking ?? "NA"}</p><p>Partial Credit: {(config.partialCredit ?? true) ? "ON" : "OFF"} · Minimum score of 0: {(config.minimumZero ?? true) ? "ON" : "OFF"}</p>{config.criteria.map((criterion,i)=><p key={criterion.id}>{criterion.title || `Criterion ${i+1}`}: {(config.gradingMethod ?? "Equal Marks") === "Custom" ? criterion.levels[0]?.points || "0" : (Number(question.points || 0)/Math.max(1,config.criteria.length)).toFixed(2)} marks</p>)}</section>
             </SAPreviewSection>
             <SAPreviewSection title="Feedback and Learning" id={`sap-feedback-${index}`}>
               <SAPreviewCard title="Full Marks" icon="fullMarks" tone="full" inset><p>{config.feedback[0] || "No feedback provided."}</p></SAPreviewCard>
@@ -494,7 +518,7 @@ function ShortAnswerPreview({ questions, configs, tags, onBack, onExit, onContin
               </dl>
             </SAPreviewSection>
           </>}
-          {index === visible[visible.length - 1]?.index && <div className="sapFooter"><button type="button" onClick={() => onBack()}>Back to Question</button><button type="button" className="sapContinue" onClick={onContinue}>Save And Continue</button></div>}
+          {index === visible[visible.length - 1]?.index && <div className="sapFooter"><button type="button" onClick={() => onBack()}>Back to Question</button>{saving&&<span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}</div>}
         </article>;
       })}
       {!visible.length && <div className="sapNoQuestions"><p>No questions match this filter.</p><button type="button" className="sapLearnerButton" onClick={() => setFilter("All Questions")}>Show All Questions</button><button type="button" className="sapLearnerButton" onClick={() => onBack()}>Back to Question</button></div>}
@@ -505,6 +529,8 @@ function ShortAnswerPreview({ questions, configs, tags, onBack, onExit, onContin
 
 function ShortAnswerBuilder({ onExit, mcqValues }: { onExit: () => void; mcqValues: MCQDetailsValues }) {
   const router = useRouter();
+  const [welcomeName, setWelcomeName] = useState("Creator");
+  useEffect(() => { const name = getDemoSession()?.displayName?.trim(); if (name) setWelcomeName(name.split(/\s+/)[0]); }, []);
   const [questions, setQuestions] = useState<SAQuestion[]>([{ text: "", points: "", difficulty: "", category: "", bloom: "", mandatory: true, answer: "", rubric: "", feedback: "", hint: "" }]);
   const [active, setActive] = useState(0);
   const [previewing, setPreviewing] = useState(false);
@@ -515,14 +541,25 @@ function ShortAnswerBuilder({ onExit, mcqValues }: { onExit: () => void; mcqValu
     setPreviewing(next);
     requestAnimationFrame(() => { document.querySelector(".mcqcScrollArea")?.scrollTo({ top: 0 }); window.scrollTo({ top: 0 }); document.getElementById(next ? "sa-preview-title" : "short-question-text")?.focus({ preventScroll: true }); });
   };
-  const [answerOpen, setAnswerOpen] = useState(false);
-  const [shortAddOpen, setShortAddOpen] = useState(false);
+  const [answerOpen, setAnswerOpen] = useState(true);
+  const numberScrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const scroller = numberScrollRef.current;
+    const selected = scroller?.querySelector<HTMLElement>('[aria-current="step"]');
+    if (!scroller || !selected) return;
+    const left = selected.offsetLeft - scroller.offsetLeft;
+    if (left < scroller.scrollLeft) scroller.scrollLeft = left;
+    else if (left + selected.offsetWidth > scroller.scrollLeft + scroller.clientWidth) scroller.scrollLeft = left + selected.offsetWidth - scroller.clientWidth;
+  }, [active]);
   const [tags, setTags] = useState<string[]>([]);
   const [addingTag, setAddingTag] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [notice, setNotice] = useState("");
+  const [continuing,setContinuing] = useState(false);
+  const continueTimer = useRef<number | null>(null);
+  useEffect(() => () => { if (continueTimer.current) window.clearTimeout(continueTimer.current); }, []);
   const [saved, setSaved] = useState(false);
-  useEffect(()=>{try{const saved=JSON.parse(assessmentStorage.getItem("shortAnswerContentDraft")||"null");if(!saved)return;if(Array.isArray(saved.questions))setQuestions(saved.questions);if(Array.isArray(saved.tags))setTags(saved.tags);if(saved.configs)setConfigs(saved.configs);}catch{}},[]);
+  useEffect(()=>{try{const saved=JSON.parse(assessmentStorage.getItem("shortAnswerContentDraft")||"null");if(!saved)return;if(Array.isArray(saved.questions) && saved.questions.length)setQuestions(saved.questions);if(Array.isArray(saved.tags))setTags(saved.tags);if(saved.configs && typeof saved.configs === "object")setConfigs(Object.fromEntries(Object.entries(saved.configs as Record<string, SAConfig>).map(([index, config]) => [index, clearLegacyExample(config)])));}catch{}},[]);
   const current = questions[active];
   const update = (patch: Partial<typeof current>) => setQuestions(old => old.map((q, i) => i === active ? { ...q, ...patch } : q));
   const save = () => {
@@ -533,6 +570,8 @@ function ShortAnswerBuilder({ onExit, mcqValues }: { onExit: () => void; mcqValu
         !q?.points.trim() || !(Number(q.points)>0) ? "Enter valid points greater than zero." :
         !q?.category.trim() ? "Select a category." :
         !q?.bloom.trim() ? "Select Bloom’s Taxonomy." : "";
+      const grading = configs[i] ?? saDefaultConfig();
+      if (grading.gradingMethod === "Custom" && (grading.criteria.some(c => !c.title.trim() || c.levels[0]?.points === "" || !Number.isFinite(Number(c.levels[0]?.points)) || Number(c.levels[0]?.points) < 0) || Math.abs(grading.criteria.reduce((sum,c)=>sum+Number(c.levels[0]?.points || 0),0) - Number(q?.points || 0)) > 0.001)) { setActive(i); setPreviewing(false); setNotice(`Question ${i+1}: criterion marks must be valid and total the question points.`); return false; }
       if (err) { setQuestions(old=>Array.from({length:Math.max(old.length,i+1)},(_,index)=>old[index]??{text:"",points:"",difficulty:"",category:"",bloom:"",mandatory:true,answer:"",rubric:"",feedback:"",hint:""})); setActive(i); setPreviewing(false); setNotice(`Question ${i+1}: ${err}`); return false; }
     }
     const sum=questions.slice(0,mcqValues.questionCount).reduce((n,q)=>n+Number(q.points),0);
@@ -540,47 +579,54 @@ function ShortAnswerBuilder({ onExit, mcqValues }: { onExit: () => void; mcqValu
     try { assessmentStorage.setItem("shortAnswerContentDraft", JSON.stringify({ questions, tags, configs })); setSaved(true); setNotice("Successfully saved"); return true; }
     catch { setNotice("Could not save. Please try again."); return false; }
   };
-  const add = () => { if(questions.length>=mcqValues.questionCount){setNotice(`Only ${mcqValues.questionCount} questions are configured.`);return;}setQuestions(old => [...old, { text: "", points: "", difficulty: "", category: "", bloom: "", mandatory: true, answer: "", rubric: "", feedback: "", hint: "" }]); setActive(questions.length); setAnswerOpen(false); };
-  const chooseShortAdd = (option: string) => { setShortAddOpen(false); if (option === "Generate with AI") {
-    try { assessmentStorage.setItem("shortAnswerContentDraft", JSON.stringify({ questions, tags, configs })); } catch { /* Keep navigation usable if storage is full. */ }
-    router.push("/assessments/create/ai?type=short-answer"); return;
-  } if (option === "Create Manually") add(); else setNotice(`${option} will be available when connected.`); };
-  const toolbar = <SAToolbar className="mcqcShortToolbar" label="Write Your Question" onAction={() => document.getElementById("short-question-text")?.focus()}/>;
+  const saveAndContinue = () => {
+    if (continuing || !save()) return;
+    setNotice(""); setContinuing(true);
+    continueTimer.current = window.setTimeout(() => { setContinuing(false); router.push("/assessments/create/evaluation"); }, 3000);
+  };
+  const selectQuestion = (index: number) => {
+    setQuestions(old => Array.from({ length: Math.max(old.length, index + 1) }, (_, i) => old[i] ?? { text: "", points: "", difficulty: "", category: "", bloom: "", mandatory: true, answer: "", rubric: "", feedback: "", hint: "" }));
+    setActive(index); setAnswerOpen(true);
+  };
+  const isQuestionComplete = (index: number) => {
+    const question = questions[index];
+    const settings = configs[index] ?? saDefaultConfig();
+    return !!question && saQuestionComplete(question) && (settings.gradingMethod !== "Custom" || (settings.criteria.every(criterion => !!criterion.title.trim() && criterion.levels[0]?.points !== "" && Number.isFinite(Number(criterion.levels[0]?.points)) && Number(criterion.levels[0]?.points) >= 0) && Math.abs(settings.criteria.reduce((sum, criterion) => sum + Number(criterion.levels[0]?.points || 0), 0) - Number(question.points)) <= 0.001));
+  };
+  const completedCount = Array.from({length: mcqValues.questionCount}, (_, index) => index).filter(isQuestionComplete).length;
   if (previewing) return <ShortAnswerPreview questions={questions} configs={configs} tags={tags} notice={notice}
-    onBack={(index) => switchPreview(false, index)} onExit={onExit} onContinue={() => { if (save()) router.push('/assessments/create/evaluation'); }}/>;
+    onBack={(index) => switchPreview(false, index)} onExit={onExit} onContinue={saveAndContinue} saving={continuing}/>;
   return <div className="mcqcBuilder mcqcShortBuilder">
-    <div className="mcqcBuilderTop"><nav className="mcqcBuilderCrumb" aria-label="Breadcrumb"><Link href="/assessments">Assessment</Link><Icon name="arrowrightdouble.svg"/><button type="button" onClick={onExit}>Create Assessment</button><Icon name="arrowrightdouble.svg"/><strong>Create Questions</strong></nav><div className="mcqcBuilderWelcome"><Icon name="ai-sparkles.svg" size={30}/><div><h2>Let&apos;s Get Started! Antony?</h2><p>Let&apos;s Build A Great Question.</p></div></div></div>
+    <div className="mcqcBuilderTop"><nav className="mcqcBuilderCrumb" aria-label="Breadcrumb"><Link href="/assessments">Assessment</Link><Icon name="arrowrightdouble.svg"/><button type="button" onClick={onExit}>Create Assessment</button><Icon name="arrowrightdouble.svg"/><strong>Create Questions</strong></nav><div className="mcqcBuilderWelcome"><Icon name="ai-sparkles.svg" size={30}/><div><h2>Let&apos;s Get Started! {welcomeName}?</h2><p>Let&apos;s Build A Great Question.</p></div></div></div>
     <div className="mcqcBuilderGrid"><section className="mcqcBuilderMain">
       <div className="mcqcQuestionsHeading mcqcShortQuestionsHeading">
         <div><h2>Question {active + 1} of {mcqValues.questionCount}</h2><p>{mcqValues.questionCount} Questions | {mcqValues.totalMarks} Marks</p></div>
-        <div className="mcqcAIBuilderActions"><button type="button" className="mcqcTopAdd" onClick={() => { try { assessmentStorage.setItem("shortAnswerContentDraft", JSON.stringify({ questions, tags, configs })); } catch {} router.push("/assessments/create/ai?type=short-answer"); }}><Icon name="ai-chip.svg" size={20}/>Generate With AI</button><button type="button" className="mcqcTopAdd" onClick={add}><Icon name="plus.svg" size={20}/>Add</button></div>
       </div>
       <div className="mcqcTopQuestionNavigator mcqcShortQuestionNavigator" aria-label="Question navigation">
-        <div className="mcqcNumberNavigation">
-          <button type="button" className="mcqcRoundNav" aria-label="Previous question" onClick={() => setActive(n => Math.max(0,n-1))}><Icon name="arrowleft.svg" size={20}/></button>
-          <div className="mcqcNumberScroller"><div className="mcqcQuestionNumbers">
+        <div className={`mcqcNumberNavigation ${mcqValues.questionCount <= 7 ? "mcqcFewQuestions" : "mcqcManyQuestions"}`}>
+          <button type="button" className="mcqcRoundNav" aria-label="Previous question" disabled={active === 0} onClick={() => selectQuestion(Math.max(0, active - 1))}><Icon name="arrowleft.svg" size={20}/></button>
+          <div ref={numberScrollRef} className="mcqcNumberScroller"><div className="mcqcQuestionNumbers">
             {Array.from({ length: mcqValues.questionCount }, (_, index) => {
-              const q = questions[index];
-              const completed = !!q?.text.trim() && !!q.points && !!q.category && !!q.bloom;
+              const completed = isQuestionComplete(index);
               const selected = index === active;
-              return <button type="button" key={index} disabled={index >= mcqValues.questionCount} className={`mcqcQuestionNumber ${selected ? "is-active" : completed ? "is-complete" : "is-empty"}`} aria-label={`Question ${index+1}`} aria-current={selected ? "step" : undefined} onClick={() => { setActive(index); setAnswerOpen(false); }}>
+              return <button type="button" key={index} disabled={index >= mcqValues.questionCount} className={`mcqcQuestionNumber ${completed ? "is-complete" : selected ? "is-active" : "is-empty"}`} aria-label={`Question ${index+1}, ${completed ? "complete" : "incomplete"}`} aria-current={selected ? "step" : undefined} onClick={() => selectQuestion(index)}>
                 <span className="mcqcNumberValue">{index+1}</span>
-                {(completed || selected) && <span className="mcqcNumberStatus" aria-hidden="true"/>}
+                <span className={`mcqcNumberStatus ${completed ? "is-done" : "is-pending"}`} aria-hidden="true">{completed ? "✓" : ""}</span>
                 <small>SA</small>
               </button>;
             })}
           </div></div>
-          <button type="button" className="mcqcRoundNav" aria-label="Next question" onClick={() => setActive(n => Math.min(questions.length-1,n+1))}><Icon name="arrowright.svg" size={20}/></button>
+          <button type="button" className="mcqcRoundNav" aria-label="Next question" disabled={active >= mcqValues.questionCount - 1} onClick={() => selectQuestion(Math.min(mcqValues.questionCount - 1, active + 1))}><Icon name="arrowright.svg" size={20}/></button>
         </div>
-        <div className="mcqcQuestionProgress" aria-label="Question completion progress"><span style={{width:`${Math.max(3, questions.filter(q=>!!q.text.trim() && !!q.points && !!q.category && !!q.bloom).length / Math.max(1,mcqValues.questionCount) * 100)}%`}}/></div>
+        <div className="mcqcQuestionProgress" aria-label="Question completion progress"><span style={{width:`${Math.min(100, Math.max(4, completedCount / Math.max(1, mcqValues.questionCount) * 100))}%`}}/></div>
       </div>
       <div className="mcqcQuestionForm">
       <div className="mcqcBuilderField"><label>Question Type</label><QuestionTypeDropdown value="Short Answer" onChange={() => {}}/></div>
-      <div className="mcqcBuilderField mcqcWriteField"><div className="mcqcFormHeading"><label htmlFor="short-question-text">Write Your Question</label><span>{current.text.length}/250</span></div><div className="mcqcEditorSurface">{toolbar}<textarea id="short-question-text" maxLength={250} rows={3} placeholder="Write your question here..." value={current.text} onChange={e => update({ text: e.target.value })}/></div></div>
-      <div className="mcqcBuilderField mcqcShortAnswerSettings"><div className="mcqcFormHeading"><label>Answer Settings</label><span>24/250</span></div><button type="button" className="mcqcSelectTrigger mcqcShortAnswerTrigger" aria-expanded={answerOpen} onClick={() => setAnswerOpen(v => !v)}><span>Answer box, Model answer, Rubrics, Feedback and Hint</span><Icon name="arrow-down-01.svg" size={20} className={answerOpen ? "mcqcRotated" : ""}/></button>{answerOpen && <ShortAnswerExpanded key={active} value={current} update={update} config={configs[active] ?? saDefaultConfig()} onConfigChange={updateConfig} />}</div>
-    </div><div className="mcqcAddMenu mcqcShortAddMenu"><button type="button" className="mcqcShortAdd" onClick={() => setShortAddOpen(v => !v)} aria-expanded={shortAddOpen} aria-haspopup="true"><Icon name="plus.svg" size={22}/>Add Questions</button>{shortAddOpen && <div className="mcqcAddMenuList" role="radiogroup">{["Create Manually", "Import From Question Bank", "Generate with AI"].map((option,index) => <button type="button" key={option} role="radio" aria-checked={index === 0} onClick={() => chooseShortAdd(option)}><span className={`mcqcOptionRadio ${index === 0 ? "mcqcOptionSelected" : ""}`}/>{option}</button>)}</div>}</div></section>
-    <aside className="mcqcBuilderAside"><section className="mcqcAsideSection"><h3>Question Settings</h3><div className="mcqcBuilderField"><label htmlFor="short-points">Points</label><input id="short-points" type="number" min="0" value={current.points} onChange={e=>update({points:e.target.value})}/></div><div className="mcqcBuilderField"><label>Difficulty</label><NeumoSelect value={current.difficulty} options={["Easy","Medium","Hard"]} onChange={v=>update({difficulty:v})}/></div><div className="mcqcBuilderField"><label>Category</label><NeumoSelect value={current.category} options={CATEGORIES} onChange={v=>update({category:v})}/></div><div className="mcqcBuilderField"><label>Bloom’s Taxonomy</label><NeumoSelect value={current.bloom} options={BLOOMS} onChange={v=>update({bloom:v})}/></div><div className="mcqcBuilderField"><label>Tag</label><div className="mcqcTagHolder"><button type="button" className="mcqcAddTag" onClick={()=>setAddingTag(v=>!v)}><Icon name="plus.svg" size={17}/>Add Tag</button>{addingTag && <input className="mcqcTagInput" autoFocus aria-label="New tag" value={tagInput} onChange={e=>setTagInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&tagInput.trim()){e.preventDefault();setTags(old=>[...old,tagInput.trim()]);setTagInput('');setAddingTag(false);}}}/>}</div><div className="mcqcTagRow">{tags.map(tag=><button type="button" key={tag} onClick={()=>setTags(old=>old.filter(t=>t!==tag))}>{tag} <span>×</span></button>)}</div></div><div className="mcqcMandatory"><span>Mandatory</span><button type="button" role="switch" aria-label="Mandatory" aria-checked={current.mandatory} className={`mcqcSwitch ${current.mandatory ? 'mcqcSwitchOn' : ''}`} onClick={()=>update({mandatory:!current.mandatory})}><span className="mcqcSwitchText">{current.mandatory?'ON':'OFF'}</span><span className="mcqcSwitchKnob"/></button></div><p className="mcqcAsideHint">This Question is Mandatory</p></section></aside></div>
-    <div className="mcqcShortFooter"><button type="button" className="mcqcFooterPill" onClick={()=>{setNotice("");switchPreview(true);}}>Preview Questions</button><div className="mcqcShortFooterRight"><button type="button" className="mcqcFooterPill mcqcFooterContinue" onClick={()=>{if(save())router.push('/assessments/create/evaluation');}}>Save &amp; Continue</button></div></div>{notice && <p role={notice === "Successfully saved" ? "status" : "alert"} className="mcqcBuilderNotice" style={notice === "Successfully saved" ? undefined : {color:"#BC1E2D",fontWeight:600}}>{notice}</p>}
+      <div className="mcqcBuilderField mcqcWriteField"><div className="mcqcFormHeading"><label htmlFor="short-question-text">Write Your Question</label></div><div className="mcqcEditorSurface"><MCQRichEditor key={active} editorId="short-question-text" value={current.text} html={configs[active]?.richHtml?.question} onChange={text => update({ text })} onHtmlChange={html => updateConfig(old => ({ ...old, richHtml: { ...old.richHtml, question: html } }))} onError={setNotice} placeholder="Write your question here..." maxLength={250} extendedToolbar /></div></div>
+      <div className="mcqcBuilderField mcqcShortAnswerSettings"><div className="mcqcFormHeading"><label>Answer Settings</label></div><button type="button" className="mcqcSelectTrigger mcqcShortAnswerTrigger" aria-expanded={answerOpen} onClick={() => setAnswerOpen(v => !v)}><span>Answer box, Model answer, Rubrics, Feedback and Hint</span><Icon name="arrow-down-01.svg" size={20} className={answerOpen ? "mcqcRotated" : ""}/></button>{answerOpen && <ShortAnswerExpanded key={active} value={current} update={update} config={configs[active] ?? saDefaultConfig()} onConfigChange={updateConfig} onError={setNotice} />}</div>
+    </div></section>
+    <aside className="mcqcBuilderAside"><section className="mcqcAsideSection"><h3>Question Settings</h3><div className="mcqcBuilderField"><label htmlFor="short-points">Points</label><input id="short-points" type="number" min="0" value={current.points} onChange={e=>update({points:e.target.value})}/></div><div className="mcqcBuilderField"><label>Difficulty</label><NeumoSelect value={current.difficulty} options={["Easy","Medium","Hard"]} onChange={v=>update({difficulty:v})}/></div><div className="mcqcBuilderField"><label>Category</label><NeumoSelect value={current.category} options={CATEGORIES} onChange={v=>update({category:v})}/></div><div className="mcqcBuilderField"><label>Bloom’s Taxonomy</label><NeumoSelect value={current.bloom} options={BLOOMS} onChange={v=>update({bloom:v})}/></div><div className="mcqcBuilderField"><label>Tag</label><div className="mcqcTagHolder"><button type="button" className="mcqcAddTag" onClick={()=>setAddingTag(v=>!v)}><Icon name="plus.svg" size={17}/>Add Tag</button>{addingTag && <input className="mcqcTagInput" autoFocus maxLength={250} aria-label="New tag" value={tagInput} onChange={e=>setTagInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&tagInput.trim()){e.preventDefault();setTags(old=>[...old,tagInput.trim()]);setTagInput('');setAddingTag(false);}}}/>}</div><div className="mcqcTagRow">{tags.map(tag=><button type="button" key={tag} onClick={()=>setTags(old=>old.filter(t=>t!==tag))}>{tag} <span>×</span></button>)}</div></div><div className="mcqcMandatory"><span>Mandatory</span><button type="button" role="switch" aria-label="Mandatory" aria-checked={current.mandatory} className={`mcqcSwitch ${current.mandatory ? 'mcqcSwitchOn' : ''}`} onClick={()=>update({mandatory:!current.mandatory})}><span className="mcqcSwitchText">{current.mandatory?'ON':'OFF'}</span><span className="mcqcSwitchKnob"/></button></div><p className="mcqcAsideHint">This Question is Mandatory</p></section></aside></div>
+    <div className="mcqcShortFooter"><div className="mcqcShortFooterLeft"><button type="button" className="mcqcFooterPill" disabled={continuing} onClick={onExit}>Back</button><button type="button" className="mcqcFooterPill" onClick={()=>{setNotice("");switchPreview(true);}}>Preview Questions</button></div><div className="mcqcShortFooterRight">{continuing && <span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}<button type="button" className="mcqcFooterPill mcqcFooterContinue" disabled={continuing} onClick={saveAndContinue}>Save &amp; Continue</button></div></div>{notice && <p role={notice === "Successfully saved" ? "status" : "alert"} className={notice === "Successfully saved" ? "mcqcBuilderNotice mcqcNoticeSuccess" : "mcqcBuilderNotice"}>{notice}</p>}
   </div>;
 }
 
@@ -588,11 +634,11 @@ type MCQDetailsValues = { totalMarks: number; questionCount: number; marksPerQue
 const DEFAULT_MCQ_VALUES: MCQDetailsValues = { totalMarks: 20, questionCount: 20, marksPerQuestion: 1 };
 const positiveInteger = (value: unknown, fallback: number) => { const number = Number(value); return Number.isFinite(number) && number >= 1 ? Math.floor(number) : fallback; };
 const nonnegativeNumber = (value: unknown, fallback: number) => { const number = Number(value); return value !== null && value !== undefined && value !== "" && Number.isFinite(number) && number >= 0 ? number : fallback; };
-export default function MCQContentPage() {
+export default function MCQContentPage({startInBuilder=false,onExitBuilder}: {startInBuilder?:boolean;onExitBuilder?:()=>void} = {}) {
   const router = useRouter();
   const [settings, setSettings] = useState<Record<string, boolean>>(() => Object.fromEntries(SETTINGS.map(item => [item.key, item.defaultOn])));
   const [message, setMessage] = useState("");
-  const [building, setBuilding] = useState(false);
+  const [building, setBuilding] = useState(startInBuilder);
   const [mcqValues, setMcqValues] = useState<MCQDetailsValues>(DEFAULT_MCQ_VALUES);
   const [questions, setQuestions] = useState<Question[]>([newQuestion()]);
   useEffect(() => {
@@ -615,7 +661,7 @@ export default function MCQContentPage() {
         <section className="mcqcMainContent">
           <div className="mcqcHeader"><Header /></div>
           <div className="mcqcScrollArea">
-            {building ? <div className="mcqcPageContent"><ShortAnswerBuilder mcqValues={mcqValues} onExit={() => setBuilding(false)} /></div> : <div className="mcqcPageContent">
+            {building ? <div className="mcqcPageContent"><ShortAnswerBuilder mcqValues={mcqValues} onExit={() => onExitBuilder ? onExitBuilder() : setBuilding(false)} /></div> : <div className="mcqcPageContent">
               <div className="mcqcBreadcrumb" aria-label="Breadcrumb">
                 <Link href="/assessments">Assessment</Link>
                 <Icon name="arrowrightdouble.svg" size={20} />
@@ -637,7 +683,6 @@ export default function MCQContentPage() {
                       <p>Start by Adding Questions.</p>
                       <div className="mcqcActions">
                         <button type="button" onClick={() => action("Bulk Upload")}><Icon name="upload.svg" />Bulk Upload</button>
-                        <button type="button" onClick={() => action("Generate With AI")}><Icon name="ai-chip.svg" size={24} />Generate With AI</button>
                       </div>
                       <button className="mcqcCreateButton" type="button" onClick={() => action("Create Questions")}><Icon name="plus.svg" size={24} />Create Questions</button>
                     </div>
@@ -662,7 +707,6 @@ export default function MCQContentPage() {
                         <span className="mcqcSwitchText">{settings[item.key] ? "ON" : "OFF"}</span><span className="mcqcSwitchKnob" />
                       </button>
                     </div>)}
-                    <button type="button" className="mcqcConfigure" onClick={() => action("Configure")}>Configure</button>
                   </section>
                 </aside>
               </div>

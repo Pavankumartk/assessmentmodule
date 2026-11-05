@@ -1,4 +1,5 @@
 "use client";
+import {maySubmitCurrentAttempt} from "@/modules/assessments/components/learner/learner-assessment-data";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -413,7 +414,20 @@ export default function ViewAssignmentPage() {
     if(Array.isArray(rubric.criteria)&&rubric.criteria.length){
       setGradeCriteria((rubric.criteria as Dict[]).map(v=>({title:str(v.title,"Criterion"),description:str(v.description),max:Number(v.marks)||0,demo:0})));
     }
-    const existing = readJSON(viewerSubmissionKey());
+    let existing = readJSON(viewerSubmissionKey());
+    const freshAttempt = new URLSearchParams(window.location.search).get("instructions") === "1";
+    const used = Number(getAssessment(loaded.id)?.attemptCount) || 0;
+    if (freshAttempt && existing.assignmentId === loaded.id && existing.submittedAt && used < loaded.attemptsAllowed) {
+      try {
+        const historyKey = `${viewerSubmissionKey()}.history`;
+        const rawHistory = JSON.parse(assessmentStorage.getItem(historyKey) || "[]");
+        const history = Array.isArray(rawHistory) ? rawHistory : [];
+        const blank = {assignmentId:loaded.id,text:"",html:"",files:[],savedAt:"",submittedAt:"",attempt:Math.max(used, Number(existing.attempt) || 1) + 1};
+        assessmentStorage.setItem(historyKey, JSON.stringify([...history, existing]));
+        assessmentStorage.setItem(viewerSubmissionKey(), JSON.stringify(blank));
+        existing = blank;
+      } catch { /* Keep the previous submission if its archive could not be saved. */ }
+    }
     // Same as MCQ: an unsubmitted assessment always starts with instructions.
     // Do not reuse the old learner-wide acceptance flag from another assignment.
     setAccepted(false);
@@ -478,10 +492,22 @@ export default function ViewAssignmentPage() {
     setShowSubmitConfirm(true);
   };
   const confirmSubmission=()=>{
+    if (!maySubmitCurrentAttempt()) { router.replace("/learner"); return; }
     setShowSubmitConfirm(false);
     const time=new Date().toISOString();
     if(save({...submission,savedAt:time,submittedAt:time})){
-      if(new URLSearchParams(window.location.search).get("preview")!=="true")updateAssessment({attemptCount:1});
+      if(new URLSearchParams(window.location.search).get("preview")!=="true") {
+        try {
+          const prior=JSON.parse(assessmentStorage.getItem("viewerAttempts") || "[]");
+          const attempts=Array.isArray(prior) ? prior : [];
+          const count=Math.max(attempts.length, Number(getAssessment(draft.id)?.attemptCount) || 0) + 1;
+          const answer=[submission.text, ...submission.files.map(file=>file.name)].filter(Boolean).join("\n");
+          const result={attemptId:crypto.randomUUID(),title:draft.title,assessmentType:"assignment",questions:[{text:draft.description || draft.title,options:[],correct:-1,selected:null,questionType:"short-answer",answerText:answer,expectedAnswer:"",gradingStatus:"pending",points:draft.marks}],totalQuestions:1,correctAnswers:0,incorrectAnswers:0,unanswered:0,pendingCount:1,totalMarks:draft.marks,earnedMarks:0,scorePercent:null,submittedAt:time};
+          assessmentStorage.setItem("viewerAssessmentResult", JSON.stringify(result));
+          assessmentStorage.setItem("viewerAttempts", JSON.stringify([...attempts, result]));
+          updateAssessment({attemptCount:count});
+        } catch { setError("The submission was saved, but its attempt history could not be updated."); }
+      }
       setTab("Grade Feedback");setShowSuccess(true);setNotice("Assignment submitted successfully.");
     }
   };

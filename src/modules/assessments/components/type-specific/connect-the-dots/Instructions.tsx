@@ -1,4 +1,6 @@
 "use client";
+import { creatorInstructionLines } from "@/modules/assessments/components/viewer/instruction-text";
+
 
 // Reuse the exact existing MCQ instruction-card classes and shared styling.
 // This is shown by the viewer route before it mounts the Connect the Dots viewer.
@@ -62,10 +64,7 @@ export default function ConnectDotsAssessmentInstructions({ assessmentId, onStar
           return Boolean(text(p.left ?? p.term)) && Boolean(text(p.right ?? p.description));
         });
     });
-    const raw = details.instructions ?? details.descriptionInstructions ?? content.instructions;
-    const list = Array.isArray(raw)
-      ? raw.map(part => text(part)).filter(Boolean)
-      : text(raw).split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+    const list = creatorInstructionLines(details.instructions, details.descriptionInstructions, content.instructions);
     const duration = text(details.duration ?? details.durationMinutes ?? details.timeLimit ?? details.totalTime, "60");
     const passing = text(details.passingScore ?? details.passingMarks, "60");
     const negative = text(details.negativeMarkingValue ?? details.negativeMarking, "NA");

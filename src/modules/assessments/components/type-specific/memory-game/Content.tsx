@@ -1,4 +1,5 @@
 "use client";
+import { AssessmentEditorDropdown } from "@/modules/assessments/components/common/steps/DetailsStep/DetailsStep";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -58,7 +59,7 @@ function MemoryAccordion({ title, icon, open, onChange, children, count }: { tit
   return <section className="memNewAccordion">
     <button type="button" className="memNewAccordionHead" aria-expanded={open} onClick={onChange}>
       <span className="memNewAccordionTitle"><span className="memNewCircle"><Icon name={icon} size={19} /></span>{title}</span>
-      <span className="memNewAccordionRight">{count && <small>{count}</small>}<span className={`memNewChevron ${open ? "up" : ""}`}><Icon name="chevron" size={20} /></span></span>
+      <span className="memNewAccordionRight">{count && !/^\d+\s*\/\s*\d+/.test(count) && <small>{count}</small>}<span className={`memNewChevron ${open ? "up" : ""}`}><Icon name="chevron" size={20} /></span></span>
     </button>
     {open && <div className="memNewAccordionBody">{children}</div>}
   </section>;
@@ -84,23 +85,19 @@ function MemoryTextEditor({ label, value, onChange, placeholder, maxLength = 250
   const goBack = () => { const previous = undo.current.pop(); if (previous === undefined) return; redo.current.push(value); onChange(previous); };
   const goForward = () => { const next = redo.current.pop(); if (next === undefined) return; undo.current.push(value); onChange(next); };
   return <div className="memNewEditor">
-    {label && <div className="memNewEditorLabel"><strong>{label}</strong><small>{value.length}/{maxLength}</small></div>}
+    {label && <div className="memNewEditorLabel"><strong>{label}</strong></div>}
     <div className="memNewToolbar" role="toolbar" aria-label={`${label || "Text"} formatting`}>
       <button type="button" onClick={goBack} title="Undo"><Icon name="undo" size={15} /></button>
       <button type="button" onClick={goForward} title="Redo"><Icon name="redo" size={15} /></button>
-      <select aria-label="Font family" value={font} onChange={e => setFont(e.target.value)}>
-        <option value="Segoe UI">Segoe UI</option><option value="Inter">Inter</option>
-      </select>
-      <select className="memNewFontSize" aria-label="Font size" value={size} onChange={e => setSize(e.target.value)}>
-        {[12, 14, 16, 18, 20, 24].map(n => <option key={n} value={n}>{n}</option>)}
-      </select>
+      <AssessmentEditorDropdown className="mcqEditorFont" label="Font family" value={font} options={["Segoe UI", "Inter"]} onChange={setFont} />
+      <AssessmentEditorDropdown className="mcqEditorSize" label="Font size" value={size} options={["12", "14", "16", "18", "20", "24"]} onChange={setSize} />
       <button type="button" aria-pressed={bold} onClick={() => setBold(v => !v)} title="Bold"><b>B</b></button>
       <button type="button" aria-pressed={italic} onClick={() => setItalic(v => !v)} title="Italic"><i>I</i></button>
       <button type="button" aria-pressed={underline} onClick={() => setUnderline(v => !v)} title="Underline"><u>U</u></button>
       <button type="button" title="Insert bullet" onClick={() => wrap("• ", "")}>≡</button>
       <button type="button" title="Insert quotation marks" onClick={() => wrap("“", "”")}>❞</button>
     </div>
-    <textarea ref={ref} maxLength={maxLength} rows={3} value={value} placeholder={placeholder} onChange={event => edit(event.target.value)} style={{ fontFamily: `"${font}", sans-serif`, fontSize: `${size}px`, fontWeight: bold ? 700 : 400, fontStyle: italic ? "italic" : "normal", textDecoration: underline ? "underline" : "none", color: accent || "#374151" }} />
+    <div className="assessmentEditorInput">    <textarea ref={ref} maxLength={maxLength} rows={3} value={value} placeholder={placeholder} onChange={event => edit(event.target.value)} style={{ fontFamily: `"${font}", sans-serif`, fontSize: `${size}px`, fontWeight: bold ? 700 : 400, fontStyle: italic ? "italic" : "normal", textDecoration: underline ? "underline" : "none", color: accent || "#374151" }} /><small className="assessmentEditorCounter">{value.length}/{maxLength}</small></div>
   </div>;
 }
 
@@ -134,12 +131,17 @@ function positive(value: unknown, fallback: number) { const n = Number(value); r
 export default function MemoryGameContent() {
   const router = useRouter();
   const [questions, setQuestions] = useState<MemoryQuestion[]>([makeQuestion()]);
+  const [draftReady, setDraftReady] = useState(false);
   const [active, setActive] = useState(0);
   const [limits, setLimits] = useState({ count: 1, marks: 1, per: 1, duration: "60" });
   const [panelOpen, setPanelOpen] = useState({ question: true, grading: true, feedback: true, explanation: true, hint: true });
   const [preview, setPreview] = useState(false);
   const [validated, setValidated] = useState(false);
   const [notice, setNotice] = useState("");
+  useEffect(() => { if (notice !== "Saved") return; const timer = window.setTimeout(() => setNotice(""), 3000); return () => window.clearTimeout(timer); }, [notice]);
+  const [continuing, setContinuing] = useState(false);
+  const continueTimer = useRef<number | null>(null);
+  useEffect(() => () => { if (continueTimer.current) window.clearTimeout(continueTimer.current); }, []);
   const [tagText, setTagText] = useState("");
   const [editingTag, setEditingTag] = useState(false);
   const scroll = useRef<HTMLDivElement>(null);
@@ -148,9 +150,13 @@ export default function MemoryGameContent() {
     const details = getDraft("memoryGameAssessmentDraft");
     const config = { count: Math.max(1, Math.min(300, Math.floor(positive(details.questionCount, 1)))), marks: positive(details.totalMarks, 1), per: positive(details.marksPerQuestion, 1), duration: String(details.duration || details.timeLimit || "60") };
     setLimits(config);
-    const existing = readMemoryQuestions(getDraft("memoryGameContentDraft"));
-    setQuestions(existing.length ? existing.slice(0, config.count) : [makeQuestion(config.per)]);
+    const storedDraft = getDraft("memoryGameContentDraft");
+    const existing = readMemoryQuestions(storedDraft);
+    if (Number.isInteger(storedDraft.active)) setActive(Math.max(0, Math.min(Math.max(config.count, existing.length)-1, Number(storedDraft.active))));
+    setQuestions(Array.from({length:Math.max(config.count,existing.length)},(_,index)=>existing[index] ?? makeQuestion(config.per)));
+    setDraftReady(true);
   }, []);
+  useEffect(()=>{if(!draftReady)return;try{assessmentStorage.setItem("memoryGameContentDraft",JSON.stringify({questions,active}));}catch{setNotice("Could not save this draft in your browser.");}},[draftReady,questions,active]);
 
   const question = questions[active] || questions[0];
   const completed = useMemo(() => questions.filter(isMemoryComplete).length, [questions]);
@@ -164,13 +170,16 @@ export default function MemoryGameContent() {
     if (showNotice) setNotice("Saved");
   };
   const continueToEvaluation = () => {
+    if (continuing) return;
     setValidated(true);
     if (!canContinue) {
-      setNotice(`Complete all ${limits.count} Memory Game questions and check the total marks equal ${limits.marks}.`);
+      setNotice(questions.length > limits.count ? `This draft has ${questions.length} saved questions. Increase the question count in Details to keep them all.` : `Complete all ${limits.count} Memory Game questions and check the total marks equal ${limits.marks}.`);
       return;
     }
-    save(false);
-    router.push("/assessments/create/evaluation");
+    try {
+      save(false); setNotice(""); setContinuing(true);
+      continueTimer.current = window.setTimeout(() => { setContinuing(false); router.push("/assessments/create/evaluation"); }, 3000);
+    } catch { setNotice("Could not save this draft in your browser."); }
   };
   const addQuestion = () => {
     if (questions.length >= limits.count) { setNotice(`Only ${limits.count} question(s) are configured in Details.`); return; }
@@ -191,7 +200,7 @@ export default function MemoryGameContent() {
 
   return <main className="memApp memFigmaApp"><div className="memLayout"><Sidebar />
     <section className="memMain"><Header /><div ref={scroll} className="memScroll"><div className="memWrap memFigmaWrap">
-      {preview ? <MemoryGamePreview breadcrumb={breadcrumb} questions={questions} onBack={() => { setPreview(false); scroll.current?.scrollTo({ top: 0 }); }} onEdit={index => { setActive(index); setPreview(false); scroll.current?.scrollTo({ top: 0 }); }} onContinue={continueToEvaluation} notice={notice} /> : <>
+      {preview ? <MemoryGamePreview breadcrumb={breadcrumb} questions={questions} onBack={() => { setPreview(false); scroll.current?.scrollTo({ top: 0 }); }} onEdit={index => { setActive(index); setPreview(false); scroll.current?.scrollTo({ top: 0 }); }} onContinue={continueToEvaluation} notice={notice} saving={continuing} /> : <>
         <div className="memFigmaTop"><div>{breadcrumb}</div><div className="memWelcome"><Icon name="sparkles" size={32} /><div><h2>Let&apos;s Get Started! <span>Institute?</span></h2><p>Let&apos;s Build A Great Question.</p></div></div></div>
         <div className="memFigmaColumns"><div className="memFigmaEditorColumn">
           <section className="memFigmaMainCard">
@@ -245,7 +254,7 @@ export default function MemoryGameContent() {
             {validated && memoryErrors(question).length > 0 && <div className="memErrors" role="alert">{memoryErrors(question).map(error => <p key={error}>{error}</p>)}</div>}
             <div className="memFigmaCenter memFigmaAddQuestions"><button type="button" className="memFigmaButton memFigmaButtonBlue" onClick={addQuestion}><Icon name="add" /> Add Questions</button></div>
           </section>
-          <footer className="memFigmaFooter"><button type="button" className="memFigmaButton" onClick={() => { save(false); setNotice(""); setPreview(true); scroll.current?.scrollTo({ top: 0 }); }}>Preview Questions</button><div><button type="button" className="memFigmaButton" onClick={() => save()}>Save</button><button type="button" className="memFigmaButton memFigmaButtonGreen" onClick={continueToEvaluation}>Continue</button></div></footer>
+          <footer className="memFigmaFooter"><button type="button" className="memFigmaButton" disabled={continuing} onClick={() => router.push("/assessments/create/details")}>Back</button><button type="button" className="memFigmaButton" onClick={() => { save(false); setNotice(""); setPreview(true); scroll.current?.scrollTo({ top: 0 }); }}>Preview Questions</button><div><button type="button" className="memFigmaButton" onClick={() => save()}>Save</button>{continuing && <span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}<button type="button" className="memFigmaButton memFigmaButtonGreen" disabled={continuing} onClick={continueToEvaluation}>Continue</button></div></footer>
         </div>
         <aside className="memFigmaAside"><h2>Question Settings</h2>
           <label>Points<input type="number" min="0.5" step="0.5" value={question.points} onChange={e => update({ points: e.target.value })} /></label>
@@ -258,7 +267,7 @@ export default function MemoryGameContent() {
           </div>
           <div className="memFigmaMandatory">Mandatory<MemoryToggle label="Mandatory question" checked={question.mandatory} onChange={mandatory => update({ mandatory })} /></div><small>This Question is Mandatory</small>
         </aside></div>
-        {notice && <p className={notice === "Saved" ? "memOk" : "memNotice"} role="status">{notice}</p>}
+        {notice && <p className={notice === "Saved" ? "mcqcSaveSuccessToast" : "memNotice"} role={notice === "Saved" ? "status" : "alert"}>{notice}</p>}
       </>}
     </div></div></section>
   </div></main>;

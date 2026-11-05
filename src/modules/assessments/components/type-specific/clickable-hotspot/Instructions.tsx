@@ -1,4 +1,6 @@
 "use client";
+import { creatorInstructionLines } from "@/modules/assessments/components/viewer/instruction-text";
+
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import Sidebar from "@/modules/assessments/components/common/sidebar/page";
@@ -35,8 +37,7 @@ export default function ClickableHotspotInstructions({assessmentId,onStart}:{ass
       const q=item as Record<string,unknown>;
       return typeof q.imageSrc==="string" && Boolean(q.imageSrc) && Array.isArray(q.hotspots) && q.hotspots.length>0;
     });
-    const raw=details.instructions ?? details.descriptionInstructions;
-    const lines=Array.isArray(raw)?raw.map(v=>toText(v)).filter(Boolean):toText(raw).split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+    const lines=creatorInstructionLines(details.instructions, details.descriptionInstructions);
     const totalMarks=configured.length?configured.reduce((sum,item)=>sum+(Number((item as Record<string,unknown>).points)||0),0):Number(record?.marks??summary.totalMarks??0);
     const duration=toText(details.duration??summary.duration??details.durationMinutes, "60");
     const passing=toText(details.passingScore??summary.passingScore,"60%");

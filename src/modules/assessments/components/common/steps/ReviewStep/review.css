@@ -112,3 +112,87 @@
 }
 
 .reviewPublishError{align-self:center;flex:1;color:#BC1E2D;font:600 14px/21px 'Segoe UI',Arial,sans-serif;text-align:center}
+
+.reviewAppShell .reviewPublishOverlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(47,53,71,.24)}
+.reviewAppShell .reviewPublishDialog{box-sizing:border-box;width:min(564px,100%);min-height:303px;max-height:calc(100dvh - 32px);padding:22px 22px 19px;border-radius:22px;background:#DFE6E9;box-shadow:-2px -2px 2px #fff,2px 2px 2px #C4C4C4;display:flex;flex-direction:column;justify-content:space-between;gap:17px;color:#2F3547;overflow-y:auto}
+.reviewAppShell .reviewPublishNotice{display:flex;align-items:flex-start;gap:10px;min-height:166px;padding:16px 15px;border:1px solid #C05512;border-radius:23px}
+.reviewAppShell .reviewPublishIcon{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border-radius:50%;background:#C05512;color:#fff;font-weight:700}
+.reviewAppShell .reviewPublishDialog h2{margin:5px 0 14px;font:700 17px/22px 'Segoe UI',Arial,sans-serif}.reviewAppShell .reviewPublishDialog p{margin:0 0 13px;font:400 14px/23px 'Segoe UI',Arial,sans-serif}.reviewAppShell .reviewPublishDialog .reviewPublishDialogError{color:#BC1E2D;font-weight:600}
+.reviewAppShell .reviewPublishActions{display:flex;justify-content:space-between;gap:14px}.reviewAppShell .reviewPublishActions button{min-height:48px;padding:9px 16px;border:1px solid transparent;border-radius:28px;background:#DFE6E9;box-shadow:-2px -2px 2px #fff,2px 2px 2px #C4C4C4;font:600 16px/22px 'Segoe UI',Arial,sans-serif;cursor:pointer}.reviewAppShell .reviewPublishActions .reviewPublishConfirm{color:#2A7308;border-color:#2A7308}@media(max-width:600px){.reviewAppShell .reviewPublishDialog{padding:15px}.reviewAppShell .reviewPublishActions button{flex:1;min-width:0;font-size:14px}}
+
+/* The publish confirmation reuses the viewer submission dialog. */
+.reviewAppShell .viewerSubmitOverlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(47,53,71,.24)}
+.reviewAppShell .viewerSubmitDialog{box-sizing:border-box;width:min(564px,100%);height:303px;max-height:calc(100dvh - 32px);padding:22px 22px 19px;border-radius:22px;background:#DFE6E9;box-shadow:-2px -2px 2px #FFFFFF,2px 2px 2px #C4C4C4;display:flex;flex-direction:column;justify-content:space-between;gap:17px;color:#2F3547;overflow-y:auto}
+.reviewAppShell .viewerSubmitNotice{display:flex;align-items:flex-start;gap:10px;width:100%;min-height:166px;padding:16px 15px;border:1px solid #C05512;transform: translateY(7);border-radius:23px}
+.reviewAppShell .viewerSubmitIcon{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border-radius:50%;background:#C05512;box-shadow:none}
+.reviewAppShell .viewerSubmitIcon img{display:block;width:24px;height:24px;object-fit:contain}
+.reviewAppShell .viewerSubmitNoticeText{min-width:0;flex:1}
+.reviewAppShell .viewerSubmitDialog h2{margin:5px 0 14px;color:#2F3547;font:700 17px/22px 'Segoe UI',Arial,sans-serif;text-align:left}
+.reviewAppShell .viewerSubmitDialog p{margin:0;text-align:left;font:400 14px/23px 'Segoe UI',Arial,sans-serif;letter-spacing:.01em}
+.reviewAppShell .viewerSubmitDialog .viewerSubmitQuestion{margin:0 0 13px;font-weight:600}
+.reviewAppShell .viewerSubmitDialog .viewerSubmitDescription{font-size:13px;line-height:23px}
+.reviewAppShell .viewerSubmitActions{display:flex;align-items:center;justify-content:space-between;width:100%;gap:14px;margin:0}
+.reviewAppShell .viewerSubmitActions button{display:flex;align-items:center;justify-content:center;gap:12px;min-height:48px;padding:9px 16px;border-radius:28px;background:#DFE6E9;box-shadow:-2px -2px 2px #FFFFFF,2px 2px 2px #C4C4C4;font:600 16px/22px 'Segoe UI',Arial,sans-serif;white-space:nowrap;cursor:pointer}
+.reviewAppShell .viewerSubmitActions img{display:block;width:20px;height:20px;object-fit:contain;flex:none}
+.reviewAppShell .viewerSubmitBack{width:170px;color:#2F3547;border:1px solid transparent}
+.reviewAppShell .viewerSubmitConfirm{width:224px;color:#2A7308;border:1px solid #2A7308}
+.reviewAppShell .viewerSubmitActions button:focus-visible{outline:2px solid #2D4CC8;outline-offset:3px}
+@media(max-width:600px){.reviewAppShell .viewerSubmitDialog{height:auto;min-height:303px;max-height:calc(100dvh - 32px);padding:15px;gap:18px}.reviewAppShell .viewerSubmitNotice{padding:13px 11px;gap:9px;min-height:0}.reviewAppShell .viewerSubmitDialog h2{font-size:16px;margin:5px 0 10px}.reviewAppShell .viewerSubmitDialog p{font-size:13px;line-height:20px}.reviewAppShell .viewerSubmitDialog .viewerSubmitDescription{font-size:12px;line-height:20px}.reviewAppShell .viewerSubmitActions button{flex:1;width:auto;min-width:0;padding:9px 8px;font-size:14px;gap:6px}}
+@media(max-width:370px){.reviewAppShell .viewerSubmitActions button{font-size:12px}.reviewAppShell .viewerSubmitActions img{width:16px;height:16px}}
+.reviewAppShell .viewerSubmitDialog{height:auto;min-height:303px;max-height:calc(100dvh - 32px);overflow-y:auto;justify-content:flex-start;gap:18px}
+.reviewAppShell .viewerSubmitNotice{transform:none;min-height:0;flex-shrink:0}
+.reviewAppShell .viewerSubmitActions{flex-shrink:0;margin-top:auto}
+@media(max-width:600px){.reviewAppShell .viewerSuccessDialog{height:auto;min-height:0;padding:20px 16px}.reviewAppShell .viewerSuccessActions{flex-wrap:wrap}.reviewAppShell .viewerSuccessActions button{flex:1 1 150px}.reviewAppShell .viewerSubmitActions{flex-wrap:wrap}}
+.reviewAppShell .viewerPublishError{color:#BC1E2D;font-weight:600}
+
+/* AI Interview and AI Viva review, scoped to their existing review shell. */
+.aiReview .aiReviewSections{display:flex;flex-direction:column;gap:24px;min-width:0}
+.aiReview .aiReviewSection{min-width:0;overflow:hidden;border-radius:16px;background:#DFE6E9;box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4}
+.aiReview .aiReviewSectionHead{min-height:79px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 16px;border-bottom:1px solid #9E9E9E;background:#DFE6E9;box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4}
+.aiReview .aiReviewSectionHead h2{min-width:0;margin:0;color:#000;font:600 18px/28px 'Segoe UI',Inter,Arial,sans-serif;letter-spacing:.02em}
+.aiReview .aiReviewSectionActions{display:flex;align-items:center;gap:16px;flex:none}
+.aiReview .aiReviewEdit{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:32px;padding:4px 10px;border-radius:4px;background:#DFE6E9;box-shadow:-2px -2px 2px #fff,2px 2px 2px #C4C4C4;color:#2D4CC8;text-decoration:none;font:400 16px/24px 'Segoe UI',Inter,Arial,sans-serif}
+.aiReview .aiReviewExpand{display:grid;place-items:center;width:32px;height:32px;padding:0;border:0;background:transparent;cursor:pointer}
+.aiReview .aiReviewExpand[aria-expanded="false"] img{transform:rotate(-90deg)}
+.aiReview .aiReviewSectionBody{min-width:0;padding:24px}
+.aiReview .aiReviewGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 32px;min-width:0}
+.aiReview .aiReviewGridThree{grid-template-columns:repeat(3,minmax(0,1fr))}
+.aiReview .aiReviewField{display:flex;flex-direction:column;gap:16px;min-width:0}
+.aiReview .aiReviewFieldWide{grid-column:1 / -1;min-width:0}
+.aiReview .aiReviewLabel{color:#374151;font:600 16px/24px 'Segoe UI',Inter,Arial,sans-serif;letter-spacing:.02em}
+.aiReview .aiReviewValue,.aiReview .aiReviewInline{min-width:0;min-height:58px;padding:16px 24px;border-radius:8px;background:#DFE6E9;box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4;color:#374151;font:400 16px/24px 'Segoe UI',Inter,Arial,sans-serif;letter-spacing:.02em;overflow-wrap:anywhere}
+.aiReview .aiReviewInline{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.aiReview .aiReviewLongText{display:block;min-height:88px;white-space:pre-wrap}
+.aiReview .aiReviewFile{display:flex;align-items:center;justify-content:center;gap:16px;min-width:0;text-align:center}
+.aiReview .aiReviewValueSwitch{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
+.aiReview .aiReviewSwitch{position:relative;display:block;flex:0 0 72px;width:72px;height:36px;border-radius:32px;background:#DFE6E9;box-shadow:-4px -4px 4px rgba(255,255,255,.5),4px 4px 4px #C4C4C4}
+.aiReview .aiReviewSwitch::before{content:"";position:absolute;top:4px;left:5px;width:62px;height:28px;border-radius:32px;background:#DFE6E9;box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4}
+.aiReview .aiReviewSwitch.isOn::before{background:linear-gradient(113.36deg,#2D4CC8 30.17%,#E01E5A 65.23%);box-shadow:none}
+.aiReview .aiReviewSwitch span{position:absolute;z-index:1;right:9px;top:8px;font:600 12px/20px 'Segoe UI',Arial,sans-serif;color:#374151}
+.aiReview .aiReviewSwitch.isOn span{left:10px;right:auto;color:#fff}
+.aiReview .aiReviewSwitch i{position:absolute;z-index:1;left:4px;top:4px;width:28px;height:28px;border-radius:50%;background:#DFE6E9;box-shadow:0 -2px 4px rgba(0,0,0,.1),0 4px 4px rgba(0,0,0,.25)}
+.aiReview .aiReviewSwitch.isOn i{left:39px}
+.aiReview .aiReviewTable{padding:12px;border-radius:8px;box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4}
+.aiReview .aiReviewList{display:flex;flex-direction:column;gap:24px;min-width:0}
+.aiReview .aiReviewQuestion,.aiReview .aiReviewRubric{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:66px;min-width:0;padding:16px 24px;border-radius:8px;background:#DFE6E9;box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4;color:#374151;font:400 16px/24px 'Segoe UI',Inter,Arial,sans-serif;letter-spacing:.02em;overflow-wrap:anywhere}
+.aiReview .aiReviewQuestion>span{min-width:0;font-weight:600}
+.aiReview .aiReviewRemoveQuestion{display:grid;place-items:center;flex:0 0 24px;width:24px;height:24px;padding:0;border:0;border-radius:50%;background:#DFE6E9;box-shadow:-2px -2px 2px #fff,2px 2px 2px #C4C4C4;cursor:pointer}
+.aiReview .aiReviewFooter{align-items:center;margin:28px 0 12px;flex-wrap:wrap}
+.aiReview .aiReviewFooter>button{min-width:225px}
+.aiReview .aiReviewFooterActions{display:flex;align-items:center;gap:24px}
+.aiReview .aiReviewFooterActions button{min-width:153px}
+.aiReview .aiReviewError{margin:12px 0;color:#BC1E2D;font:600 14px/21px 'Segoe UI',Arial,sans-serif}
+.aiReview .aiReviewSuccess{margin:12px 0;color:#2A7308;font:600 14px/21px 'Segoe UI',Arial,sans-serif}
+@media(max-width:900px){.aiReview .aiReviewGridThree{grid-template-columns:repeat(2,minmax(0,1fr))}.aiReview .aiReviewSectionBody{padding:20px}}
+@media(max-width:700px){.aiReview .aiReviewGrid,.aiReview .aiReviewGridThree{grid-template-columns:minmax(0,1fr);gap:16px}.aiReview .aiReviewSectionHead{min-height:60px;padding:10px 12px}.aiReview .aiReviewSectionHead h2{font-size:16px;line-height:22px}.aiReview .aiReviewSectionActions{gap:8px}.aiReview .aiReviewEdit{font-size:14px}.aiReview .aiReviewSectionBody{padding:16px 12px}.aiReview .aiReviewField{gap:8px}.aiReview .aiReviewLabel{font-size:14px;line-height:20px}.aiReview .aiReviewValue,.aiReview .aiReviewInline,.aiReview .aiReviewQuestion,.aiReview .aiReviewRubric{min-height:54px;padding:12px 14px;font-size:14px;line-height:21px}.aiReview .aiReviewList{gap:14px}.aiReview .aiReviewFooter{align-items:stretch;gap:14px}.aiReview .aiReviewFooter>button{width:100%;min-width:0}.aiReview .aiReviewFooterActions{width:100%;gap:12px}.aiReview .aiReviewFooterActions button{flex:1;min-width:0;padding:9px}}
+
+/* Publication confirmation for the AI Interview and AI Viva review. */
+.aiReview .aiPublishSuccessOverlay{position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(47,53,71,.25)}
+.aiReview .aiPublishSuccessDialog{position:relative;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:10px;width:min(564px,100%);max-height:calc(100dvh - 32px);overflow-y:auto;padding:16px 24px 24px;border-radius:22px;background:#DFE6E9;box-shadow:-2px -2px 2px #fff,2px 2px 2px #C4C4C4;text-align:center;color:#2F3547;font-family:'Segoe UI',Arial,sans-serif}
+.aiReview .aiPublishSuccessArt{position:relative;width:152px;height:102px;flex:none}
+.aiReview .aiPublishSuccessArt img:first-child{position:absolute;inset:0;width:152px;height:102px;object-fit:contain}
+.aiReview .aiPublishSuccessArt img:last-child{position:absolute;top:30px;left:46px;width:60px;height:55px;object-fit:contain}
+.aiReview .aiPublishSuccessDialog h2{margin:0;color:#2A7308;font-size:22px;line-height:32px}
+.aiReview .aiPublishSuccessDialog p{margin:0;font-size:16px;overflow-wrap:anywhere}
+.aiReview .aiPublishSuccessDialog button{min-height:48px;margin-top:14px;padding:9px 20px;border:0;border-radius:32px;background:#DFE6E9;box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4;color:#374151;font:600 16px/24px 'Segoe UI',Arial,sans-serif;cursor:pointer}
+@media(max-width:600px){.aiReview .aiPublishSuccessDialog{padding:12px 16px 20px}.aiReview .aiPublishSuccessDialog h2{font-size:18px;line-height:25px}}

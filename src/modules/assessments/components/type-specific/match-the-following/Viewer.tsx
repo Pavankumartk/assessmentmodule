@@ -1,4 +1,5 @@
 "use client";
+import {maySubmitCurrentAttempt} from "@/modules/assessments/components/learner/learner-assessment-data";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -6,7 +7,7 @@ import { createPortal } from "react-dom";
 import Sidebar from "../../common/sidebar/page";
 import Header from "../../common/header/Header";
 import "./matchthefollowing.css";
-import { assessmentStorage, resultPath, viewerPath } from "@/modules/assessments/storage/assessment-storage";
+import { assessmentStorage, getActiveAssessmentId, getAssessment, updateAssessment, resultPath, viewerPath } from "@/modules/assessments/storage/assessment-storage";
 import ViewerSubmitConfirm from "@/modules/assessments/components/viewer/ViewerSubmitConfirm";
 import TextSubmitSuccess from "@/modules/assessments/components/viewer/TextSubmitSuccess";
 import { releaseForAssessment } from "@/modules/assessments/components/viewer/assessment-result-bridge";
@@ -363,6 +364,7 @@ export default function MatchFollowingViewerPage() {
   const [expiresAt, setExpiresAt] = useState(0);
   const [now, setNow] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const recordedAttempt = useRef(false);
   const [submitOpen, setSubmitOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [ready, setReady] = useState(false);
@@ -429,8 +431,20 @@ export default function MatchFollowingViewerPage() {
     try { assessmentStorage.setItem(sessionKey, JSON.stringify(state)); }
     catch { /* Continue when browser storage is unavailable. */ }
   }, [ready, signature, current, answers, flagged, skipped, expiresAt, submitted]);
+  const recordAttempt = () => {
+    if (recordedAttempt.current || new URLSearchParams(window.location.search).get("preview") === "true") return;
+    const totalMarks = draft.questions.reduce((sum, q) => sum + q.points, 0);
+    const prior = JSON.parse(assessmentStorage.getItem("viewerAttempts") || "[]");
+    const attempts = Array.isArray(prior) ? prior : [];
+    const record = getAssessment(getActiveAssessmentId() || "");
+    const count = Math.max(attempts.length, Number(record?.attemptCount) || 0) + 1;
+    assessmentStorage.setItem("viewerAttempts", JSON.stringify([...attempts, {attemptId:crypto.randomUUID(), submittedAt:new Date().toISOString(), scorePercent:totalMarks ? Math.round(score / totalMarks * 100) : 0, earnedMarks:score, totalMarks, pendingCount:0}]));
+    updateAssessment({attemptCount:count});
+    recordedAttempt.current = true;
+  };
   useEffect(() => {
     if (!ready || submitted || !expiresAt || secondsLeft > 0) return;
+    if (!maySubmitCurrentAttempt()) { router.replace("/learner"); return; }
     setSubmitted(true);
     setNotice("Time is up. Your assessment has been submitted.");
     try {
@@ -440,6 +454,7 @@ export default function MatchFollowingViewerPage() {
         questions: draft.questions.map((q, i) => ({ text: q.text, terms: q.terms, options: q.options, correct: q.correct, selected: answers[i] ?? [], points: q.points })),
         submittedAt: new Date().toISOString(),
       }));
+      recordAttempt();
     } catch { /* Submission remains finished. */ }
     if (new URLSearchParams(window.location.search).get("preview") !== "true") setSuccessOpen(true);
   }, [ready, submitted, expiresAt, secondsLeft, draft, answers, score, answered, total, flagged, router]);
@@ -471,6 +486,7 @@ export default function MatchFollowingViewerPage() {
   };
   const submit = () => { setSubmitOpen(true); };
   const confirmSubmission = () => {
+    if (!maySubmitCurrentAttempt()) { router.replace("/learner"); return; }
     try {
       assessmentStorage.setItem(isRetry ? "matchFollowingRetryResult" : "matchFollowingViewerResult", JSON.stringify({
         title: draft.title, answers, score, answered, total, flagged,
@@ -478,6 +494,7 @@ export default function MatchFollowingViewerPage() {
         questions: draft.questions.map((q, i) => ({ text: q.text, terms: q.terms, options: q.options, correct: q.correct, selected: answers[i] ?? [], points: q.points })),
         submittedAt: new Date().toISOString(),
       }));
+      recordAttempt();
     } catch { /* Submission remains complete even when storage is unavailable. */ }
     setSubmitted(true);
     setSubmitOpen(false);
@@ -548,8 +565,8 @@ export default function MatchFollowingViewerPage() {
                   </div>
                   {notice && <p className="viewerInlineNotice" role="status">{notice}</p>}
                   <div className="viewerExamActions">
-                    <button type="button" className="viewerExamButton" disabled={current === 0}
-                      onClick={() => goTo(current - 1)}><Icon name="arrowleft.svg" />Previous</button>
+                    {current > 0 && <button type="button" className="viewerExamButton" disabled={current === 0}
+                      onClick={() => goTo(current - 1)}><Icon name="arrowleft.svg" />Previous</button>}
                     <button type="button" className="viewerExamButton viewerNext"
                       disabled={submitted && current === total - 1}
                       onClick={() => current === total - 1 ? submit() : goTo(current + 1)}>

@@ -961,3 +961,7 @@
   .assessment-variant--short-answer .viewerAppShell .viewerShortAnswer .viewerQuestionHeading{margin-bottom:16px}
   .assessment-variant--short-answer .viewerAppShell .viewerShortAnswer .viewerReferenceHintCopy small{font-size:13px}
 }
+
+/* Keep the forward action in its usual position on the first question. */
+.assessment-variant--short-answer .viewerAppShell .viewerShortAnswer .viewerExamActions > .viewerNext:only-child{margin-left:auto}
+@media(max-width:700px){.assessment-variant--short-answer .viewerAppShell .viewerShortAnswer .viewerExamActions > .viewerNext:only-child{grid-column:2;grid-row:2}}

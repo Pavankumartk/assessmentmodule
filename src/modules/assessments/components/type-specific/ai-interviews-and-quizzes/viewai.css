@@ -19,7 +19,7 @@
 .viewaiCameraPanel{width:100%;max-width:408px;min-height:434px;padding:24px 15px 25px;background:var(--vbg);box-shadow:var(--vinset);border-radius:16px;display:flex;flex-direction:column;align-items:center;gap:24px}
 .viewaiCameraOval{position:relative;display:grid;place-items:center;overflow:hidden;width:min(100%,267px);height:315px;flex:0 0 315px;border:1px dashed #111;border-radius:50%;background:#D9D9D9;text-align:center}
 .viewaiCameraOval>span{padding:0 12px;font-size:14px;line-height:24px;letter-spacing:.01em;white-space:nowrap}
-.viewaiCameraVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.viewaiCameraVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;background:#D9D9D9}
 .viewaiHiddenVideo{display:none}
 .viewaiCameraButton{width:156px;height:46px;flex:none;border:none;border-radius:32px;background:var(--vbg);box-shadow:-4px -4px 4px #fff,4px 4px 4px #c4c4c4;color:#2F3547;font-size:20px;font-weight:600;line-height:32px;letter-spacing:.02em}
 .viewaiCameraButton:active,.viewaiTestButton:active{box-shadow:var(--vinset)}
@@ -130,6 +130,9 @@
 
 /* Session Complete — matches the Figma results screen without changing preparation. */
 .viewaiResults{min-width:0;width:100%;padding:24px 18px 38px;border-radius:8px;background:#DFE6E9;box-shadow:-4px -4px 8px #fff,4px 4px 8px #C4C4C4;display:flex;flex-direction:column;align-items:stretch;gap:24px}
+.viewaiBackToAssessments{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:0 18px;border-radius:50px;background:#DFE6E9;box-shadow:-3px -3px 5px #fff,3px 3px 5px #C4C4C4;color:#374151;font-size:14px;font-weight:700;text-decoration:none}
+.viewaiBackToAssessments:hover{color:#2D4CC8}
+.viewaiBackToAssessments:focus-visible{outline:2px solid #2D4CC8;outline-offset:3px}
 .viewaiResultsIntro{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px}
 .viewaiConfetti{display:grid;place-items:center;width:213px;height:157px;margin-bottom:-5px;pointer-events:none;overflow:visible}
 .viewaiConfetti img{display:block;width:213px;height:157px;object-fit:contain;transform-origin:50% 75%;animation:viewaiBlast 900ms cubic-bezier(.15,.65,.28,1.18) both}
@@ -197,9 +200,15 @@
 .viewaiApp .viewaiHiddenVideo{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none}
 
 /* Camera device picker and diagnostic feedback — scoped to AI Interview only. */
-.viewaiApp .viewaiCameraControls{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;width:100%;max-width:390px}
+.viewaiApp .viewaiCameraControls{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:10px;width:100%;max-width:390px}
 .viewaiApp .viewaiCameraControls label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:#374151;min-width:0;max-width:100%;flex:1 1 175px}
 .viewaiApp .viewaiCameraControls select{min-width:0;width:100%;height:38px;padding:0 10px;border:1px solid #C4C4C4;border-radius:8px;background:#DFE6E9;color:#374151;font:400 13px/20px 'Segoe UI',sans-serif;box-shadow:inset -2px -2px 3px #FFF,inset 2px 2px 3px #C4C4C4}
-.viewaiApp .viewaiDetectCamera{border:0;background:#DFE6E9;color:#2D4CC8;border-radius:20px;padding:9px 12px;box-shadow:-2px -2px 3px #FFF,2px 2px 4px #C4C4C4;font:600 12px/18px 'Segoe UI',sans-serif;white-space:nowrap}
+.viewaiApp .viewaiDetectCamera{height:38px;border:0;background:#DFE6E9;color:#2D4CC8;border-radius:20px;padding:9px 12px;box-shadow:-2px -2px 3px #FFF,2px 2px 4px #C4C4C4;font:600 12px/18px 'Segoe UI',sans-serif;white-space:nowrap}
 .viewaiApp .viewaiCameraDiagnostics{margin:0;color:#374151;font-size:12px;line-height:18px;overflow-wrap:anywhere;text-align:left;width:100%;max-width:390px}
 @media(max-width:600px){.viewaiApp .viewaiCameraControls{gap:8px}.viewaiApp .viewaiCameraControls label{flex-basis:100%}}
+.viewaiApp .viewaiBreadcrumb a{color:#2F3547;text-decoration:none}
+.viewaiApp .viewaiInstructions>h2{margin:0 0 20px}
+.viewaiApp .viewaiInstructions .viewaiStartButton span{font-weight:700}
+
+/* A finished AI assessment cannot be restarted after its attempts close. */
+.viewaiPage .viewaiResultRestart:disabled{opacity:.5;cursor:not-allowed}

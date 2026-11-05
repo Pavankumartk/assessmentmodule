@@ -1,4 +1,5 @@
 "use client";
+import { AssessmentEditorDropdown } from "@/modules/assessments/components/common/steps/DetailsStep/DetailsStep";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -169,8 +170,8 @@ function RichEditor({ value, onChange, label: ariaLabel, rows=3, placeholder="",
     <div className="ibqRichToolbar" aria-label={`${ariaLabel} formatting tools`}>
       <button type="button" onClick={()=>undo(-1)} title="Undo" aria-label="Undo"><Undo2 size={16}/></button>
       <button type="button" onClick={()=>undo(1)} title="Redo" aria-label="Redo"><Redo2 size={16}/></button>
-      <select aria-label="Font" value={family} onChange={e=>setFamily(e.target.value)}><option>Arial</option><option>Segoe UI</option><option>Inter</option></select>
-      <select aria-label="Font size" value={size} onChange={e=>setSize(e.target.value)}><option>12</option><option>14</option><option>16</option><option>18</option><option>20</option></select>
+      <AssessmentEditorDropdown className="mcqEditorFont" label="Font" value={family} options={["Arial", "Segoe UI", "Inter"]} onChange={setFamily} />
+      <AssessmentEditorDropdown className="mcqEditorSize" label="Font size" value={size} options={["12", "14", "16", "18", "20"]} onChange={setSize} />
       <button type="button" onClick={()=>command("bold")} title="Bold" aria-label="Bold"><Bold size={16}/></button>
       <button type="button" onClick={()=>command("italic")} title="Italic" aria-label="Italic"><Italic size={16}/></button>
       <button type="button" onClick={()=>command("underline")} title="Underline" aria-label="Underline"><Underline size={16}/></button>
@@ -182,6 +183,7 @@ function RichEditor({ value, onChange, label: ariaLabel, rows=3, placeholder="",
     <div ref={ref} contentEditable suppressContentEditableWarning role="textbox" aria-label={ariaLabel} aria-multiline="true"
       data-placeholder={placeholder} className="ibqRichInput" style={{minHeight:rows*24+29,fontFamily:family,fontSize:`${size}px`}}
       onInput={e=>setText(e.currentTarget.innerText)} />
+    <small className="assessmentEditorCounter" aria-live="polite">{value.length}/250</small>
   </div>;
 }
 
@@ -214,6 +216,9 @@ export default function ImageBasedContent() {
   const [newTag,setNewTag]=useState("");
   const [message,setMessage]=useState("");
   const [saving,setSaving]=useState(false);
+  const continueTimer=useRef<number|null>(null);
+  useEffect(()=>()=>{if(continueTimer.current!==null)window.clearTimeout(continueTimer.current);},[]);
+  useEffect(()=>{if(message!=="Successfully saved"||saving)return;const timer=window.setTimeout(()=>setMessage(""),3000);return()=>window.clearTimeout(timer);},[message,saving]);
   const [passingScore,setPassingScore]=useState("60");
   const scroll=useRef<HTMLDivElement>(null);
   useEffect(()=>{
@@ -271,6 +276,7 @@ export default function ImageBasedContent() {
   const go=(index:number)=>{if(index<0 || index>=count)return;setActive(index);setMessage("");scroll.current?.children[index]?.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});};
   const add=()=>{if(active>=count-1){setMessage(`Maximum ${count} questions configured in Details.`);return;}go(active+1);};
   const save=(continueToEvaluation=false)=>{
+    if(saving)return;
     if(continueToEvaluation){
       const firstIncomplete=Array.from({length:count},(_,i)=>i).find(i=>!questions[i]||!imageQuestionValid(questions[i]));
       if(firstIncomplete!==undefined){go(firstIncomplete);setMessage(`Complete Question ${firstIncomplete+1}: ${questions[firstIncomplete]?.subtype === "image-sorting" ? "write the question, upload 2–6 item images, enter unique text and choose a group for every item." : questions[firstIncomplete]?.subtype === "image-sequencing" ? "enter the question and 2–6 ordered steps, each with an image and unique text." : questions[firstIncomplete]?.subtype === "image-dropdown" ? "upload an image, add up to five dropdowns, and give each dropdown 2–6 unique choices with exactly one correct answer." : questions[firstIncomplete]?.subtype === "image-labeling" ? "upload an image, add 2–6 pins and give every pin a unique label." : questions[firstIncomplete]?.subtype === "image-matching" ? "enter your question and at least two picture/text pairs, including an image for each." : "add a question image, at least two options, and mark the correct answer."}`);return;}
@@ -278,8 +284,8 @@ export default function ImageBasedContent() {
     try {
       assessmentStorage.setItem(IMAGE_CONTENT_KEY,JSON.stringify({questions,active,savedAt:new Date().toISOString()}));
       const valid=questions.filter(imageQuestionValid);updateAssessment({questions:valid.length,marks:valid.reduce((sum,q)=>sum+(Number(q.points)||0),0)});
-      setMessage(continueToEvaluation?"Saved. Opening Preview Questions...":"Successfully saved");
-      if(continueToEvaluation){setSaving(true);router.push("/assessments/create/image-based-preview");}
+      setMessage("Successfully saved");
+      if(continueToEvaluation){setSaving(true);continueTimer.current=window.setTimeout(()=>{setMessage("");setSaving(false);router.push("/assessments/create/image-based-preview");},3000);}
     } catch {setMessage("Unable to save. Please reduce image sizes.");}
   };
   const toggle=(name:Section)=>setOpen(old=>old.includes(name)?old.filter(x=>x!==name):[...old,name]);
@@ -303,16 +309,15 @@ export default function ImageBasedContent() {
       ...(value === "image-matching" && !question.matchPairs ? {matchPairs:Array.from({length:4},newImageMatchPair),matchExtras:[""],shuffleTexts:true}: {}),
       ...(value === "image-dropdown" && !question.dropdownSpots ? {dropdownSpots:[],shuffleDropdowns:true}: {}),
       ...(value === "image-sequencing" && !question.sequenceSteps ? {sequenceSteps:Array.from({length:5},newSequenceStep),shuffleSteps:true}: {}),
-      ...(value === "image-sorting" && !question.sortingItems ? {sortingItems:Array.from({length:4},newSortingItem),sortingGroups:["Hardware","Software"],shuffleSorting:true,feedbackFull:question.feedbackFull||"All sorted correctly!"}: {}),
+      ...(value === "image-sorting" && !question.sortingItems ? {sortingItems:Array.from({length:4},newSortingItem),sortingGroups:["",""],shuffleSorting:true}: {}),
       ...(value === "image-labeling" && !question.labelPins ? {labelPins:[],labelExtras:[],shuffleLabels:true}: {}),
-      ...(value === "image-labeling" && !question.feedbackFull && !question.feedback ? {feedbackFull:"All labels are correct!"}: {}),
     });
     setOpen(value === "image-sorting" ? ["Question and Image","Groups and Items","Grading Method","Model Answer and Grader Information"] : value === "image-sequencing" ? ["Question and Image", "Drag Items", "Grading Method", "Feedback"] : value === "image-dropdown" ? ["Question and Image","Dropdowns on the Picture","Grading Method","Feedback"] : value === "image-matching" ? ["Question","Picture and matching text","Grading Method","Feedback"]
       : value === "image-labeling" ? ["Question and Image","Labels","Grading Method","Model Answer and Grader Information"]
       : ["Question and Image","Answer Options","Grading Method","Feedback"]);
   };
   const sortingItems: ImageSortingItem[] = question.sortingItems || [];
-  const sortingGroups=question.sortingGroups || ["Hardware","Software"];
+  const sortingGroups=question.sortingGroups || ["",""];
   const sortingItem=(id:string, patch:Partial<ImageSortingItem>)=>update({sortingItems:sortingItems.map(item=>item.id===id?{...item,...patch}:item)});
   const editSortingGroup=(index:number,name:string)=>{
     const oldName=sortingGroups[index];
@@ -362,16 +367,16 @@ export default function ImageBasedContent() {
       <div className="ibqTop"><nav aria-label="Breadcrumb" className="ibqBreadcrumb"><Link href="/assessments">Assessment</Link><span>»</span><button type="button" onClick={()=>router.push("/assessments/create/details")}>Create Assessment</button><span>»</span><strong>Create Questions</strong></nav><div className="ibqWelcome"><Sparkles size={24}/><div><strong>Let&apos;s Get Started! Antony?</strong><span>Let&apos;s Build A Great Question.</span></div></div></div>
       <><div className="ibqColumns"><div className="ibqPrimary"><section className="ibqCard">
         <div className="ibqCardHead"><div><h1>Question {active+1} of {count}</h1><p>{count} Question | {totalMarks} Marks</p></div><button className="ibqAccentButton" type="button" onClick={add}><Plus size={20}/>Add</button></div>
-        <div className="ibqNumberLine"><button className="ibqCircle" aria-label="Previous question" onClick={()=>go(active-1)} disabled={active===0}><ChevronLeft size={20}/></button><div className="ibqNumberScroll" ref={scroll}>{Array.from({length:count},(_,i)=>{const q=questions[i];const done=q&&imageQuestionValid(q);return <button key={i} type="button" onClick={()=>go(i)} className={`ibqNumber ${active===i?"is-active":done?"is-done":""}`} aria-current={active===i?"step":undefined}><b>{i+1}</b>{(done||active===i)&&<span className="ibqDot"/>}<small>{q&&imageQuestionStarted(q)?(q.subtype === "image-matching"?"IM":q.subtype === "image-labeling"?"IL":q.subtype === "image-dropdown"?"ID":q.subtype === "image-sequencing"?"IS":q.subtype === "image-sorting"?"ISO":"MCQ"):""}</small></button>})}</div><button className="ibqCircle" aria-label="Next question" onClick={()=>go(active+1)} disabled={active>=count-1}><ChevronRight size={20}/></button></div>
+        <div className="ibqNumberLine"><button className="ibqCircle" aria-label="Previous question" onClick={()=>go(active-1)} disabled={active===0}><ChevronLeft size={20}/></button><div className="ibqNumberScroll" ref={scroll}>{Array.from({length:count},(_,i)=>{const q=questions[i];const done=q&&imageQuestionValid(q);return <button key={i} type="button" onClick={()=>go(i)} className={`ibqNumber ${done?"is-done":active===i?"is-active":""}`} aria-current={active===i?"step":undefined}><b>{i+1}</b><span className={`ibqDot ${done?"is-done":"is-pending"}`} aria-hidden="true">{done?"✓":""}</span><small>{q&&imageQuestionStarted(q)?(q.subtype === "image-matching"?"IM":q.subtype === "image-labeling"?"IL":q.subtype === "image-dropdown"?"ID":q.subtype === "image-sequencing"?"IS":q.subtype === "image-sorting"?"ISO":"MCQ"):""}</small></button>})}</div><button className="ibqCircle" aria-label="Next question" onClick={()=>go(active+1)} disabled={active>=count-1}><ChevronRight size={20}/></button></div>
         <div className="ibqTrack"><span style={{width:`${Math.max(1,complete/count*100)}%`}}/></div>
         <section className="ibqForm"><div className="ibqField"><label>Question Type</label><div className="ibqStaticSelect">Image Based {(isLabeling||isSequencing||isSorting)?<LabelAsset file="arrow-down-01.svg" size={20}/>:<ChevronDown size={20}/>}</div></div><div className="ibqField"><label id="ibqSubtypeLabel">Sub type</label><div className={`ibqSubtypeControl ${subtypeOpen?"is-open":""}`} ref={subtypeMenuRef} onBlur={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node))setSubtypeOpen(false);}}>
           <button type="button" className="ibqSubtypeTrigger" aria-labelledby="ibqSubtypeLabel ibqSubtypeValue" aria-haspopup="listbox" aria-expanded={subtypeOpen} aria-controls="ibqSubtypeMenu" onClick={()=>setSubtypeOpen(value=>!value)}><span id="ibqSubtypeValue">{isMatching?"Image Matching":isLabeling?"Image Labeling":isDropdown?"Image Dropdown":isSequencing?"Image Sequencing":isSorting?"Image Sorting":"Image-Based Multiple Choice"}</span><LabelAsset file="arrow-down-01.svg" size={20} className={subtypeOpen?"ibqRotated":""}/></button>
           {subtypeOpen&&<div className="ibqSubtypeMenu" role="listbox" aria-label="Image-Based subtype options" id="ibqSubtypeMenu" onKeyDown={event=>{const items=Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('button[role="option"]'));const current=items.indexOf(document.activeElement as HTMLButtonElement);if(event.key==="ArrowDown"||event.key==="ArrowUp"){event.preventDefault();items[(current+(event.key==="ArrowDown"?1:items.length-1)+items.length)%items.length]?.focus();}if(event.key==="Home"){event.preventDefault();items[0]?.focus();}if(event.key==="End"){event.preventDefault();items[items.length-1]?.focus();}}}>
             {([['multiple-choice','Image-Based Multiple Choice'],['image-matching','Image Matching'],['image-labeling','Image Labeling'],['image-dropdown','Image Dropdown'],['image-sequencing','Image Sequencing'],['image-sorting','Image Sorting']] as [ImageSubtype,string][]).map(([value,text])=><button key={value} type="button" role="option" aria-selected={question.subtype===value||(value==='multiple-choice'&&!isLabeling&&!isMatching&&!isDropdown&&!isSequencing&&!isSorting)} className={`ibqSubtypeOption ${(question.subtype===value||(value==='multiple-choice'&&!isLabeling&&!isMatching&&!isDropdown&&!isSequencing&&!isSorting))?'is-selected':''}`} onClick={()=>{chooseSubtype(value);setSubtypeOpen(false);}}>{text}{(question.subtype===value||(value==='multiple-choice'&&!isLabeling&&!isMatching&&!isDropdown&&!isSequencing&&!isSorting))&&<LabelAsset file="checkmark-square-02.svg" size={18}/>}</button>)}
           </div>}</div></div>
-          {sections.map(name=>{const Icon=iconMap[name];const opened=open.includes(name);return <div className="ibqAccordion" data-section={name} key={name}><button type="button" className="ibqAccordionToggle" aria-expanded={opened} onClick={()=>toggle(name)}><span className="ibqSectionIcon">{isSorting&&name==="Question and Image"?<LabelAsset file="grid-view.svg" size={16}/>:((isLabeling||isDropdown||isSequencing||isSorting)&&LABEL_SECTION_ASSETS[name]?<LabelAsset file={LABEL_SECTION_ASSETS[name]!} size={18}/>:<Icon size={18}/>)}</span><b>{name}</b>{(name==="Feedback"||name==="Model Answer and Grader Information")&&<small>{(question.feedbackFull||question.feedback||"").length}/250</small>}{(isLabeling||isSequencing||isSorting)?<LabelAsset file="arrow-down-01.svg" size={20} className={opened?"ibqRotated":""}/>:<ChevronDown className={opened?"ibqRotated":""} size={20}/>}</button>{opened&&<div className="ibqAccordionBody">
+          {sections.map(name=>{const Icon=iconMap[name];const opened=open.includes(name);return <div className="ibqAccordion" data-section={name} key={name}><button type="button" className="ibqAccordionToggle" aria-expanded={opened} onClick={()=>toggle(name)}><span className="ibqSectionIcon">{isSorting&&name==="Question and Image"?<LabelAsset file="grid-view.svg" size={16}/>:((isLabeling||isDropdown||isSequencing||isSorting)&&LABEL_SECTION_ASSETS[name]?<LabelAsset file={LABEL_SECTION_ASSETS[name]!} size={18}/>:<Icon size={18}/>)}</span><b>{name}</b>{(isLabeling||isSequencing||isSorting)?<LabelAsset file="arrow-down-01.svg" size={20} className={opened?"ibqRotated":""}/>:<ChevronDown className={opened?"ibqRotated":""} size={20}/>}</button>{opened&&<div className="ibqAccordionBody">
           {name==="Question"&&<>
-            <label>Write your Question <small>{question.text.length}/250</small></label>
+            <label>Write your Question </label>
             <RichEditor label="Write your matching question" rows={3} value={question.text} onChange={text=>update({text})} placeholder="Match each picture with its topic."/>
           </>}
           {name==="Picture and matching text"&&<>
@@ -465,7 +470,7 @@ export default function ImageBasedContent() {
             <label className="ibqMatchShuffle">Shuffle the Labels <Toggle title="Shuffle labels" value={question.shuffleLabels!==false} onChange={value=>update({shuffleLabels:value})}/></label>
           </>}
           {name==="Question and Image"&&<>
-            <label>Write your Question <small>{question.text.length}/250</small></label>
+            <label>Write your Question </label>
             <RichEditor label="Write your Question" rows={3} value={question.text} onChange={text=>update({text})} placeholder="Write your question..." />
             {!isSorting&&<><label>Choose an Image <span className="ibqRequired">*</span></label>
             {!isLabeling&&!isDropdown&&!isSequencing&&!isSorting&&<div className="ibqGallery">{Array.from({length:4},(_,i)=><GalleryThumb key={i} index={i} src={galleryImages[i]||""} selected={!!galleryImages[i]&&question.image===galleryImages[i]} onSelect={()=>{if(galleryImages[i])update({image:galleryImages[i]});}}/>)}</div>}
@@ -504,15 +509,15 @@ export default function ImageBasedContent() {
           </>}
           {(name==="Feedback"||name==="Model Answer and Grader Information")&&<>
             {name==="Model Answer and Grader Information"&&<p className="ibqLabelHelp">Not shown to Learners</p>}
-            <label className="ibqFeedbackLabel is-full">Full Marks <small>{(question.feedbackFull||question.feedback||"").length}/250</small></label>
+            <label className="ibqFeedbackLabel is-full">Full Marks </label>
             <RichEditor tone="ibqRichFull" label="Full Marks feedback" rows={3} value={question.feedbackFull??question.feedback??""} onChange={text=>update({feedbackFull:text,feedback:text})} placeholder="Feedback for correct answers"/>
-            <label className="ibqFeedbackLabel is-partial">Partial Marks <small>{(question.feedbackPartial||"").length}/250</small></label>
+            <label className="ibqFeedbackLabel is-partial">Partial Marks </label>
             <RichEditor tone="ibqRichPartial" label="Partial Marks feedback" rows={3} value={question.feedbackPartial||""} onChange={text=>update({feedbackPartial:text})} placeholder="Feedback for partially correct answers"/>
-            <label className="ibqFeedbackLabel is-zero">Zero Marks <small>{(question.feedbackZero||"").length}/250</small></label>
+            <label className="ibqFeedbackLabel is-zero">Zero Marks </label>
             <RichEditor tone="ibqRichZero" label="Zero Marks feedback" rows={3} value={question.feedbackZero||""} onChange={text=>update({feedbackZero:text})} placeholder="Feedback for incorrect answers"/>
-            <div className="ibqInnerAccordion"><button type="button" aria-expanded={extraOpen.explanation} onClick={()=>setExtraOpen(p=>({...p,explanation:!p.explanation}))}><span className="ibqSectionIcon"><ClipboardList size={17}/></span><b>Explanation</b><small>{question.explanation.length}/250</small>{(isLabeling||isDropdown||isSequencing||isSorting)?<LabelAsset file="arrow-down-01.svg" size={19} className={extraOpen.explanation?"ibqRotated":""}/>:<ChevronDown className={extraOpen.explanation?"ibqRotated":""} size={19}/>}</button>
+            <div className="ibqInnerAccordion"><button type="button" aria-expanded={extraOpen.explanation} onClick={()=>setExtraOpen(p=>({...p,explanation:!p.explanation}))}><span className="ibqSectionIcon"><ClipboardList size={17}/></span><b>Explanation</b>{(isLabeling||isDropdown||isSequencing||isSorting)?<LabelAsset file="arrow-down-01.svg" size={19} className={extraOpen.explanation?"ibqRotated":""}/>:<ChevronDown className={extraOpen.explanation?"ibqRotated":""} size={19}/>}</button>
               {extraOpen.explanation&&<RichEditor label="Explanation" rows={3} value={question.explanation} onChange={text=>update({explanation:text})} placeholder="Explain the correct answer"/>}</div>
-            <div className="ibqInnerAccordion"><button type="button" aria-expanded={extraOpen.hint} onClick={()=>setExtraOpen(p=>({...p,hint:!p.hint}))}><span className="ibqSectionIcon"><MessageCircleMore size={17}/></span><b>Hint</b><small>{question.hint.length}/250</small>{(isLabeling||isDropdown||isSequencing||isSorting)?<LabelAsset file="arrow-down-01.svg" size={19} className={extraOpen.hint?"ibqRotated":""}/>:<ChevronDown className={extraOpen.hint?"ibqRotated":""} size={19}/>}</button>
+            <div className="ibqInnerAccordion"><button type="button" aria-expanded={extraOpen.hint} onClick={()=>setExtraOpen(p=>({...p,hint:!p.hint}))}><span className="ibqSectionIcon"><MessageCircleMore size={17}/></span><b>Hint</b>{(isLabeling||isDropdown||isSequencing||isSorting)?<LabelAsset file="arrow-down-01.svg" size={19} className={extraOpen.hint?"ibqRotated":""}/>:<ChevronDown className={extraOpen.hint?"ibqRotated":""} size={19}/>}</button>
               {extraOpen.hint&&<><RichEditor label="Hint" rows={3} value={question.hint} onChange={text=>update({hint:text})} placeholder="Write a hint"/><label className="ibqHintCheck"><input className="ibqHintNative" type="checkbox" checked={question.showHintBefore!==false} onChange={e=>update({showHintBefore:e.target.checked})}/><span className="ibqHintSquare" aria-hidden="true"/><span>Show hint before answering</span></label><label className="ibqHintCheck"><input className="ibqHintNative" type="checkbox" checked={!!question.allowHintRequest} onChange={e=>update({allowHintRequest:e.target.checked})}/><span className="ibqHintSquare" aria-hidden="true"/><span>Allow learner to request hint</span></label></>}</div>
           </>}
           </div>}</div>})}
@@ -550,7 +555,7 @@ export default function ImageBasedContent() {
             <div className="ibqMcqField"><label htmlFor="ibqPass">Passing Score</label><AsideNeumorphicSelect id="ibqPass" title="Passing Score" value={`${passingScore}%`} options={["40%","50%","60%","70%","80%","90%"]} onChange={selected=>{const value=selected.replace("%","");setPassingScore(value);try{const draft=JSON.parse(assessmentStorage.getItem("mcqAssessmentEvaluationDraft")||"{}");assessmentStorage.setItem("mcqAssessmentEvaluationDraft",JSON.stringify({...draft,passingScore:value}));}catch{setMessage("Unable to save the passing score.");}}}/></div>
           </section>
         </aside>
-      </div><div className="ibqFooter"><button type="button" onClick={()=>{try{assessmentStorage.setItem(IMAGE_CONTENT_KEY,JSON.stringify({questions,active,savedAt:new Date().toISOString()}));router.push("/assessments/create/image-based-preview");}catch{setMessage("Unable to save the preview. Please reduce image sizes.");}}}>Preview Questions</button><div>{message&&<span className="ibqStatus" role="status">{message}</span>}<button type="button" onClick={()=>save(false)}>Save</button><button className="ibqContinue" disabled={saving} type="button" onClick={()=>save(true)}>Continue</button></div></div></>
+      </div><div className="ibqFooter"><button type="button" onClick={()=>{try{assessmentStorage.setItem(IMAGE_CONTENT_KEY,JSON.stringify({questions,active,savedAt:new Date().toISOString()}));router.push("/assessments/create/image-based-preview");}catch{setMessage("Unable to save the preview. Please reduce image sizes.");}}}>Preview Questions</button><div>{message&&<span className={message === "Successfully saved" ? "mcqcSaveSuccessToast" : "ibqStatus"} role={message === "Successfully saved" ? "status" : "alert"}>{message}</span>}<button type="button" onClick={()=>save(false)}>Save</button><button className="ibqContinue" disabled={saving} type="button" onClick={()=>save(true)}>Continue</button></div></div></>
     </div></div></section></div>
   </main>;
 }

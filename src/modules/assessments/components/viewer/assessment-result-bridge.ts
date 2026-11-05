@@ -15,8 +15,8 @@ const n = (value: unknown, fallback = 0) => {
 };
 const str = (value: unknown, fallback = "") => typeof value === "string" ? value : typeof value === "number" ? String(value) : fallback;
 const text = (value: unknown) => str(asData(value)?.text ?? asData(value)?.label ?? value);
-function read(key: string): Data | null {
-  try { return asData(JSON.parse(assessmentStorage.getItem(key) || "null")); } catch { return null; }
+function read(key: string, assessmentId?: string): Data | null {
+  try { const raw=assessmentId && typeof window !== "undefined" ? localStorage.getItem(`neurolxp.assessments.draft.v1.${assessmentId}.${key}`) : assessmentStorage.getItem(key); return asData(JSON.parse(raw || "null")); } catch { return null; }
 }
 function truthy(value: unknown, fallback = true): boolean {
   return value === undefined || value === null || value === "" ? fallback : !["false", "no", "off", "0", "never", "disabled"].includes(String(value).toLowerCase());
@@ -29,8 +29,8 @@ function fromSettings(draft: Data, ...keys: string[]) {
   }
   return undefined;
 }
-export function releaseForAssessment(typeCode: string, pending = 0): ReleasePolicy {
-  if (typeCode === "one-word" || typeCode === "short-answer") return getTextResultRelease(typeCode, pending);
+export function releaseForAssessment(typeCode: string, pending = 0, assessmentId?: string): ReleasePolicy {
+  if (typeCode === "one-word" || typeCode === "short-answer" || typeCode === "long-answer" || typeCode === "fill-in-the-blanks") return getTextResultRelease(typeCode, pending, Date.now(), assessmentId);
   const key: Record<string, string[]> = {
     mcq: ["mcqAssessmentEvaluationDraft"],
     "image-based": ["mcqAssessmentEvaluationDraft", "imageBasedEvaluationDraft", "imageBasedAssessmentEvaluationDraft"],
@@ -41,7 +41,7 @@ export function releaseForAssessment(typeCode: string, pending = 0): ReleasePoli
     "drag-and-drop": ["dragDropEvaluationDraft"],
     "memory-game": ["memoryGameEvaluationDraft"],
   };
-  const draft = (key[typeCode] || ["mcqAssessmentEvaluationDraft"]).reduce<Data>((previous, name) => ({ ...previous, ...(read(name) || {}) }), {});
+  const draft = (key[typeCode] || ["mcqAssessmentEvaluationDraft"]).reduce<Data>((previous, name) => ({ ...previous, ...(read(name, assessmentId) || {}) }), read("mcqAssessmentEvaluationDraft", assessmentId) || {});
   const option = str(fromSettings(draft, "resultAvailable", "reviewAvailability", "resultAvailability", "resultReleaseMode", "releaseMode"), "Immediately").toLowerCase();
   const visible = truthy(fromSettings(draft, "showResults", "showResult", "resultAfter", "showResultAfterSubmission"));
   let mode: ReleasePolicy["mode"] = "immediate";

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import "./assessment.css";
 import {useAssessments} from "@/modules/assessments/hooks/useAssessment";
-import {duplicateAssessment,setActiveAssessmentId} from "@/modules/assessments/storage/assessment-storage";
+import {duplicateAssessment,deleteAssessment,setActiveAssessmentId} from "@/modules/assessments/storage/assessment-storage";
 import {typeGroups,getAssessmentTypeGroups} from "@/modules/assessments/config/assessment-types";
 import {getDemoSession} from "@/modules/assessments/auth/demo-auth";
 import CreateStep from "../steps/CreateStep/CreateStep";
@@ -40,6 +40,7 @@ type AssessmentStatus = "Published" | "Draft" | "Closing soon" | "Scheduled";
 type Assessment = {
 
   id: string;
+  createdAt: string;
 
   title: string;
 
@@ -112,6 +113,12 @@ function FilterDropdown({ name, label, value, onChange, icon, open, onToggle, on
   const [expanded, setExpanded] = useState<string[]>([]);
 
   const rootRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (leaveTimer.current) clearTimeout(leaveTimer.current);
+  }, []);
 
   const searchable = name === "course" || name === "type";
 
@@ -119,7 +126,11 @@ function FilterDropdown({ name, label, value, onChange, icon, open, onToggle, on
 
   useEffect(() => {
 
-    if (!open) { setTyped(""); setExpanded([]); return; }
+    if (!open) {
+      if (leaveTimer.current) clearTimeout(leaveTimer.current);
+      leaveTimer.current = null;
+      setTyped(""); setExpanded([]); return;
+    }
 
     const handleOutside = (event: PointerEvent) => {
 
@@ -129,15 +140,41 @@ function FilterDropdown({ name, label, value, onChange, icon, open, onToggle, on
 
     const handleEscape = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
 
+    const handleFocus = (event: FocusEvent) => {
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) onClose();
+    };
+
+    const menu = menuRef.current;
+    const handleWheel = (event: WheelEvent) => {
+      if (!menu || !event.deltaY) return;
+      let element = event.target instanceof Element ? event.target : null;
+      while (element && menu.contains(element)) {
+        if (element instanceof HTMLElement) {
+          const overflow = window.getComputedStyle(element).overflowY;
+          const canScroll = /auto|scroll/.test(overflow) && element.scrollHeight > element.clientHeight;
+          if (canScroll && ((event.deltaY < 0 && element.scrollTop > 0) ||
+              (event.deltaY > 0 && element.scrollTop + element.clientHeight < element.scrollHeight - 1))) return;
+        }
+        element = element.parentElement;
+      }
+      event.preventDefault();
+    };
+
     document.addEventListener("pointerdown", handleOutside);
 
     document.addEventListener("keydown", handleEscape);
+
+    document.addEventListener("focusin", handleFocus);
+    menu?.addEventListener("wheel", handleWheel, { passive: false });
 
     return () => {
 
       document.removeEventListener("pointerdown", handleOutside);
 
       document.removeEventListener("keydown", handleEscape);
+
+      document.removeEventListener("focusin", handleFocus);
+      menu?.removeEventListener("wheel", handleWheel);
 
     };
 
@@ -157,7 +194,16 @@ function FilterDropdown({ name, label, value, onChange, icon, open, onToggle, on
 
   return (
 
-    <div className={`asm-filter asm-filter--${name}`} ref={rootRef}>
+    <div className={`asm-filter asm-filter--${name}`} ref={rootRef}
+      onPointerEnter={() => {
+        if (leaveTimer.current) clearTimeout(leaveTimer.current);
+        leaveTimer.current = null;
+      }}
+      onPointerLeave={event => {
+        if (!open || (event.pointerType !== "mouse" && event.pointerType !== "pen")) return;
+        if (leaveTimer.current) clearTimeout(leaveTimer.current);
+        leaveTimer.current = setTimeout(onClose, 300);
+      }}>
 
       <button className="asm-filter-trigger" type="button" aria-expanded={open} aria-label={label} onClick={onToggle}>
 
@@ -167,7 +213,7 @@ function FilterDropdown({ name, label, value, onChange, icon, open, onToggle, on
 
       </button>
 
-      {open && <div className="asm-filter-menu">
+      {open && <div className="asm-filter-menu" ref={menuRef}>
 
         {searchable ? <>
 
@@ -241,7 +287,7 @@ function AssessmentContent({initialScreen = "list"}:{initialScreen?:"list"|"crea
   const [tenantId,setTenantId]=useState<string|null>(null);
   useEffect(()=>{setTenantId(getDemoSession()?.tenantId||null);},[]);
   const assessments:Assessment[]=stored.filter(item=>tenantId!==null && (item.tenantId||"north")===tenantId).map(item=>({
-    id:item.id,title:item.title,type:item.typeCode.toUpperCase(),course:item.course,
+    id:item.id,createdAt:item.createdAt,title:item.title,type:item.typeCode.toUpperCase(),course:item.course,
     questions:item.questions,marks:item.marks,status:item.status,window:null,
     attempts:item.attemptCount?`${item.attemptCount} Attempts`:"—",grading:item.status==="Published"?"Auto-graded":"Not Graded",submissions:item.attemptCount?`${item.attemptCount} Submitted`:"—"
   }));
@@ -268,6 +314,15 @@ function AssessmentContent({initialScreen = "list"}:{initialScreen?:"list"|"crea
   const [viewAll, setViewAll] = useState(false);
 
   const [openAction, setOpenAction] = useState<string | null>(null);
+  const actionLeaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (actionLeaveTimer.current) clearTimeout(actionLeaveTimer.current); }, []);
+  useEffect(()=>{
+    if (!openAction) return;
+    const close=(event:PointerEvent)=>{if (!(event.target as HTMLElement)?.closest?.(".asm-action-cell")) setOpenAction(null);};
+    const escape=(event:KeyboardEvent)=>{if(event.key==="Escape")setOpenAction(null);};
+    document.addEventListener("pointerdown",close);document.addEventListener("keydown",escape);
+    return ()=>{document.removeEventListener("pointerdown",close);document.removeEventListener("keydown",escape);};
+  },[openAction]);
 
   const [notice, setNotice] = useState("");
   const [screen, setScreen] = useState<"list" | "create">(initialScreen);
@@ -294,13 +349,13 @@ function AssessmentContent({initialScreen = "list"}:{initialScreen?:"list"|"crea
 
     if (sort === "Assessment Z-A") filtered.sort((a, b) => b.title.localeCompare(a.title));
 
-    if (sort === "Newest First") filtered.sort((a, b) => b.id.localeCompare(a.id));
+    if (sort === "Newest First") filtered.sort((a, b) => Date.parse(b.createdAt)-Date.parse(a.createdAt));
 
-    if (sort === "Oldest First") filtered.sort((a, b) => a.id.localeCompare(b.id));
+    if (sort === "Oldest First") filtered.sort((a, b) => Date.parse(a.createdAt)-Date.parse(b.createdAt));
 
     return filtered;
 
-  }, [query, course, type, status, sort, stored]);
+  }, [query, course, type, status, sort, stored, tenantId]);
 
   const maxPage = Math.max(1, Math.ceil(results.length / pageSize));
 
@@ -311,7 +366,7 @@ function AssessmentContent({initialScreen = "list"}:{initialScreen?:"list"|"crea
   const changeFilter = (setter: (value: string) => void) => (value: string) => { setter(value); setPage(1); };
 
   if (screen === "create") {
-    return <CreateStep onCancel={() => router.push("/assessments")} />;
+    return <CreateStep onCancel={() => { setScreen("list"); router.push("/assessments"); }} />;
   }
 
   return (
@@ -446,6 +501,14 @@ function AssessmentContent({initialScreen = "list"}:{initialScreen?:"list"|"crea
 
                   <td className="asm-action-cell">
 
+                    <div className="asm-action-control"
+                      onPointerEnter={() => { if (actionLeaveTimer.current) clearTimeout(actionLeaveTimer.current); actionLeaveTimer.current = null; }}
+                      onPointerLeave={event => {
+                        if (openAction !== item.id || (event.pointerType !== "mouse" && event.pointerType !== "pen")) return;
+                        if (actionLeaveTimer.current) clearTimeout(actionLeaveTimer.current);
+                        actionLeaveTimer.current = setTimeout(() => setOpenAction(current => current === item.id ? null : current), 300);
+                      }}>
+
                     <button className="asm-action-button" type="button" aria-label={`Actions for ${item.title}`} aria-expanded={openAction === item.id} onClick={() => setOpenAction(openAction === item.id ? null : item.id)}>
 
                       <img src={icons.actions} width={20} height={20} alt="" />
@@ -454,14 +517,25 @@ function AssessmentContent({initialScreen = "list"}:{initialScreen?:"list"|"crea
 
                     {openAction === item.id && <div className="asm-action-menu">
 
-                      {(["View details", "Edit assessment", "Duplicate"] as string[]).map(action => <button key={action} type="button" onClick={() => {
+                      {(["View details", "Edit assessment", "Duplicate", "Delete"] as string[]).map(action => <button key={action} type="button" onClick={() => {
                       setOpenAction(null);
                       if(action === "Duplicate") { duplicateAssessment(item.id); setNotice(`Duplicated ${item.title}`); return; }
+                      if(action === "Delete") {
+                        if(window.confirm(`Delete assessment "${item.title}"? This cannot be undone.`)) {
+                          if(deleteAssessment(item.id)) setNotice(`Deleted ${item.title}`);
+                          else setNotice("Unable to delete this assessment.");
+                        }
+                        return;
+                      }
                       setActiveAssessmentId(item.id);
-                      router.push("/assessments/create/details");
+                      if(action === "View details") {router.push(`/assessments/${encodeURIComponent(item.id)}/details`);return;}
+                      sessionStorage.setItem("assessment-editing-id",item.id);
+                      router.push(`/assessments/${encodeURIComponent(item.id)}/edit`);
                     }}>{action}</button>)}
 
                     </div>}
+
+                    </div>
 
                   </td>
 

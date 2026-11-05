@@ -66,3 +66,23 @@ body {
 html, body, body *, body *::before, body *::after {
   font-family: "Segoe UI", "Inter", sans-serif !important;
 }
+
+/* Keep typing fields in their existing inset style instead of a blue focus box. */
+body :is(input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="color"]):not([type="file"]), textarea, [contenteditable]:not([contenteditable="false"])):is(:focus, :focus-visible) {
+  outline: none !important;
+}
+body :is([class$="PointsControl"], .ibqLabelRow, .ibqSortingGroupWrap):has(:is(input, textarea, [contenteditable]:not([contenteditable="false"])):focus) {
+  outline: none !important;
+}
+body .asgn-rich-editable:focus-visible { box-shadow: none !important; }
+
+/* Hide only the empty tag display; the input and added tags remain available. */
+body :is(.mcqcTagRow, .fillqcTagRow, .tfqcTagRow, .dragcTagRow):empty { display:none !important; }
+/* Match the existing Details-page save confirmation. */
+body :is(.mcqcSaveSuccessToast, .fillqcSaveSuccessToast, .tfqcSaveSuccessToast, .dragcSaveSuccessToast) {
+  display:inline-flex; align-items:center; justify-content:center;
+  min-height:38px; padding:7px 18px; border:1.5px solid #2A7308 !important;
+  border-radius:24px; color:#2A7308 !important; background:#DFE6E9;
+  font:600 14px/20px "Segoe UI",Arial,sans-serif;
+  box-shadow:-2px -2px 3px #fff,2px 2px 3px #C4C4C4; white-space:nowrap;
+}

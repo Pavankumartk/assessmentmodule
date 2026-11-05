@@ -6,7 +6,7 @@ import type {LongQuestion} from "./long-answer-data";
 import Select from "./LongAnswerSelect";
 import {validLongQuestion} from "./long-answer-data";
 
-type Props={questions:LongQuestion[];onBack:()=>void;onSaveAndContinue:()=>void;onEdit:(index:number)=>void};
+type Props={questions:LongQuestion[];onBack:()=>void;onSaveAndContinue:()=>void;onEdit:(index:number)=>void;saving:boolean};
 const Asset=({name}:{name:string})=><img alt="" aria-hidden="true" src={`/assets/assessmenticons/${name}`} width={19} height={19}/>;
 function Toggle({on}:{on:boolean}){return <span className={`la-mini-switch ${on?"is-on":""}`}>{on?"ON":"OFF"}</span>;}
 function Block({heading,icon,children}:{heading:string;icon?:string;children:React.ReactNode}){
@@ -14,7 +14,7 @@ function Block({heading,icon,children}:{heading:string;icon?:string;children:Rea
  return <section className="la-preview-block"><button type="button" className="la-preview-sectionhead" aria-expanded={open} onClick={()=>setOpen(v=>!v)}><span>{icon&&<span className="la-icon-round"><Asset name={icon}/></span>}{heading}</span><span className={`la-collapse-chevron ${open?"is-expanded":""}`}><Asset name="arrow-down-01.svg"/></span></button>{open&&<div className="la-preview-sectionbody">{children}</div>}</section>;
 }
 function Field({label,value}:{label:string;value:React.ReactNode}){return <div className="la-preview-field"><label>{label}</label><div>{value||"—"}</div></div>;}
-export default function LongAnswerPreview({questions,onBack,onEdit,onSaveAndContinue}:Props){
+export default function LongAnswerPreview({questions,onBack,onEdit,onSaveAndContinue,saving}:Props){
  const [filter,setFilter]=useState("All Questions"); const [index,setIndex]=useState(0);
  const router=useRouter();
  const valid=useMemo(()=>questions.map(q=>validLongQuestion(q).length===0),[questions]);
@@ -35,12 +35,12 @@ export default function LongAnswerPreview({questions,onBack,onEdit,onSaveAndCont
    <div className="la-preview-placeholder">Answer Box Placeholder</div>
    <Block heading="Answer Settings" icon="editbig.svg"><div className="la-preview-fieldgrid"><Field label="Responses" value={`${q.responseFormat} · ${q.inputBoxLines} lines`}/><Field label="Length" value={`${q.minWords}–${q.maxWords} words · ${q.maxCharacters} characters`}/><Field label="Required" value={q.responseRequired?"YES":"NO"}/></div>
      <article className="la-preview-info"><h3><span className="la-icon-round"><Asset name="editbig.svg"/></span>Model Answer</h3><p>{q.modelAnswer||"—"}</p></article>
-     <article className="la-preview-info"><h3><span className="la-icon-round"><Asset name="editbig.svg"/></span>Grading – Rubric</h3><div className="la-preview-rubrics">{q.criteria.map((criterion,i)=><div className="la-preview-rubric-row" key={criterion.id}><div><b>{criterion.title||`Criterion ${i+1}`}</b><p>{criterion.description}</p></div>{criterion.levels.map((level,j)=><div key={level.id}><b className={j===0?"la-blue":j===1?"la-orange":"la-red"}>{level.title} - {level.points}</b><p>{level.description}</p></div>)}</div>)}</div></article>
+     <article className="la-preview-info"><h3>Grading Method</h3><p>{q.gradingMethod ?? "Equal Marks"} · {q.points} points · Negative marking: {q.negativeMarking ?? "NA"}</p><p>Partial Credit: {(q.partialCredit ?? true)?"ON":"OFF"} · Minimum score of 0: {(q.minimumZero ?? true)?"ON":"OFF"}</p>{q.criteria.map((criterion,i)=><p key={criterion.id}>{criterion.title||`Criterion ${i+1}`}: {(q.gradingMethod??"Equal Marks")==="Custom"?criterion.levels[0]?.points||"0":(Number(q.points||0)/Math.max(1,q.criteria.length)).toFixed(2)} marks</p>)}</article>
    </Block>
    <Block heading="Feedback and Learning" icon="message-circle-more.svg"><div className="la-preview-info-list">{[{heading:"Full Marks",value:q.feedbackFull,cls:"la-green",icon:"checkmark-circle.svg"},{heading:"Partial Marks",value:q.feedbackPartial,cls:"la-orange",icon:"alert.svg"},{heading:"Zero Marks",value:q.feedbackZero,cls:"la-red",icon:"cancel.svg"},{heading:"Explanation",value:q.explanation,cls:"",icon:"idea.svg"},{heading:"Hint",value:q.hint,cls:"",icon:"idea.svg"},{heading:"Information for Graders",value:q.graderInfo,cls:"",icon:"editbig.svg"}].map(item=><article key={item.heading} className="la-preview-info"><h3 className={item.cls}><span className="la-icon-round"><Asset name={item.icon}/></span>{item.heading}</h3><p>{item.value||"—"}</p></article>)}</div></Block>
    <Block heading="Question Settings" icon="assignments.svg"><div className="la-preview-fieldgrid la-preview-settings"><Field label="Difficulty" value={q.difficulty}/><Field label="Blooms Taxonomy" value={q.bloom}/><Field label="Category" value={q.category}/><Field label="Tags" value={q.tags.join(", ")}/><Field label="Mandatory" value={q.mandatory?<Toggle on/>:<Toggle on={false}/>}/></div></Block>
   </>}
-  <div className="la-preview-footer"><button type="button" onClick={onBack}>Back to Question</button><button type="button" className="la-blue" onClick={onSaveAndContinue}>Save And Continue</button></div>
+  <div className="la-preview-footer"><button type="button" onClick={onBack}>Back to Question</button><div className="la-footer-right">{saving&&<span className="la-save-notice" role="status">Successfully saved</span>}</div></div>
   </div>
  </div>;
 }

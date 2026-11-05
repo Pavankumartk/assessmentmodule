@@ -3,3 +3,37 @@
 .mcqcContentEntryFooter>div{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
 .mcqcContentEntryFooter>div .mcqcBack:last-child{color:#2A7308}
 @media(max-width:540px){.mcqcContentEntryFooter,.mcqcContentEntryFooter>div{gap:12px}.mcqcContentEntryFooter .mcqcBack{width:auto;min-width:100px;flex:1}}
+
+/* Question slots are configured in Details; keep creation options on the Content entry. */
+.assessment-variant .mcqcBuilder .mcqcAddMenu,
+.assessment-variant .tfqcBuilder .tfqcAddMenu,
+.assessment-variant .fillqcBuilder .fillqcAddMenu,
+.assessment-variant .mcqcShortAdd,
+.assessment-variant .mcqcAIBuilderActions > .mcqcTopAdd:last-child,
+.assessment-variant .mcqcMatchQuestionsHeading > .mcqcTopAdd,
+.assessment-variant .mcqcBuilderBottom > .mcqcSubmitQuestion,
+.assessment-variant .dragcBuilderBottom > .dragcSubmitQuestion,
+.assessment-variant .memFigmaQuestionHeader > .memFigmaButtonBlue,
+.assessment-variant .memFigmaAddQuestions,
+.assessment-variant .ibqCardHead > .ibqAccentButton,
+.assessment-variant .ibqWithinActions > .ibqAccentButton{display:none!important}
+
+/* Save confirmations and warnings keep their existing layout with consistent colours. */
+.assessment-variant .mcqcSaveSuccessToast,
+.assessment-variant .tfqcSaveSuccessToast,
+.assessment-variant .fillqcSaveSuccessToast,
+.assessment-variant .dragcSaveSuccessToast,
+.assessment-variant .mcqFooterSavedPill,
+.assessment-variant .la-save-notice,
+.assessment-variant .evaluationSaveMessage:not(.evaluationSaveError),
+.assessment-variant .mcqcNoticeSuccess,
+.assessment-variant .asgn-notice-success,
+.assessment-variant .aiNoticeSuccess {color:#2A7308!important;border-color:#2A7308!important}
+.assessment-variant [role="alert"],
+.assessment-variant .mcqcMessage,
+.assessment-variant .mcqcBuilderNotice:not(.mcqcNoticeSuccess),
+.assessment-variant .tfqcBuilderNotice,
+.assessment-variant .fillqcBuilderNotice,
+.assessment-variant .dragcBuilderNotice,
+.assessment-variant .asgn-notice:not(.asgn-notice-success),
+.assessment-variant .aiNotice:not(.aiNoticeSuccess) {color:#BC1E2D!important}

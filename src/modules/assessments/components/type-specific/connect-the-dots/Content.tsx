@@ -162,7 +162,6 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
       {button("italic.svg", "Italic", () => command("italic"))}
       {button("underline.svg", "Underline", () => command("underline"))}
       {button("text-centerline-center-top.svg", "Bulleted list", () => command("insertUnorderedList"))}
-      <div className="mcqcRichMenuRoot"><button type="button" aria-label="Special characters" title="Special characters" aria-expanded={menu === "symbols"} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={e => openFormatMenu("symbols", e.currentTarget)}><Icon name="more-vertical.svg" size={18}/></button></div>
     </div>
     {menu && typeof document !== "undefined" && createPortal(
       <div ref={floatingMenu} className={`mcqcFloatingFormatMenu ${menu === "symbols" ? "mcqcFloatingSymbols" : ""}`}
@@ -183,6 +182,7 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
     <div ref={editor} id={editorId} role="textbox" aria-label={placeholder} aria-multiline="true" contentEditable suppressContentEditableWarning data-placeholder={placeholder}
       className="mcqcRichEditable" onBeforeInput={beforeInput} onInput={notify} onKeyUp={remember} onMouseUp={remember} onFocus={remember} onPaste={pasteText}
       onDrop={event => { event.preventDefault(); event.currentTarget.focus(); const value = allowedInsertion(event.dataTransfer.getData("text/plain")); if (value) document.execCommand("insertText", false, value); notify(); }}/>
+    {maxWords !== undefined && <small className="assessmentEditorCounter" aria-live="polite">{Array.from(value).length}/{maxWords}</small>}
   </div>;
 }
 
@@ -213,8 +213,8 @@ function QuestionTypeDropdown({ value, onChange }: { value: string; onChange: (v
   }, [open]);
   const label = value === "MCQ" ? "Multiple Choice Question (MCQ)" : value === "Fill in the Blanks" ? "Fill in the Blank" : value;
   const normalized = search.trim().toLowerCase();
-  return <div className="mcqcSelectRoot mcqcTypeRoot" ref={root}>
-    <button type="button" className="mcqcSelectTrigger" aria-label="Question Type" aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? "mcqcQuestionTypeList" : undefined} onClick={() => setOpen(previous => !previous)}>
+  return <div className="mcqcSelectRoot mcqcTypeRoot" ref={root} onPointerLeave={event => { if (event.pointerType === "mouse") window.setTimeout(() => { if (root.current && !root.current.matches(":hover")) setOpen(false); }, 300); }}>
+    <button type="button" className="mcqcSelectTrigger" aria-label="Question Type" disabled aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? "mcqcQuestionTypeList" : undefined} onClick={() => setOpen(previous => !previous)}>
       <span>{label || "Select Question Type"}</span><Icon name="arrow-down-01.svg" size={20} className={open ? "mcqcRotated" : ""}/>
     </button>
     {open && <div id="mcqcQuestionTypeList" className="mcqcTypeDropdown">
@@ -241,7 +241,7 @@ function NeumoSelect({ value, options, onChange, placeholder }: { value: string;
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => { if (!open) return; const outside = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) setOpen(false); }; const escape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); }; document.addEventListener("pointerdown", outside); document.addEventListener("keydown", escape); return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); }; }, [open]);
-  return <div className="mcqcSelectRoot" ref={root}><button type="button" className="mcqcSelectTrigger" aria-expanded={open} onClick={() => setOpen(v => !v)}><span>{value || placeholder || "Select"}</span><Icon name="arrow-down-01.svg" size={20} /></button>{open && <div className="mcqcSelectList" role="radiogroup">{options.map(option => <button key={option} type="button" role="radio" aria-checked={value === option} className="mcqcSelectItem" onClick={() => { onChange(option); setOpen(false); }}>{value === option ? <SelectedCheck/> : <span className="mcqcOptionRadio"/>}<span>{option}</span></button>)}</div>}</div>;
+  return <div className="mcqcSelectRoot" ref={root} onPointerLeave={event => { if (event.pointerType === "mouse") window.setTimeout(() => { if (root.current && !root.current.matches(":hover")) setOpen(false); }, 300); }}><button type="button" className="mcqcSelectTrigger" aria-expanded={open} onClick={() => setOpen(v => !v)}><span>{value || placeholder || "Select"}</span><Icon name="arrow-down-01.svg" size={20} /></button>{open && <div className="mcqcSelectList" role="radiogroup">{options.map(option => <button key={option} type="button" role="radio" aria-checked={value === option} className="mcqcSelectItem" onClick={() => { onChange(option); setOpen(false); }}>{value === option ? <SelectedCheck/> : <span className="mcqcOptionRadio"/>}<span>{option}</span></button>)}</div>}</div>;
 }
 
 
@@ -300,7 +300,7 @@ function DragPanel({ title, icon, open, onToggle, children, subtitle }: {
   return <section className={`mcqcDDPanel ${open ? "is-open" : ""}`}>
     <button type="button" className="mcqcAnswerExpand mcqcDDPanelHead" aria-expanded={open} aria-label={`${title}: ${open ? "collapse" : "expand"}`} onClick={onToggle}>
       <span className="mcqcDDPanelHeading"><span className="mcqcDDPanelIcon"><Icon name={icon} size={19}/></span><strong>{title}</strong></span>
-      {subtitle && <small className="mcqcDDPanelCount">{subtitle}</small>}
+      {subtitle && !/^\d+\s*\/\s*\d+/.test(subtitle) && <small className="mcqcDDPanelCount">{subtitle}</small>}
       <Icon name="arrow-down-01.svg" size={20} className={open ? "mcqcRotated" : ""}/>
     </button>
     {open && <div className="mcqcDDPanelBody">{children}</div>}
@@ -367,7 +367,7 @@ function makeQuestion(sample=false):DotQuestion {
     hint:sample?"Think about how each structure stores and retrieves data.":"",
     showCorrectCount:true,showConnectionsAfterTrial:false,
     showHintBeforeAnswering:false,allowHintRequest:false,
-    difficulty:"Medium",category:sample?"AI":"",bloom:sample?"Analyse":"",
+    difficulty:"",category:sample?"AI":"",bloom:sample?"Analyse":"",
     tags:sample?["Data Structure","Stack"]:[],mandatory:true
   };
 }
@@ -613,7 +613,7 @@ function PreviewToggle({label,enabled}:{label:string;enabled:boolean}){
 function PreviewReadValue({label,value}:{label:string;value:string}){
   return <div className="cdReadValue"><span>{label}</span><strong>{value||"—"}</strong></div>;
 }
-function ConnectDotsReviewPreview({questions,values,onBack,onEdit,onContinue}:{questions:DotQuestion[];values:AssessmentValues;onBack:()=>void;onEdit:(i:number)=>void;onContinue:()=>void}){
+function ConnectDotsReviewPreview({questions,values,onBack,onEdit,onContinue,saving}:{questions:DotQuestion[];values:AssessmentValues;onBack:()=>void;onEdit:(i:number)=>void;onContinue:()=>void;saving:boolean}){
   const [filter,setFilter]=useState("All Questions");
   const [filterOpen,setFilterOpen]=useState(false);
   const [learnerIndex,setLearnerIndex]=useState<number|null>(null);
@@ -669,20 +669,20 @@ function ConnectDotsReviewPreview({questions,values,onBack,onEdit,onContinue}:{q
               })}
             </div>
           : <div className="cdPreviewPairTable"><div className="cdPreviewPairHeader"><span>{question.columnA||"Column A"}</span><span>{question.columnB||"Column B"}</span><span>Marks</span></div>{question.pairs.map((pair,pairIndex)=>{const pairFilled=Boolean(pair.left.trim()&&pair.right.trim());return <div className={`cdPreviewPairRow ${pairFilled?"is-filled":""}`} key={pair.id}><div className="cdPreviewPairLeft"><span>{String.fromCharCode(65+pairIndex)}.</span>{pair.left||`Left item ${pairIndex+1}`}</div><div className="cdPreviewPairRight">{pair.right||`Correct match ${pairIndex+1}`}{pairFilled&&<span className="cdPreviewMatchCheck" aria-label="Correct match">✓</span>}</div><div className="cdPreviewPairMarks">{formatMarks(question.grading==="Custom"?Number(pair.marks)||0:pairMarks)}</div></div>})}</div>}{question.extraEnabled&&<div className={`cdPreviewExtraAnswers ${question.questionMode==="Numeric Value"?"cdPreviewNumericExtras":question.questionMode==="Picture"?"cdPreviewPictureExtras":""}`}><h3>Extra Answers</h3>{question.extras.length?<div className="cdPreviewExtraChips">{question.extras.map((answer,extraIndex)=><span key={`${extraIndex}-${answer}`}>{answer}<b>Distractors</b></span>)}</div>:<p>No extra answers added.</p>}</div>}</PreviewSection>
-        <PreviewSection title="Advanced Settings" icon="settings-02.svg" open={openSections.advanced} onToggle={()=>toggleSection("advanced")} className="cdPreviewAdvancedSection"><div className="cdPreviewSettingsGrid">{read.map(([label,value])=><PreviewReadValue key={label} label={label} value={value}/>)}</div><div className="cdPreviewLongValue"><span>Instruction shown to learners</span><div>{question.instructions||"—"}</div></div><div className="cdPreviewLongValue"><span>Information for graders</span><div>{question.graderInfo||"—"}</div></div></PreviewSection>
+        <PreviewSection title="Advanced Settings" icon="target.svg" open={openSections.advanced} onToggle={()=>toggleSection("advanced")} className="cdPreviewAdvancedSection"><div className="cdPreviewSettingsGrid">{read.map(([label,value])=><PreviewReadValue key={label} label={label} value={value}/>)}</div><div className="cdPreviewLongValue"><span>Instruction shown to learners</span><div>{question.instructions||"—"}</div></div><div className="cdPreviewLongValue"><span>Information for graders</span><div>{question.graderInfo||"—"}</div></div></PreviewSection>
         <PreviewSection title="Grading Method" icon="quiz.svg" open={openSections.grading} onToggle={()=>toggleSection("grading")} className="cdPreviewGradingSection"><div className="cdPreviewSettingsGrid cdPreviewGradingGrid"><PreviewReadValue label="Grading Method" value={question.grading}/><PreviewReadValue label="Points (total for Question)" value={question.points}/><PreviewReadValue label="Negative Marking" value={question.negative}/></div><div className="cdPreviewToggleList"><PreviewToggle label="Partial Credit" enabled={question.partialCredit}/><PreviewToggle label="Calculate grade with a minimum score of 0" enabled={question.minZero}/><PreviewToggle label="Allow learner to move items between zones before submit" enabled={question.allowMove}/></div><div className="cdPreviewPairMarksBar"><span>Total of pair marks: {Number(question.pairs.reduce((sum,_,i)=>sum+marksFor(question,i),0).toFixed(2))} / {question.points}</span><strong>{Math.abs(question.pairs.reduce((sum,_,i)=>sum+marksFor(question,i),0)-Number(question.points))<0.001?"Matches Points":"Check Points"}</strong></div><div className="cdPreviewSimulatorTitle">Score Simulator - Outcome per Pairs</div><div className="cdPreviewSimulatorTable"><div className="cdPreviewSimulatorHead"><span>Outcome</span><span>Marks</span></div>{Array.from({length:question.pairs.length+1},(_,rowIndex)=>question.pairs.length-rowIndex).map(n=><div className="cdPreviewSimulatorRow" key={n}><span>{n} correct, {question.pairs.length-n} wrong</span><strong>{formatMarks(scoreFor(question,n))}</strong></div>)}</div></PreviewSection>
         <PreviewSection title="Feedback and Learning" open={openSections.learning} onToggle={()=>toggleSection("learning")} className="cdPreviewLearningSection"><div className="cdPreviewFeedbackCards"><section className="cdPreviewFeedbackCard cdFullFeedback"><h3><span>✓</span>Full Marks</h3><div>{question.feedbackFull||"—"}</div></section><section className="cdPreviewFeedbackCard cdPartialFeedback"><h3><span>•</span>Partial Marks</h3><div>{question.feedbackPartial||"—"}</div></section><section className="cdPreviewFeedbackCard cdZeroFeedback"><h3><span>×</span>Zero Marks</h3><div>{question.feedbackZero||"—"}</div></section><section className="cdPreviewFeedbackCard cdLearningText"><h3><Icon name="assignments.svg" size={17}/>Explanation</h3><div>{question.explanation||"—"}</div></section><section className="cdPreviewFeedbackCard cdLearningText"><h3><Icon name="idea.svg" size={17}/>Hint</h3><div>{question.hint||"—"}</div></section></div></PreviewSection>
         <PreviewSection title="Question Settings" open={openSections.settings} onToggle={()=>toggleSection("settings")} className="cdPreviewQuestionSettings"><div className="cdPreviewQuestionSettingGrid"><div><span>Difficulty</span><strong><Icon name="target.svg" size={16}/>{question.difficulty}</strong></div><div><span>Bloom’s Taxonomy</span><strong><Icon name="brain.svg" size={16}/>{question.bloom||"—"}</strong></div><div><span>Category</span><strong><Icon name="folder.svg" size={16}/>{question.category||"—"}</strong></div><div><span>Tags</span><strong><Icon name="tag.svg" size={16}/>{question.tags.join(", ")||"—"}</strong></div><div><span>Mandatory</span><strong><Icon name="circle-check.svg" size={16}/>{question.mandatory?"YES":"NO"}</strong></div></div></PreviewSection>
       </article>;
     }):<div className="cdPreviewEmpty"><p>{filter==="All Questions"?"No questions have been entered yet.":`No ${filter.toLowerCase()} questions found.`}</p><button type="button" onClick={onBack}>Back to Question</button></div>}
-    <footer className="cdPreviewFooter"><button type="button" className="cdFooterPill" onClick={onBack}>Back to Question</button><button type="button" className="cdFooterPill cdContinueButton" onClick={onContinue}>Save &amp; Continue</button></footer>
+    <footer className="cdPreviewFooter"><button type="button" className="cdFooterPill" onClick={onBack}>Back to Question</button>{saving&&<span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}</footer>
   </div>;
 }
 
 function QuestionBuilder(){
   const router=useRouter();
   const [values,setValues]=useState<AssessmentValues>(DEFAULT_VALUES);
-  const [questions,setQuestions]=useState<DotQuestion[]>(()=>Array.from({length:20},(_,i)=>makeQuestion(i===0)));
+  const [questions,setQuestions]=useState<DotQuestion[]>(()=>Array.from({length:20},()=>makeQuestion(false)));
   const [active,setActive]=useState(0);
   const [preview,setPreview]=useState(false);
   const [sections,setSections]=useState({question:false,advanced:false,pairs:false,grading:false,feedback:false});
@@ -690,6 +690,9 @@ function QuestionBuilder(){
   const [richHtml,setRichHtml]=useState<Record<string,string>>({});
   const [extraDrafts,setExtraDrafts]=useState<Record<number,string>>({});
   const [notice,setNotice]=useState("");
+  const [continuing,setContinuing]=useState(false);
+  const continueTimer=useRef<number | null>(null);
+  useEffect(()=>()=>{if(continueTimer.current) window.clearTimeout(continueTimer.current);},[]);
   const [showValidation,setShowValidation]=useState(false);
   const [tagInput,setTagInput]=useState("");
   const [addingTag,setAddingTag]=useState(false);
@@ -700,11 +703,12 @@ function QuestionBuilder(){
     let savedData:any=null;
     try{const raw=assessmentStorage.getItem(DRAFT_KEY);if(raw)savedData=JSON.parse(raw);}catch{/* Use a fresh draft. */}
     const stored=Array.isArray(savedData?.questions)?savedData.questions:[];
-    setQuestions(Array.from({length:details.questionCount},(_,i)=>stored[i]?{...makeQuestion(false),...stored[i],questionMode:stored[i].questionMode||"Text Based",lineStyle:["Solid","Dashed","Dot style","Dash-dot"].includes(stored[i].lineStyle)?stored[i].lineStyle:"Solid",lineShape:stored[i].lineShape||"Straight",endPoint:stored[i].endPoint||"Circle",pairs:Array.isArray(stored[i].pairs)?(stored[i].questionMode==="Picture"?stored[i].pairs.map((p:DotPair)=>({...p,left:p.pictureOriginalLeft??p.left,right:p.pictureOriginalRight??p.right})):stored[i].pairs):Array.from({length:5},blankPair)}:makeQuestion(i===0&&!stored.length)));
+    setQuestions(Array.from({length:details.questionCount},(_,i)=>stored[i]?{...makeQuestion(false),...stored[i],questionMode:stored[i].questionMode||"Text Based",lineStyle:["Solid","Dashed","Dot style","Dash-dot"].includes(stored[i].lineStyle)?stored[i].lineStyle:"Solid",lineShape:stored[i].lineShape||"Straight",endPoint:stored[i].endPoint||"Circle",pairs:Array.isArray(stored[i].pairs)?(stored[i].questionMode==="Picture"?stored[i].pairs.map((p:DotPair)=>({...p,left:p.pictureOriginalLeft??p.left,right:p.pictureOriginalRight??p.right})):stored[i].pairs):Array.from({length:5},blankPair)}:makeQuestion(false)));
     if(savedData?.richHtml&&typeof savedData.richHtml==="object")setRichHtml(savedData.richHtml);
     if(Number.isInteger(savedData?.active))setActive(Math.min(details.questionCount-1,Math.max(0,savedData.active)));
     setReady(true);
   },[]);
+  useEffect(()=>{if(!ready)return;try{saveDraft(questions,values,active,richHtml);}catch{setNotice("Could not save this draft in your browser.");}},[ready,questions,values,active,richHtml]);
   const question=questions[active]||makeQuestion();
   const completed=questions.slice(0,values.questionCount).filter(complete).length;
   const earned=questions.slice(0,values.questionCount).filter(complete).reduce((s,q)=>s+(Number(q.points)||0),0);
@@ -778,29 +782,29 @@ function QuestionBuilder(){
   };
   const openPreview=()=>{setShowValidation(false);setNotice("");setPreview(true);};
   const continueToEvaluation=()=>{
-    if(!ready)return;
+    if(!ready || continuing)return;
     if(extraDraft.trim()){setNotice("Save the pending extra answer first.");setSections(s=>({...s,pairs:true}));return;}
     const invalid=questions.slice(0,values.questionCount).findIndex(q=>!complete(q));
     if(invalid!==-1){jump(invalid);setPreview(false);setShowValidation(true);setNotice(`Question ${invalid+1}: ${errorsFor(questions[invalid])[0]}`);return;}
-    try{saveDraft(questions,values,active,richHtml);updateAssessment({questions:values.questionCount,marks:questions.slice(0,values.questionCount).reduce((sum,q)=>sum+Number(q.points||0),0)});router.push("/assessments/create/evaluation");}
+    try{saveDraft(questions,values,active,richHtml);updateAssessment({questions:values.questionCount,marks:questions.slice(0,values.questionCount).reduce((sum,q)=>sum+Number(q.points||0),0)});setNotice("");setContinuing(true);continueTimer.current=window.setTimeout(()=>{setContinuing(false);router.push("/assessments/create/evaluation");},3000);}
     catch{setNotice("Unable to save this assessment.");}
   };
   const addPair=()=>{if(question.pairs.length>=20){setNotice("Maximum 20 pairs.");return;}update({pairs:[...question.pairs,blankPair()],scoreOverrides:{}});};
   const removePair=(id:string)=>{if(question.pairs.length<=2){setNotice("At least two pairs are required.");return;}update({pairs:question.pairs.filter(p=>p.id!==id),scoreOverrides:{}});};
-  if(preview)return <ConnectDotsReviewPreview questions={questions.slice(0,values.questionCount)} values={values} onBack={()=>setPreview(false)} onEdit={i=>{setPreview(false);jump(i);}} onContinue={continueToEvaluation}/>;
+  if(preview)return <ConnectDotsReviewPreview questions={questions.slice(0,values.questionCount)} values={values} saving={continuing} onBack={()=>setPreview(false)} onEdit={i=>{setPreview(false);jump(i);}} onContinue={continueToEvaluation}/>;
   return <div className="mcqcBuilder mcqcMatchBuilder mcqcConnectBuilder">
     <div className="mcqcBuilderTop"><nav className="mcqcBuilderCrumb" aria-label="Question breadcrumb"><Link href="/assessments">Assessment</Link><Icon name="arrowrightdouble.svg" size={18}/><button type="button" onClick={()=>router.back()}>Create Assessment</button><Icon name="arrowrightdouble.svg" size={18}/><strong>Create Questions</strong></nav><div className="mcqcBuilderWelcome"><Icon name="ai-sparkles.svg" size={30}/><div><h2>Let&apos;s Get Started! Antony?</h2><p>Let&apos;s Build A Great Question.</p></div></div></div>
     <div className="mcqcBuilderGrid"><section className="mcqcBuilderMain">
       <div className="mcqcQuestionsHeading mcqcMatchQuestionsHeading"><div><h2>Question {active+1} of {values.questionCount}</h2><p>{values.questionCount} Question | {values.totalMarks} Marks</p></div><button type="button" className="mcqcBuilderAction mcqcTopAdd" onClick={()=>jump(active+1,true)} disabled={active>=values.questionCount-1}><Icon name="plus.svg" size={19}/>Add</button></div>
-      <div className="mcqcNumberNavigation"><button type="button" className="mcqcRoundNav" aria-label="Scroll numbers left" onClick={()=>numberRef.current?.scrollBy({left:-320,behavior:"smooth"})}><Icon name="arrowleft.svg" size={20}/></button><div className="mcqcQuestionNumbers" ref={numberRef}>{questions.slice(0,values.questionCount).map((q,i)=><button key={i} type="button" className={`mcqcQuestionNumber ${active===i?"is-active":complete(q)?"is-complete":hasData(q)?"is-partial":""}`} aria-current={active===i?"step":undefined} onClick={()=>jump(i)}><span>{i+1}</span><small>{"CD"}</small><i aria-hidden="true"/></button>)}</div><button type="button" className="mcqcRoundNav" aria-label="Scroll numbers right" onClick={()=>numberRef.current?.scrollBy({left:320,behavior:"smooth"})}><Icon name="arrowright.svg" size={20}/></button></div>
+      <div className="mcqcNumberNavigation"><button type="button" className="mcqcRoundNav" aria-label="Previous question" disabled={active===0} onClick={()=>jump(active-1)}><Icon name="arrowleft.svg" size={20}/></button><div className="mcqcQuestionNumbers" ref={numberRef}>{questions.slice(0,values.questionCount).map((q,i)=><button key={i} type="button" className={`mcqcQuestionNumber ${complete(q)?"is-complete":active===i?"is-active":"is-empty"}`} aria-current={active===i?"step":undefined} onClick={()=>jump(i)}><span>{i+1}</span><small>{"CD"}</small><i aria-hidden="true"/></button>)}</div><button type="button" className="mcqcRoundNav" aria-label="Next question" disabled={active>=values.questionCount-1} onClick={()=>jump(active+1)}><Icon name="arrowright.svg" size={20}/></button></div>
       <div className="mcqcQuestionProgress"><span style={{width:`${completed/Math.max(1,values.questionCount)*100}%`}}/></div>
       <div className="mcqcQuestionForm mcqcDDQuestionForm mcqcMatchQuestionForm">
         <div className="mcqcBuilderField"><label>Question Type</label><QuestionTypeDropdown value="Connect the Dots" onChange={v=>setNotice(v==="Connect the Dots"?"":`${v} is a different question type. This page creates Connect the Dots questions.`)}/></div>
         <DragPanel title="Question and Connection Board" icon="grid-view.svg" open={sections.question} onToggle={()=>toggle("question")}>
-          <div className="mcqcBuilderField mcqcWriteField"><label>Write your Question <small>{characters(question.text)}/250</small></label><div className="mcqcEditorSurface">{editor(`dot-question-${active}`,question.text,v=>update({text:v}),"Write your question...",{maxWords:250})}</div></div>
+          <div className="mcqcBuilderField mcqcWriteField"><label>Write your Question </label><div className="mcqcEditorSurface">{editor(`dot-question-${active}`,question.text,v=>update({text:v}),"Write your question...",{maxWords:250})}</div></div>
           <div className="mcqcDDThree"><div className="mcqcBuilderField"><label>Column A Heading</label><NeumoSelect value={question.columnA} options={["Data Structure","Term","Item","Concept","Name"]} onChange={v=>update({columnA:v})}/></div><div className="mcqcBuilderField"><label>Column B Heading</label><NeumoSelect value={question.columnB} options={["Description","Answer","Definition","Match","Meaning"]} onChange={v=>update({columnB:v})}/></div><div className="mcqcBuilderField"><label>Question Mode</label><NeumoSelect value={question.questionMode} options={["Text Based","Numeric Value","Picture"]} onChange={v=>{update({questionMode:v});if(v==="Numeric Value"||v==="Picture")setSections(old=>({...old,pairs:true}));}}/></div></div>
         </DragPanel>
-        <DragPanel title="Advanced Settings" icon="settings-02.svg" open={sections.advanced} onToggle={()=>toggle("advanced")}>
+        <DragPanel title="Advanced Settings" icon="target.svg" open={sections.advanced} onToggle={()=>toggle("advanced")}>
           <div className="mcqcDDThree">{([
             ["Connection mode","connectionMode",["One to one","One to many","Many to one","Many to many"]],
             ["Shuffle Left","shuffleLeft",["NO","YES"]],
@@ -814,10 +818,10 @@ function QuestionBuilder(){
             ["Minimum connections to submit","minConnections",Array.from({length:question.pairs.length+1},(_,i)=>String(i))],
             ["Response Required","responseRequired",["Yes","No"]]
           ] as const).map(([label,key,opts])=><div className="mcqcBuilderField" key={key}><label>{label}</label><NeumoSelect value={typeof question[key]==="boolean"?(question[key]?key==="responseRequired"?"Yes":"YES":key==="responseRequired"?"No":"NO"):String(question[key])} options={[...opts]} onChange={v=>update({[key]:typeof question[key]==="boolean"?v.toLowerCase()==="yes":v})}/></div>)}</div>
-          <div className="mcqcBuilderField mcqcAdvancedDescriptionField"><label>Instruction shown to learners <small aria-live="polite">{characters(question.instructions)}/250</small></label><div className="mcqcEditorSurface">{editor(`dot-instructions-${active}`,question.instructions,v=>update({instructions:v}),"Instructions for connecting the dots...",{maxWords:250,showWordCount:false})}</div></div>
-          <div className="mcqcBuilderField mcqcAdvancedDescriptionField"><label>Information for graders <small aria-live="polite">{characters(question.graderInfo)}/250</small></label><div className="mcqcEditorSurface">{editor(`dot-grader-${active}`,question.graderInfo,v=>update({graderInfo:v}),"Instructions for graders...",{maxWords:250,showWordCount:false})}</div></div>
+          <div className="mcqcBuilderField mcqcAdvancedDescriptionField"><label>Instruction shown to learners </label><div className="mcqcEditorSurface">{editor(`dot-instructions-${active}`,question.instructions,v=>update({instructions:v}),"Instructions for connecting the dots...",{maxWords:250,showWordCount:false})}</div></div>
+          <div className="mcqcBuilderField mcqcAdvancedDescriptionField"><label>Information for graders </label><div className="mcqcEditorSurface">{editor(`dot-grader-${active}`,question.graderInfo,v=>update({graderInfo:v}),"Instructions for graders...",{maxWords:250,showWordCount:false})}</div></div>
         </DragPanel>
-        <DragPanel title="Matching Pairs" icon="grip-vertical.svg" open={sections.pairs} onToggle={()=>toggle("pairs")}>
+        <DragPanel title="Matching Pairs" icon="adjust-position.svg" open={sections.pairs} onToggle={()=>toggle("pairs")}>
           {question.questionMode==="Picture" ? <>
             <div className="mcqcConnectPairHead mcqcPicturePairHead"><span/><strong>Data Structure</strong><strong>Description</strong><span/></div>
             <div className="mcqcMatchPairs mcqcPicturePairs">{question.pairs.map((p,i)=><div className="mcqcMatchPairRow mcqcConnectPairRow mcqcPicturePairRow" key={p.id}>
@@ -858,7 +862,7 @@ function QuestionBuilder(){
           </>}
           <div className="mcqcMatchPairActions"><button type="button" className="mcqcBuilderAction mcqcDDAddSmall" onClick={addPair}><Icon name="plus.svg" size={16}/>Add Pairs</button><small>2 to 20 Pairs</small></div>
           <div className="mcqcMatchExtras"><div className="mcqcDDToggleRow"><span>Extra Answers (Distractors) Optional</span><Switch label="Extra answers" checked={question.extraEnabled} onChange={v=>update({extraEnabled:v})}/></div>
-            {question.extraEnabled&&<><div className="mcqcMatchExtraEditor"><small className="mcqcMatchExtraTopCounter" aria-live="polite">{characters(extraDraft)}/250</small><div className="mcqcEditorSurface">{editor(`dot-extra-${active}-${question.extras.length}`,extraDraft,v=>setExtraDrafts(old=>({...old,[active]:v})),"Write an extra answer...",{maxWords:250})}</div><div className="mcqcMatchExtraSaveRow"><button type="button" className="mcqcMatchExtraSave" onClick={saveExtra}>Save</button></div></div>
+            {question.extraEnabled&&<><div className="mcqcMatchExtraEditor"><div className="mcqcEditorSurface">{editor(`dot-extra-${active}-${question.extras.length}`,extraDraft,v=>setExtraDrafts(old=>({...old,[active]:v})),"Write an extra answer...",{maxWords:250})}</div><div className="mcqcMatchExtraSaveRow"><button type="button" className="mcqcMatchExtraSave" onClick={saveExtra}>Save</button></div></div>
               {question.extras.length>0&&<div className="mcqcConnectExtraChips">{question.extras.map((x,i)=><button type="button" key={i} onClick={()=>update({extras:question.extras.filter((_,j)=>i!==j)})}>{x}<Icon name="cancel.svg" size={14}/></button>)}</div>}
               <div className="mcqcMatchExtraActions"><button type="button" className="mcqcBuilderAction mcqcDDAddSmall" onClick={()=>{if(extraDraft.trim())saveExtra();else document.getElementById(`dot-extra-${active}-${question.extras.length}`)?.focus();}}><Icon name="plus.svg" size={16}/>Add Extra Answer</button></div></>}
           </div>
@@ -873,8 +877,8 @@ function QuestionBuilder(){
           <div className="mcqcBuilderField"><label>Score Simulator - Outcome per Pairs</label><div className="mcqcDDScoreTable"><div className="mcqcDDScoreHead"><span>Outcome</span><span>Marks</span></div>{Array.from({length:question.pairs.length+1},(_,i)=>question.pairs.length-i).map(n=><div className="mcqcDDScoreRow" key={n}><span>{n} correct, {question.pairs.length-n} wrong</span><NeumoSelect value={formatMarks(scoreFor(question,n))} options={Array.from({length:Math.max(1,Math.floor(Number(question.points))+1)},(_,i)=>formatMarks(i)).reverse()} onChange={v=>update({scoreOverrides:{...question.scoreOverrides,[String(n)]:String(Number(v))}})}/></div>)}</div></div>
         </DragPanel>
         <DragPanel title="Feedback" icon="message-circle-more.svg" subtitle={`${Math.max(characters(question.feedbackFull),characters(question.feedbackPartial),characters(question.feedbackZero))}/250`} open={sections.feedback} onToggle={()=>toggle("feedback")}>
-          {([['Full Marks','feedbackFull','Write feedback for full marks...'],['Partial Marks','feedbackPartial','Write feedback for partial marks...'],['Zero Marks','feedbackZero','Write feedback for zero marks...']] as const).map(([title,key,placeholder])=><div className={`mcqcBuilderField mcqcDDFeedbackField mcqcDDFeedback${key}`} key={key}><label>{title}<small>{characters(question[key])}/250</small></label><div className="mcqcEditorSurface">{editor(`dot-${key}-${active}`,question[key],v=>update({[key]:v}),placeholder,{maxWords:250})}</div></div>)}
-          {([['Explanation','explanation','assignments.svg','Explain the correct connections...'],['Hint','hint','idea.svg','Write a hint...']] as const).map(([title,key,icon,placeholder])=><div className="mcqcDDFeedbackSubpanel" key={key}><button type="button" className="mcqcDDFeedbackSubhead" aria-expanded={feedbackOpen[key]} onClick={()=>setFeedbackOpen(old=>({...old,[key]:!old[key]}))}><span className="mcqcDDPanelHeading"><span className="mcqcDDPanelIcon"><Icon name={icon} size={18}/></span><strong>{title}</strong></span><small>{characters(question[key])}/250</small><Icon name="arrow-down-01.svg" size={18} className={feedbackOpen[key]?"mcqcRotated":""}/></button>{feedbackOpen[key]&&<div className="mcqcDDFeedbackSubbody"><div className="mcqcEditorSurface">{editor(`dot-${key}-${active}`,question[key],v=>update({[key]:v}),placeholder,{maxWords:250})}</div>{key==="hint"&&<div className="mcqcHintChecks"><label className={question.showCorrectCount?"is-checked":""}><input type="checkbox" checked={question.showCorrectCount} onChange={e=>update({showCorrectCount:e.target.checked})}/>Show number of correct connections after finishing</label><label className={question.showConnectionsAfterTrial?"is-checked":""}><input type="checkbox" checked={question.showConnectionsAfterTrial} onChange={e=>update({showConnectionsAfterTrial:e.target.checked})}/>Show correct connections after final try</label><label className={question.showHintBeforeAnswering?"is-checked":""}><input type="checkbox" checked={question.showHintBeforeAnswering} onChange={e=>update({showHintBeforeAnswering:e.target.checked})}/>Show hint before answering</label><label className={question.allowHintRequest?"is-checked":""}><input type="checkbox" checked={question.allowHintRequest} onChange={e=>update({allowHintRequest:e.target.checked})}/>Allow learner to request hint</label></div>}</div>}</div>)}
+          {([['Full Marks','feedbackFull','Write feedback for full marks...'],['Partial Marks','feedbackPartial','Write feedback for partial marks...'],['Zero Marks','feedbackZero','Write feedback for zero marks...']] as const).map(([title,key,placeholder])=><div className={`mcqcBuilderField mcqcDDFeedbackField mcqcDDFeedback${key}`} key={key}><label>{title}</label><div className="mcqcEditorSurface">{editor(`dot-${key}-${active}`,question[key],v=>update({[key]:v}),placeholder,{maxWords:250})}</div></div>)}
+          {([['Explanation','explanation','assignments.svg','Explain the correct connections...'],['Hint','hint','idea.svg','Write a hint...']] as const).map(([title,key,icon,placeholder])=><div className="mcqcDDFeedbackSubpanel" key={key}><button type="button" className="mcqcDDFeedbackSubhead" aria-expanded={feedbackOpen[key]} onClick={()=>setFeedbackOpen(old=>({...old,[key]:!old[key]}))}><span className="mcqcDDPanelHeading"><span className="mcqcDDPanelIcon"><Icon name={icon} size={18}/></span><strong>{title}</strong></span><Icon name="arrow-down-01.svg" size={18} className={feedbackOpen[key]?"mcqcRotated":""}/></button>{feedbackOpen[key]&&<div className="mcqcDDFeedbackSubbody"><div className="mcqcEditorSurface">{editor(`dot-${key}-${active}`,question[key],v=>update({[key]:v}),placeholder,{maxWords:250})}</div>{key==="hint"&&<div className="mcqcHintChecks"><label className={question.showCorrectCount?"is-checked":""}><input type="checkbox" checked={question.showCorrectCount} onChange={e=>update({showCorrectCount:e.target.checked})}/>Show number of correct connections after finishing</label><label className={question.showConnectionsAfterTrial?"is-checked":""}><input type="checkbox" checked={question.showConnectionsAfterTrial} onChange={e=>update({showConnectionsAfterTrial:e.target.checked})}/>Show correct connections after final try</label><label className={question.showHintBeforeAnswering?"is-checked":""}><input type="checkbox" checked={question.showHintBeforeAnswering} onChange={e=>update({showHintBeforeAnswering:e.target.checked})}/>Show hint before answering</label><label className={question.allowHintRequest?"is-checked":""}><input type="checkbox" checked={question.allowHintRequest} onChange={e=>update({allowHintRequest:e.target.checked})}/>Allow learner to request hint</label></div>}</div>}</div>)}
         </DragPanel>
         {showValidation&&errorsFor(question).length>0&&<div className="mcqcValidationErrors" role="alert">{errorsFor(question).map(err=><p key={err}>{err}</p>)}</div>}
       </div>
@@ -890,7 +894,7 @@ function QuestionBuilder(){
     </section><section className="mcqcAsideSection mcqcBuilderSummary"><h3>Assessment Summary</h3><div className="mcqcStatGrid"><div><strong>{completed}</strong><span>Questions</span></div><div><strong>{earned}</strong><span>Marks</span></div><div><strong>{values.duration}</strong><span>Minutes</span></div></div><div className="mcqcSummaryProgress"><span style={{width:`${completed/Math.max(1,values.questionCount)*100}%`}}/></div><p>Target is {values.questionCount} questions · {values.totalMarks} marks. {completed===values.questionCount?"All questions are ready.":"Add questions to get started."}</p><div className="mcqcBuilderField"><label>Passing Score</label><PassingScoreSelect value={values.passingScore} onChange={v=>setValues(old=>({...old,passingScore:v}))}/></div></section></aside>
     </div>
     {notice&&<p className="mcqcBuilderNotice" role="status">{notice}</p>}
-    <div className="mcqcBuilderPageFooter"><button type="button" className="mcqcFooterPill" onClick={openPreview}>Preview Questions</button><div className="mcqcSaveContinueGroup"><button type="button" className="mcqcFooterPill mcqcFooterContinue" onClick={continueToEvaluation}>Save &amp; Continue</button></div></div>
+    <div className="mcqcBuilderPageFooter"><button type="button" className="mcqcFooterPill" disabled={continuing} onClick={()=>router.push("/assessments/create/details")}>Back</button><button type="button" className="mcqcFooterPill" onClick={openPreview}>Preview Questions</button><div className="mcqcSaveContinueGroup">{continuing && <span className="mcqcSaveSuccessToast" role="status">Successfully saved</span>}<button type="button" className="mcqcFooterPill mcqcFooterContinue" disabled={continuing} onClick={continueToEvaluation}>Save &amp; Continue</button></div></div>
   </div>;
 }
 export default function ConnectDotsPage(){

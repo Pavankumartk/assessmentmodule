@@ -575,3 +575,15 @@
 }
 
 /* MEMORY GAME FIGMA POLISH END */
+.memFigmaApp .memNewToolbar .mcqEditorFormatTrigger { display:inline-flex; align-items:center; justify-content:space-between; padding:4px 7px; font-size:12px; box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4; }
+.memFigmaApp .memNewToolbar .mcqEditorFont { flex:0 0 105px; width:105px; }
+.memFigmaApp .memNewToolbar .mcqEditorSize { flex:0 0 62px; width:62px; }
+@media(max-width:700px){.memFigmaApp .memNewToolbar .mcqEditorFont{flex-basis:95px;width:95px}.memFigmaApp .memNewToolbar .mcqEditorSize{flex-basis:58px;width:58px}}
+
+.memFigmaTile:not(.done):not(.selected){border-color:#A6AFB5;color:#374151;}
+.memFigmaTile i{width:13px;height:13px;box-sizing:border-box;background:transparent!important;border:1.5px solid currentColor;}
+.memFigmaTile.done{border-color:#2A7308;color:#2A7308;background:#DFE6E9;}
+.memFigmaTile.done i{border-color:#2A7308;background:#2A7308!important;}
+.memFigmaTile.done i::after{content:'✓';position:absolute;inset:0;color:#fff;font:700 10px/12px Arial,sans-serif;text-align:center;}
+
+.memFigmaTile:not(.done){border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}.memFigmaTile:not(.done) i{background:#2D4CC8!important;border:0}

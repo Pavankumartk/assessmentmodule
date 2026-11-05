@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Sidebar from "@/modules/assessments/components/common/sidebar/page";
 import Header from "@/modules/assessments/components/common/header/Header";
+import "@/modules/assessments/components/common/steps/EvaluationStep/evaluation.css";
 import "./evaluation.css";
 
 type PanelId = "feedback" | "security";
@@ -51,6 +52,7 @@ type DropdownSettings = {
   attemptCooldown: string;
   feedbackTiming: string;
   resultAvailable: string;
+  resultReleaseDate: string;
   releaseMarks: string;
   accessControl: string;
   violationThreshold: string;
@@ -83,7 +85,7 @@ type DropdownSettings = {
 
 const initialDropdownSettings: DropdownSettings = {
   maximumAttempts: "2", scoreForResult: "Highest", attemptCooldown: "None", feedbackTiming: "After",
-  resultAvailable: "Immediately", releaseMarks: "After Grading", accessControl: "Open",
+  resultAvailable: "Immediately", resultReleaseDate: "", releaseMarks: "After Grading", accessControl: "Open",
   violationThreshold: "3", violationAction: "Warn",
   showResult: true, showScore: true, showPassFail: true, showCorrectAnswers: true,
   showAnswerFeedback: true, showExplanation: true,
@@ -98,18 +100,19 @@ type DropdownSettingKey = keyof DropdownSettings;
 type SwitchKey = { [K in DropdownSettingKey]: DropdownSettings[K] extends boolean ? K : never }[DropdownSettingKey];
 type SelectKey = { [K in DropdownSettingKey]: DropdownSettings[K] extends string ? K : never }[DropdownSettingKey];
 
-function SettingSwitch({ checked, onChange, label }: { checked: boolean; onChange: () => void; label: string }) {
+function SettingSwitch({ checked, onChange, label, disabled = false }: { checked: boolean; onChange: () => void; label: string; disabled?: boolean }) {
   return (
-    <button className={`ev-switch ${checked ? "ev-switch-on" : "ev-switch-off"}`} type="button"
-      role="switch" aria-label={label} aria-checked={checked} onClick={onChange}>
-      <span className="ev-switch-word">{checked ? "ON" : "OFF"}</span><span className="ev-switch-knob" />
+    <button className={`evaluationToggle ${checked ? "is-on" : ""}`} type="button"
+      role="switch" aria-label={label} aria-checked={checked} disabled={disabled} onClick={onChange}>
+      <span className="evaluationToggleText">{checked ? "ON" : "OFF"}</span><span className="evaluationToggleKnob" />
     </button>
   );
 }
 
-function MatchingMcqDropdown({label,value,options,onSelect}:{label:string;value:string;options:string[];onSelect?:(next:string)=>void}) {
+function MatchingMcqDropdown({label,value,options,onSelect,disabled=false}:{label:string;value:string;options:string[];onSelect?:(next:string)=>void;disabled?:boolean}) {
   const [open,setOpen]=useState(false);
   const root=useRef<HTMLDivElement>(null);
+  useEffect(()=>{ if(disabled)setOpen(false); },[disabled]);
   useEffect(()=>{
     if(!open)return;
     const outside=(event:PointerEvent)=>{if(!root.current?.contains(event.target as Node))setOpen(false);};
@@ -118,8 +121,8 @@ function MatchingMcqDropdown({label,value,options,onSelect}:{label:string;value:
     document.addEventListener("keydown",escape);
     return()=>{document.removeEventListener("pointerdown",outside);document.removeEventListener("keydown",escape);};
   },[open]);
-  return <div className="evaluationMiniSelectWrap" ref={root}>
-    <button type="button" className="evaluationMiniSelectTrigger" aria-label={label} aria-haspopup="listbox" aria-expanded={open} onClick={()=>setOpen(v=>!v)}>
+  return <div className="evaluationMiniSelectWrap" ref={root} onPointerLeave={event => { if (event.pointerType === "mouse") window.setTimeout(() => { if (root.current && !root.current.matches(":hover")) setOpen(false); }, 300); }}>
+    <button type="button" className="evaluationMiniSelectTrigger" disabled={disabled} aria-label={label} aria-haspopup="listbox" aria-expanded={open} onClick={()=>setOpen(v=>!v)}>
       <span>{value || `Select ${label.toLowerCase()}`}</span>
       <img src="/assets/assessmenticons/arrow-down-01.svg" alt="" width={17} height={17}/>
     </button>
@@ -129,20 +132,21 @@ function MatchingMcqDropdown({label,value,options,onSelect}:{label:string;value:
   </div>;
 }
 
-function SettingRow({ label, value, options, checked, onSelect, onToggle }: {
+function SettingRow({ label, value, options, checked, onSelect, onToggle, disabled = false }: {
   label: string;
   value?: string;
   options?: string[];
   checked?: boolean;
   onSelect?: (value: string) => void;
   onToggle?: () => void;
+  disabled?: boolean;
 }) {
   return (
-    <div className="ev-setting-row">
-      <span className="ev-setting-name">{label}</span>
-      {onToggle ? <SettingSwitch label={label} checked={Boolean(checked)} onChange={onToggle} /> : options ? (
-        <MatchingMcqDropdown label={label} value={value || ""} options={options} onSelect={onSelect}/>
-      ) : <span className="ev-setting-value">{value || "—"}</span>}
+    <div className={`evaluationSettingRow ${disabled ? "evaluationRowDisabled" : ""}`}>
+      <span>{label}</span>
+      {onToggle ? <SettingSwitch label={label} checked={Boolean(checked)} disabled={disabled} onChange={onToggle} /> : options ? (
+        <MatchingMcqDropdown label={label} value={value || ""} options={options} onSelect={onSelect} disabled={disabled}/>
+      ) : <span className="evaluationDisplayValue">{value || "—"}</span>}
     </div>
   );
 }
@@ -154,9 +158,9 @@ function SettingCard({ title, icon, color, children, id }: {
   children: ReactNode;
   id?: string;
 }) {
-  return <section className="ev-setting-card" id={id} aria-label={title}>
-    <h3 className="ev-card-heading"><span className="ev-card-icon" style={{ color }}><EvaluationIcon name={icon} /></span><span>{title}</span></h3>
-    <div className="ev-card-rows">{children}</div>
+  return <section className="evaluationSettingCard" id={id} aria-label={title}>
+    <h3 ><span className="evaluationSmallIcon" style={{ color }}><EvaluationIcon name={icon} /></span><span>{title}</span></h3>
+    <div className="evaluationSettingRows">{children}</div>
   </section>;
 }
 
@@ -170,13 +174,13 @@ function EvaluationPanelContents({ panel, settings, onChange, totalMarks, passin
   const passingMarks = Number.isFinite(percentage) ? `${Number(((percentage / 100) * totalMarks).toFixed(2))}/${totalMarks}` : `—/${totalMarks}`;
   function setSelect(key: SelectKey, value: string) { onChange((prev) => ({ ...prev, [key]: value })); }
   function flip(key: SwitchKey) { onChange((prev) => ({ ...prev, [key]: !prev[key] })); }
-  function selectRow(label: string, key: SelectKey, options: string[]) {
-    return <SettingRow label={label} value={settings[key]} options={options} onSelect={(v) => setSelect(key, v)} />;
+  function selectRow(label: string, key: SelectKey, options: string[], disabled = false) {
+    return <SettingRow label={label} value={settings[key]} options={options} disabled={disabled} onSelect={(v) => setSelect(key, v)} />;
   }
-  function switchRow(label: string, key: SwitchKey) {
-    return <SettingRow label={label} checked={settings[key]} onToggle={() => flip(key)} />;
+  function switchRow(label: string, key: SwitchKey, disabled = false) {
+    return <SettingRow label={label} checked={settings[key]} disabled={disabled} onToggle={() => flip(key)} />;
   }
-  return <div className="ev-card-grid">{panel === "feedback" ? <>
+  return <div className="evaluationSettingGrid">{panel === "feedback" ? <>
 
                 <SettingCard id="ev-scoring" title="Scorings" icon="scorings" color="#2D4CC8">
                   <SettingRow label="Total Marks" value={String(totalMarks)} />
@@ -190,18 +194,19 @@ function EvaluationPanelContents({ panel, settings, onChange, totalMarks, passin
                 </SettingCard>
                 <SettingCard id="ev-results" title="Results" icon="results" color="#CB5F14">
                   {switchRow("Show Result After Submission", "showResult")}
-                  {switchRow("Show Score", "showScore")}
-                  {switchRow("Show Pass/ Fail", "showPassFail")}
-                  {switchRow("Show Correct Answers", "showCorrectAnswers")}
-                  {selectRow("Result Available", "resultAvailable", ["Immediately", "Scheduled", "After Grading", "After Closing", "Manually", "Never"])}
+                  {switchRow("Show Score", "showScore", !settings.showResult)}
+                  {switchRow("Show Pass/ Fail", "showPassFail", !settings.showResult)}
+                  {switchRow("Show Correct Answers", "showCorrectAnswers", !settings.showResult)}
+                  {selectRow("Result Available", "resultAvailable", ["Immediately", "Scheduled", "After Grading", "After Closing", "Manually", "Never"], !settings.showResult)}
+                  {settings.showResult && settings.resultAvailable === "Scheduled" && <label className="evaluationSettingRow"><span>Result release date and time</span><input aria-label="Result release date and time" type="datetime-local" value={settings.resultReleaseDate} onChange={event=>onChange(old=>({...old,resultReleaseDate:event.target.value}))}/></label>}
                 </SettingCard>
                 <SettingCard id="ev-feedback" title="Answer Feedback" icon="answerFeedback" color="#91860C">
                   {switchRow("Show Answer Feedback", "showAnswerFeedback")}
-                  {switchRow("Show Explanation", "showExplanation")}
-                  {selectRow("Feedback Timing", "feedbackTiming", ["After", "Immediately", "After Closing", "Never"])}
-                  <div className="ev-feedback-checks" aria-label="Available feedback types">
+                  {switchRow("Show Explanation", "showExplanation", !settings.showAnswerFeedback)}
+                  {selectRow("Feedback Timing", "feedbackTiming", ["After", "Immediately", "After Closing", "Never"], !settings.showAnswerFeedback)}
+                  <div className="evaluationFeedbackChecks" aria-label="Available feedback types">
                     {['Correct Answer Feedback', 'Wrong Answer Feedback', 'Question Explanation'].map(label =>
-                      <span key={label}><span className="ev-tick"><EvaluationIcon name="check" /></span>{label}</span>)}
+                      <div key={label}><span className="evaluationFeedbackCheckIcon" aria-hidden="true" />{label}</div>)}
                   </div>
                 </SettingCard>
                 <SettingCard id="ev-manual" title="Manual Grading" icon="manualGrading" color="#CB5F14">
@@ -385,8 +390,10 @@ export default function EvaluationPage() {
     } catch { /* Use the copied defaults if browser storage is unavailable. */ }
   }, []);
   const updateDropdown = (change: (previous: DropdownSettings) => DropdownSettings) => { setDropdownSettings(change); setMessage(""); };
-  const togglePanel = (panel: PanelId) => setOpenPanels(previous => previous.includes(panel) ? previous.filter(item => item !== panel) : [...previous, panel]);
+  const togglePanel = (panel: PanelId) => setOpenPanels(previous => previous.includes(panel) ? [] : [panel]);
+  useEffect(() => { const requested = new URLSearchParams(window.location.search).get("reviewPanel"); if (requested !== "feedback" && requested !== "security") return; setOpenPanels([requested]); const timer = window.setTimeout(() => document.getElementById(`evaluation-content-${requested}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 180); return () => window.clearTimeout(timer); }, []);
   const saveAndContinue = () => {
+    if (saving) return;
     const passingScore=Number(settings.passingScore);
     if(!Number.isFinite(passingScore)||passingScore<=0||passingScore>100){setMessage("Passing score must be between 1% and 100%.");return;}
     if(!Number.isFinite(totalMarks)||totalMarks<=0){setMessage("Total marks must be greater than zero.");return;}
@@ -396,22 +403,22 @@ export default function EvaluationPage() {
         showCorrectAnswers: dropdownSettings.showCorrectAnswers ? (settings.showCorrectAnswers === "Never" ? "After assessment closes" : settings.showCorrectAnswers) : "Never",
         dropdownSettings, totalMarks }));
       setMessage("Successfully saved");
-      setSaving(false);
-      router.push("/assessments/create/review");
+      setSaving(true);
+      redirectRef.current = setTimeout(() => { setMessage(""); setSaving(false); router.push("/assessments/create/review"); }, 3000);
     } catch { setMessage("Unable to save settings"); setSaving(false); }
   };
   return <main className="superAdminPage institutionAdminPage evaluationAppShell"><div className="dashboardLayout evaluationDashboardLayout">
     <Sidebar /><section className="mainContent evaluationMainContent"><div className="evaluationHeaderSlot"><Header /></div><div className="institutionScrollArea evaluationScrollArea"><div className="pageContent institutionPageContent evaluationPageContent">
       <nav className="evaluationBreadcrumb" aria-label="Breadcrumb"><Link href="/assessments">Assessment</Link><span className="evaluationBreadcrumbChevrons" aria-hidden="true">»</span><span>Create Assessment</span></nav>
       <ol className="evaluationWizard" aria-label="Assessment creation progress">{steps.map((step, index) => <li key={step} className={`evaluationWizardStep ${index < 3 ? "is-complete" : index === 3 ? "is-current" : "is-upcoming"}`} aria-current={index === 3 ? "step" : undefined}><WizardStepLink index={index} current={3}/><span className="evaluationWizardNumber"><span className="evaluationWizardDigit">{index + 1}</span></span><span className="evaluationWizardLabel">{step}</span></li>)}</ol>
-      <div className="evaluationTitleGroup"><h1>Assessment Evaluation (Long Answers)</h1><p>Set Evaluation, Feedback, Results, And Security.</p></div>
-       <div className="evaluationBodyLayout"><div className="evaluationBodyPrimary">
+      <div className="evaluationTitleGroup"><h1>Assessment Evaluation (Long Answer)</h1><p>Set Evaluation, Feedback, Results, And Security.</p></div>
+       <div className="evaluationQuestionLayout"><div className="evaluationQuestionMain">
       <div className="evaluationPanels">{categories.map(category => { const isOpen = openPanels.includes(category.id); return <section key={category.id} className={`evaluationPanel evaluationPanel--${category.id} ${isOpen ? "is-open" : ""}`}>
         <div className="evaluationPanelHeader"><div className="evaluationPanelIcon" aria-hidden="true"><img src={category.iconSrc} alt="" width={37} height={37} onError={event => { event.currentTarget.style.visibility = "hidden"; }} /></div><div className="evaluationPanelText"><h2>{category.heading}</h2><p>{category.subtitle}</p></div><button type="button" className="evaluationExpandButton" aria-label={`${isOpen ? "Collapse" : "Expand"} ${category.heading}`} aria-expanded={isOpen} aria-controls={`evaluation-content-${category.id}`} onClick={() => togglePanel(category.id)}><img className="evaluationChevronAsset" src="/assets/assessmenticons/arrow-down-01.svg" width={20} height={20} alt=""/></button></div>
         <div className="evaluationPills" aria-label={`${category.heading} sections`}>{category.tabs.map(tab => <span key={tab} className={`evaluationPill ${isOpen && activeTabs[category.id] === tab ? "is-selected" : ""}`}>{tab}</span>)}</div>
-        {isOpen && <div className="evaluationPanelBody evaluationDropdownBody" id={`evaluation-content-${category.id}`}><EvaluationPanelContents panel={category.id} settings={dropdownSettings} onChange={updateDropdown} totalMarks={totalMarks} passingScore={settings.passingScore}/></div>}
+        {isOpen && <div className="evaluationPanelBody evaluationDetailedBody" id={`evaluation-content-${category.id}`}><EvaluationPanelContents panel={category.id} settings={dropdownSettings} onChange={updateDropdown} totalMarks={totalMarks} passingScore={settings.passingScore}/></div>}
       </section>; })}</div>
-      <div className="evaluationFooter"><button type="button" className="evaluationFooterButton" onClick={() => router.push("/assessments/create/content")}>Back</button><div className="evaluationFooterRight">{message && <span role={message === "Successfully saved" ? "status" : "alert"} className={`evaluationSaveMessage ${message === "Successfully saved" ? "" : "evaluationSaveError"}`}>{message}</span>}<button type="button" className="evaluationFooterButton evaluationContinue" disabled={saving} onClick={saveAndContinue}>Save &amp; Continue</button></div></div>
+      <div className="evaluationFooter"><button type="button" className="evaluationFooterButton" onClick={() => { if (redirectRef.current) { clearTimeout(redirectRef.current); redirectRef.current=null; } setSaving(false); router.push("/assessments/create/content"); }}>Back</button><div className="evaluationFooterRight">{message && <span role={message === "Successfully saved" ? "status" : "alert"} className={`evaluationSaveMessage ${message === "Successfully saved" ? "" : "evaluationSaveError"}`}>{message}</span>}<button type="button" className="evaluationFooterButton evaluationContinue" disabled={saving} onClick={saveAndContinue}>Save &amp; Continue</button></div></div>
        </div></div>
     </div></div></section></div></main>;
 }

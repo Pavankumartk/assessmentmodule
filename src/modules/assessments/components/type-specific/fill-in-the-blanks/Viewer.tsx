@@ -1,4 +1,6 @@
 "use client";
+import { creatorInstructionLines } from "@/modules/assessments/components/viewer/instruction-text";
+
 import {useEffect,useState} from "react";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
@@ -55,8 +57,7 @@ export default function FillViewer(){
   const title=val(details,["assessmentName","assessmentTitle","title"],record?.title||"Fill in the Blanks");
   const duration=val(details,["duration","timeLimit","totalTime"],"60");
   const passing=val(details,["passingScore","passingMarks"],"60%");
-  const rawInstructions=val(details,["instructions","descriptionInstructions"],"");
-  const customInstructions=rawInstructions.replace(/<[^>]*>/g," ").split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  const customInstructions=creatorInstructionLines(details.instructions, details.descriptionInstructions);
   const instructions=customInstructions.length?customInstructions:standardInstructions;
   const marks=val(details,["totalMarks"],String(questionMarks||record?.marks||0));
   const negative=val(details,["negativeMarkingValue"],"None");

@@ -65,9 +65,26 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
       lastHtml.current = next;
     }
   }, [editorId, value, html]);
+  const charLimit = /(?:explanation|hint)/i.test(editorId) ? 250 : undefined;
+  const allowedText = (text: string) => {
+    const el = editor.current;
+    if (!el || charLimit === undefined) return text;
+    const selection = window.getSelection();
+    const selected = selection?.anchorNode && selection.focusNode && el.contains(selection.anchorNode) && el.contains(selection.focusNode) ? selection.toString().length : 0;
+    const current = (el.innerText || el.textContent || "").replace(/\u00a0/g, " ").length;
+    return text.slice(0, Math.max(0, charLimit - current + selected));
+  };
   const notify = () => {
     const el = editor.current;
     if (!el) return;
+    const plain = (el.innerText || el.textContent || "").replace(/\u00a0/g, " ");
+    if (charLimit !== undefined && plain.length > charLimit && plain.length > value.length) {
+      el.innerHTML = lastHtml.current ?? "";
+      const range = document.createRange(); range.selectNodeContents(el); range.collapse(false);
+      const selection = window.getSelection(); selection?.removeAllRanges(); selection?.addRange(range);
+      onError("This field allows a maximum of 250 characters.");
+      return;
+    }
     lastHtml.current = el.innerHTML;
     onHtmlChange(el.innerHTML);
     onChange((el.innerText || el.textContent || "").replace(/\u00a0/g, " "));
@@ -134,7 +151,6 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
       {button("text-centerline-center-top.svg", "Bulleted list", () => command("insertUnorderedList"))}
       {button("image.svg", "Insert image", () => { setFileKind("image"); if (fileInput.current) { fileInput.current.accept="image/*"; fileInput.current.value=""; fileInput.current.click(); } })}
       {button("attachment.svg", "Attach file", () => { setFileKind("attachment"); if (fileInput.current) { fileInput.current.accept=""; fileInput.current.value=""; fileInput.current.click(); } })}
-      <div className="tfqcRichMenuRoot"><button type="button" aria-label="Special characters" title="Special characters" aria-expanded={menu === "symbols"} onMouseDown={e => { e.preventDefault(); remember(); }} onClick={e => openFormatMenu("symbols", e.currentTarget)}><Icon name="more-vertical.svg" size={18}/></button></div>
     </div>
     {menu && typeof document !== "undefined" && createPortal(
       <div ref={floatingMenu} className={`tfqcFloatingFormatMenu ${menu === "symbols" ? "tfqcFloatingSymbols" : ""}`}
@@ -154,7 +170,8 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
       </div>, document.body)}
     <input ref={fileInput} type="file" hidden onChange={e => { const f=e.target.files?.[0]; if (f) void addFile(f); }}/>
     <div ref={editor} id={editorId} role="textbox" aria-label={placeholder} aria-multiline="true" contentEditable suppressContentEditableWarning data-placeholder={placeholder}
-      className="tfqcRichEditable" onInput={notify} onKeyUp={remember} onMouseUp={remember} onFocus={remember} onPaste={e => { e.preventDefault(); const text=e.clipboardData.getData("text/plain"); document.execCommand("insertText", false, text); notify(); }}/>
+      className="tfqcRichEditable" onInput={notify} onBeforeInput={e => { const input = e.nativeEvent as InputEvent; if (input.data && allowedText(input.data) !== input.data) e.preventDefault(); }} onKeyUp={remember} onMouseUp={remember} onFocus={remember} onPaste={e => { e.preventDefault(); const text=allowedText(e.clipboardData.getData("text/plain")); if (text) document.execCommand("insertText", false, text); notify(); }}/>
+    <small className="assessmentEditorCounter" aria-live="polite">{value.length}/250</small>
   </div>;
 }
 type Question = {
@@ -220,8 +237,8 @@ function QuestionTypeDropdown({ value, onChange }: { value: string; onChange: (v
   }, [open]);
   const label = value === "MCQ" ? "Multiple Choice Question (MCQ)" : value === "Fill in the Blanks" ? "Fill in the Blank" : value;
   const normalized = search.trim().toLowerCase();
-  return <div className="tfqcSelectRoot tfqcTypeRoot" ref={root}>
-    <button type="button" className="tfqcSelectTrigger" aria-label="Question Type" aria-expanded={open} aria-controls="tfqcQuestionTypeList" onClick={() => setOpen(previous => !previous)}>
+  return <div className="tfqcSelectRoot tfqcTypeRoot" ref={root} onPointerLeave={event => { if (event.pointerType === "mouse") window.setTimeout(() => { if (root.current && !root.current.matches(":hover")) setOpen(false); }, 300); }}>
+    <button type="button" className="tfqcSelectTrigger" aria-label="Question Type" disabled aria-expanded={open} aria-controls="tfqcQuestionTypeList" onClick={() => setOpen(previous => !previous)}>
       <span>{label || "Select Question Type"}</span><Icon name="arrow-down-01.svg" size={20} className={open ? "tfqcRotated" : ""}/>
     </button>
     {open && <div id="tfqcQuestionTypeList" className="tfqcTypeDropdown">
@@ -248,15 +265,15 @@ function NeumoSelect({ value, options, onChange, placeholder }: { value: string;
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => { if (!open) return; const outside = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) setOpen(false); }; const escape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); }; document.addEventListener("pointerdown", outside); document.addEventListener("keydown", escape); return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); }; }, [open]);
-  return <div className="tfqcSelectRoot" ref={root}><button type="button" className="tfqcSelectTrigger" aria-expanded={open} onClick={() => setOpen(v => !v)}><span>{value || placeholder || "Select"}</span><Icon name="arrow-down-01.svg" size={20} /></button>{open && <div className="tfqcSelectList" role="radiogroup">{options.map(option => <button key={option} type="button" role="radio" aria-checked={value === option} className="tfqcSelectItem" onClick={() => { onChange(option); setOpen(false); }}><span className={`tfqcOptionRadio ${value === option ? "tfqcOptionSelected" : ""}`} /><span>{option}</span></button>)}</div>}</div>;
+  return <div className="tfqcSelectRoot" ref={root} onPointerLeave={event => { if (event.pointerType === "mouse") window.setTimeout(() => { if (root.current && !root.current.matches(":hover")) setOpen(false); }, 300); }}><button type="button" className="tfqcSelectTrigger" aria-expanded={open} onClick={() => setOpen(v => !v)}><span>{value || placeholder || "Select"}</span><Icon name="arrow-down-01.svg" size={20} /></button>{open && <div className="tfqcSelectList" role="radiogroup">{options.map(option => <button key={option} type="button" role="radio" aria-checked={value === option} className="tfqcSelectItem" onClick={() => { onChange(option); setOpen(false); }}><span className={`tfqcOptionRadio ${value === option ? "tfqcOptionSelected" : ""}`} /><span>{option}</span></button>)}</div>}</div>;
 }
 function PreviewStatus({ correct, size = 20 }: { correct: boolean; size?: number }) {
   return <span className={`tfqcPreviewStatusIcon ${correct ? "is-correct" : "is-wrong"}`} aria-hidden="true" />;
 }
 type OptionDetail = { feedback: string; explanation: string; hint: string; showHint: boolean; allowHint: boolean };
-function QuestionsPreview({ questions, details, tags, onBack, onEdit, onContinue, mcqValues }: {
+function QuestionsPreview({ questions, details, tags, onBack, onEdit, onContinue, saving, mcqValues }: {
   questions: Question[]; details: Record<string,OptionDetail>; tags: string[];
-  onBack: () => void; onEdit: (index:number) => void; onContinue: () => void;
+  onBack: () => void; onEdit: (index:number) => void; onContinue: () => void; saving: boolean;
   mcqValues: MCQDetailsValues;
 }) {
   const [filter,setFilter] = useState("All Questions");
@@ -293,7 +310,7 @@ function QuestionsPreview({ questions, details, tags, onBack, onEdit, onContinue
 })()}</p></section></div>}</div>}
         {!learner && <div className="tfqcPreviewPanel"><button type="button" className="tfqcPreviewSectionHead" onClick={()=>toggle("settings")}>Question Settings <Icon name="arrow-down-01.svg" size={18} className={sections.settings?"tfqcRotated":""}/></button>{sections.settings && <div className="tfqcPreviewSettings">{[["Difficulty",current.q.difficulty||"Not selected","target.svg"],["Bloom’s Taxonomy",current.q.bloom||"Not selected","brain.svg"],["Category",current.q.category||"Not selected","folder.svg"],["Tags",tags.join(", ")||"No tags","tag.svg"],["Mandatory",current.q.mandatory?"YES":"NO","circle-check.svg"]].map(([label,value,icon])=><div key={label}><span>{label}</span><strong><Icon name={icon} size={18}/>{value}</strong></div>)}</div>}</div>}
         {filtered.length > 1 && <nav className="tfqcTrueFalsePreviewPaging" aria-label="Preview question navigation"><button type="button" disabled={openQuestion === 0} onClick={()=>{setOpenQuestion(i=>Math.max(0,i-1));setOpenFeedback(null);}}>Previous Question</button><span>Question {filtered.findIndex(q=>q.index===current.index)+1} of {filtered.length}</span><button type="button" disabled={openQuestion >= filtered.length-1} onClick={()=>{setOpenQuestion(i=>Math.min(filtered.length-1,i+1));setOpenFeedback(null);}}>Next Question</button></nav>}
-        <div className="tfqcPreviewBottom"><button type="button" onClick={onBack}>Back to Question</button><button type="button" className="tfqcPreviewSave" onClick={continuePreview}>Save And Continue</button></div></article> : <div className="tfqcPreviewEmpty"><p>No questions to preview.</p><button type="button" onClick={onBack}>Back to Question</button></div>}
+        <div className="tfqcPreviewBottom"><button type="button" onClick={onBack}>Back to Question</button>{saving && <span className="tfqcSaveSuccessToast" role="status">Successfully saved</span>}</div></article> : <div className="tfqcPreviewEmpty"><p>No questions to preview.</p><button type="button" onClick={onBack}>Back to Question</button></div>}
       {notice && <p className="tfqcBuilderNotice tfqcValidationError" role="alert">{notice}</p>}
     </div>
   </div>;
@@ -317,6 +334,8 @@ function QuestionBuilder({ questions, setQuestions, onExit, mcqValues, duration,
   const [notice, setNotice] = useState("");
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const saveTimer = useRef<number | null>(null);
+  useEffect(() => () => { if (saveTimer.current) window.clearTimeout(saveTimer.current); }, []);
   const saveAndContinue = () => {
     if (isSaving) return;
     setShowValidation(true);
@@ -335,7 +354,7 @@ function QuestionBuilder({ questions, setQuestions, onExit, mcqValues, duration,
       setNotice("");
       setSaveSuccess(true);
       setIsSaving(true);
-      window.setTimeout(() => router.push("/assessments/create/evaluation"), 1200);
+      saveTimer.current = window.setTimeout(() => { setSaveSuccess(false); setIsSaving(false); router.push("/assessments/create/evaluation"); }, 3000);
     } catch {
       setIsSaving(false);
       setSaveSuccess(false);
@@ -374,14 +393,18 @@ function QuestionBuilder({ questions, setQuestions, onExit, mcqValues, duration,
   const getDetail = (index: number) => optionDetails[optionKey(index)] || { feedback: "", explanation: "", hint: "", showHint: false, allowHint: false };
   const setDetail = (index: number, patch: Partial<{ feedback: string; explanation: string; hint: string; showHint: boolean; allowHint: boolean }>) => setOptionDetails(old => ({...old, [optionKey(index)]: {...(old[optionKey(index)] || {feedback:"",explanation:"",hint:"",showHint:false,allowHint:false}),...patch}}));
   const [richHtml, setRichHtml] = useState<Record<string, string>>({});
+  const [draftReady, setDraftReady] = useState(false);
   useEffect(() => {
     try {
       const saved = JSON.parse(assessmentStorage.getItem("trueFalseContentDraft") || "{}");
+      if (Number.isInteger(saved.active)) setActive(Math.max(0, Math.min(questions.length - 1, saved.active)));
       if (saved.richHtml && typeof saved.richHtml === "object") setRichHtml(saved.richHtml);
       if (saved.optionDetails && typeof saved.optionDetails === "object") setOptionDetails(saved.optionDetails);
       if (Array.isArray(saved.tags)) setTags(saved.tags.filter((tag: unknown): tag is string => typeof tag === "string"));
     } catch { /* Existing unsaved editor content stays available. */ }
+    setDraftReady(true);
   }, []);
+  useEffect(() => { if (!draftReady) return; try { assessmentStorage.setItem("trueFalseContentDraft", JSON.stringify({questions,optionDetails,tags,richHtml,active})); } catch { setNotice("Could not save this draft in your browser."); } }, [draftReady,questions,optionDetails,tags,richHtml,active]);
   const richEditor = (fieldId: string, value: string, onChange: (next: string) => void, placeholder: string) =>
     <MCQRichEditor key={fieldId} editorId={fieldId} value={value} html={richHtml[fieldId]}
       onChange={onChange} onHtmlChange={(html) => setRichHtml(previous => ({ ...previous, [fieldId]: html }))}
@@ -390,30 +413,30 @@ function QuestionBuilder({ questions, setQuestions, onExit, mcqValues, duration,
     const id = `tfqc-${field}-${active}-${index}`;
     return <div className="tfqcOptionEditor">{richEditor(id, getDetail(index)[field], text => setDetail(index, { [field]: text }), `Write ${field} here...`)}</div>;
   };
-  if (previewing) return <QuestionsPreview questions={questions} details={optionDetails} tags={tags} mcqValues={mcqValues} onBack={()=>setPreviewing(false)} onContinue={saveAndContinue} onEdit={(index)=>{setActive(index);setPreviewing(false);setExpandedOptions([0]);}}/>;
+  if (previewing) return <QuestionsPreview questions={questions} details={optionDetails} tags={tags} mcqValues={mcqValues} saving={isSaving} onBack={()=>setPreviewing(false)} onContinue={saveAndContinue} onEdit={(index)=>{setActive(index);setPreviewing(false);setExpandedOptions([0]);}}/>;
   return <div className="tfqcBuilder">
     <div className="tfqcBuilderTop"><nav className="tfqcBuilderCrumb" aria-label="Question breadcrumb"><Link href="/assessments">Assessment</Link><Icon name="arrowrightdouble.svg" /><button type="button" onClick={onExit}>Create Assessment</button><Icon name="arrowrightdouble.svg" /><strong>Create Questions</strong></nav><div className="tfqcBuilderWelcome"><Icon name="ai-sparkles.svg" size={30} /><div><h2>Let's Get Started! Antony?</h2><p>Let's Build A Great Question.</p></div></div></div>
     <div className={`tfqcBuilderGrid ${active === 0 && !questions.slice(1).some(q=>q.text.trim()) ? "tfqcFirstQuestion" : ""}`}><section className="tfqcBuilderMain">
-      <div className="tfqcQuestionsHeading"><div><h2>Question {active + 1} of {mcqValues.questionCount}</h2><p>{mcqValues.questionCount} Questions | {mcqValues.totalMarks} Marks</p></div><div className="tfqcAddMenu"><button type="button" className="tfqcTopAdd" onClick={() => setAddOpen(v => !v)} aria-expanded={addOpen}><Icon name="plus.svg" size={20} />Add</button>{addOpen && <div className="tfqcAddMenuList" role="radiogroup">{["Create Manually", "Generate with AI"].map((option,index) => <button type="button" key={option} role="radio" aria-checked={index === 0} onClick={() => chooseAdd(option)}><span className={`tfqcOptionRadio ${index === 0 ? "tfqcOptionSelected" : ""}`} />{option}</button>)}</div>}</div></div>
-      <div className={`tfqcNumberNavigation ${mcqValues.questionCount <= 7 ? "tfqcFewQuestions" : "tfqcManyQuestions"}`}><button type="button" className="tfqcRoundNav" aria-label="Previous question" onClick={() => setActive(n => Math.max(0,n-1))}><Icon name="arrowleft.svg" size={20}/></button><div className="tfqcNumberScroller"><div ref={numberScrollRef} onScroll={syncNumberScroll} className="tfqcQuestionNumbers" aria-label="Question numbers">{Array.from({ length: mcqValues.questionCount }, (_, index) => { const q = questions[index]; const status = index === active ? "is-active" : q && complete(q) ? "is-complete" : q && partial(q) ? "is-partial" : "is-empty"; return <button type="button" key={index} className={`tfqcQuestionNumber ${status}`} aria-label={`Question ${index+1}`} aria-current={active===index?"step":undefined} onClick={() => { setActive(index);  setExpandedOptions([]); setExpandedDetail(null); }}><span className="tfqcNumberValue">{index+1}</span>{status === "is-complete" && <span className="tfqcNumberStatus"><Icon name="checkmark-circle.svg" size={13}/></span>}{status === "is-partial" && <span className="tfqcNumberStatus"><Icon name="alerto.svg" size={13}/></span>}{q && q.typeSelected === true && q.type && <small>{q.type === "True / False" ? "T/F" : q.type === "MCQ" ? "MCQ" : q.type.split(/\s+/).map(part => part[0] || "").join("").slice(0, 4).toUpperCase()}</small>}</button>; })}</div><div className="tfqcNumberShortTrack" aria-hidden="true"><span className="tfqcNumberShortThumb" style={{ left: `calc((100% - var(--tfqc-scroll-thumb, min(67px, 26%))) * ${numberScrollProgress})` }} /></div></div><button type="button" className="tfqcRoundNav" aria-label="Next question" onClick={() => { if (active + 1 < mcqValues.questionCount) setActive(n=>n+1); setExpandedOptions([]); setExpandedDetail(null); }}><Icon name="arrowright.svg" size={20}/></button></div>
+      <div className="tfqcQuestionsHeading"><div><h2>Question {active + 1} of {mcqValues.questionCount}</h2><p>{mcqValues.questionCount} Questions | {mcqValues.totalMarks} Marks</p></div><div className="tfqcAddMenu"><button type="button" className="tfqcTopAdd" onClick={() => setAddOpen(v => !v)} aria-expanded={addOpen}><Icon name="plus.svg" size={20} />Add</button>{addOpen && <div className="tfqcAddMenuList" role="radiogroup">{["Create Manually"].map((option,index) => <button type="button" key={option} role="radio" aria-checked={index === 0} onClick={() => chooseAdd(option)}><span className={`tfqcOptionRadio ${index === 0 ? "tfqcOptionSelected" : ""}`} />{option}</button>)}</div>}</div></div>
+      <div className={`tfqcNumberNavigation ${mcqValues.questionCount <= 7 ? "tfqcFewQuestions" : "tfqcManyQuestions"}`}><button type="button" className="tfqcRoundNav" aria-label="Previous question" disabled={active === 0} onClick={() => setActive(n => Math.max(0,n-1))}><Icon name="arrowleft.svg" size={20}/></button><div className="tfqcNumberScroller"><div ref={numberScrollRef} onScroll={syncNumberScroll} className="tfqcQuestionNumbers" aria-label="Question numbers">{Array.from({ length: mcqValues.questionCount }, (_, index) => { const q = questions[index]; const status = q && complete(q) ? "is-complete" : index === active ? "is-active" : "is-empty"; return <button type="button" key={index} className={`tfqcQuestionNumber ${status}`} aria-label={`Question ${index+1}`} aria-current={active===index?"step":undefined} onClick={() => { setActive(index);  setExpandedOptions([]); setExpandedDetail(null); }}><span className="tfqcNumberValue">{index+1}</span><span className={`tfqcNumberStatus ${status === "is-complete" ? "is-done" : "is-pending"}`} aria-hidden="true">{status === "is-complete" ? "✓" : ""}</span>{q && q.typeSelected === true && q.type && <small>{q.type === "True / False" ? "T/F" : q.type === "MCQ" ? "MCQ" : q.type.split(/\s+/).map(part => part[0] || "").join("").slice(0, 4).toUpperCase()}</small>}</button>; })}</div><div className="tfqcNumberShortTrack" aria-hidden="true"><span className="tfqcNumberShortThumb" style={{ left: `calc((100% - var(--tfqc-scroll-thumb, min(67px, 26%))) * ${numberScrollProgress})` }} /></div></div><button type="button" className="tfqcRoundNav" aria-label="Next question" disabled={active >= mcqValues.questionCount - 1} onClick={() => { if (active + 1 < mcqValues.questionCount) setActive(n=>n+1); setExpandedOptions([]); setExpandedDetail(null); }}><Icon name="arrowright.svg" size={20}/></button></div>
       <div className="tfqcQuestionProgress"><span style={{ width: `${Math.min(100,Math.max(4,currentDone / mcqValues.questionCount*100))}%` }}/></div>
       <div className="tfqcQuestionForm"><div className="tfqcBuilderField"><label>Question Type</label><QuestionTypeDropdown value={item.type} onChange={type=>update({type,typeSelected:true})}/></div>
-        <div className="tfqcBuilderField tfqcWriteField"><label htmlFor="tfqcQuestionText">Write Your Question <small>{item.text.length}/250</small></label><div className="tfqcEditorSurface">{richEditor(`tfqc-question-${active}`, item.text, text => update({ text }), "Write your True / False question...")}</div></div>
+        <div className="tfqcBuilderField tfqcWriteField"><label htmlFor="tfqcQuestionText">Write Your Question </label><div className="tfqcEditorSurface">{richEditor(`tfqc-question-${active}`, item.text, text => update({ text }), "Write your True / False question...")}</div></div>
         <div className="tfqcBuilderField"><label>Available Options</label>
           
           <div className="tfqcAnswerOptions">{item.options.map((option,index)=>{ const open=expandedOptions.includes(index); const detail=getDetail(index); const chosen=trueFalseAnswer(item)===index; return <div className="tfqcAnswerSection" key={index}>
             <button type="button" className="tfqcAnswerExpand" aria-expanded={open} onClick={()=>{setExpandedOptions(open?[]:[index]);setExpandedDetail(null);}}><span>{index === 0 ? "True" : index === 1 ? "False" : option.trim() || `Option ${String.fromCharCode(65 + index)}`}</span><Icon name="arrow-down-01.svg" size={21} className={open?"tfqcRotated":""}/></button>
-            {open && <div className="tfqcAnswerContent"><div className="tfqcOptionSubLabel"><span>Text</span><small>{option.length}/250</small></div><div className="tfqcOptionEditor">{richEditor(`tfqc-opt-${active}-${index}`,option,text=>setOption(index,text),`Enter option ${String.fromCharCode(65+index)}`)}</div><label className="tfqcCorrectOption"><input type="checkbox" checked={chosen} onChange={()=>setCorrectForBlank(index)}/>Correct Answers</label>
-              {(["feedback","explanation","hint"] as const).map(field=>{const sectionId=`${index}-${field}`;const sectionOpen=expandedDetail===sectionId;return <div className="tfqcOptionDetail" key={field}><button type="button" className="tfqcOptionDetailHead" aria-expanded={sectionOpen} onClick={()=>setExpandedDetail(sectionOpen?null:sectionId)}><span className="tfqcDetailHeading"><Icon name={field==="feedback"?"message-circle-more.svg":field==="explanation"?"assignments.svg":"idea.svg"} size={18}/>{field[0].toUpperCase()+field.slice(1)}</span><small>{detail[field].length}/250</small><Icon name="arrow-down-01.svg" size={18} className={sectionOpen?"tfqcRotated":""}/></button>{sectionOpen && <div className="tfqcOptionDetailBody">{detailEditor(index,field)}{field==="hint" && <div className="tfqcHintChecks"><label><input type="checkbox" checked={detail.showHint} onChange={e=>setDetail(index,{showHint:e.target.checked})}/>Show hint before answering</label><label><input type="checkbox" checked={detail.allowHint} onChange={e=>setDetail(index,{allowHint:e.target.checked})}/>Allow learner to request hint</label></div>}</div>}</div>;})}
+            {open && <div className="tfqcAnswerContent"><div className="tfqcOptionSubLabel"><span>Text</span></div><div className="tfqcOptionEditor">{richEditor(`tfqc-opt-${active}-${index}`,option,text=>setOption(index,text),`Enter option ${String.fromCharCode(65+index)}`)}</div><label className="tfqcCorrectOption"><input type="checkbox" checked={chosen} onChange={()=>setCorrectForBlank(index)}/>Correct Answers</label>
+              {(["feedback","explanation","hint"] as const).map(field=>{const sectionId=`${index}-${field}`;const sectionOpen=expandedDetail===sectionId;return <div className="tfqcOptionDetail" key={field}><button type="button" className="tfqcOptionDetailHead" aria-expanded={sectionOpen} onClick={()=>setExpandedDetail(sectionOpen?null:sectionId)}><span className="tfqcDetailHeading"><Icon name={field==="feedback"?"message-circle-more.svg":field==="explanation"?"assignments.svg":"idea.svg"} size={18}/>{field[0].toUpperCase()+field.slice(1)}</span><Icon name="arrow-down-01.svg" size={18} className={sectionOpen?"tfqcRotated":""}/></button>{sectionOpen && <div className="tfqcOptionDetailBody">{detailEditor(index,field)}{field==="hint" && <div className="tfqcHintChecks"><label><input type="checkbox" checked={detail.showHint} onChange={e=>setDetail(index,{showHint:e.target.checked})}/>Show hint before answering</label><label><input type="checkbox" checked={detail.allowHint} onChange={e=>setDetail(index,{allowHint:e.target.checked})}/>Allow learner to request hint</label></div>}</div>}</div>;})}
               
             </div>}
           </div>;})}</div><button type="button" className="tfqcAddOptions" onClick={addOption}><Icon name="plus.svg" size={20}/>Add Options</button>
           {showValidation && trueFalseErrors(item).length>0 && <div className="tfqcValidationErrors" role="alert">{trueFalseErrors(item).map(error=><p key={error}>{error}</p>)}</div>}
         </div>
-      </div><div className="tfqcBuilderBottom"><div className="tfqcAddMenu tfqcBottomAddMenu"><button type="button" className="tfqcBuilderAction tfqcSubmitQuestion" onClick={() => { setBottomAddOpen(v => !v); setAddOpen(false); }} aria-expanded={bottomAddOpen} aria-haspopup="true"><Icon name="plus.svg" size={21}/>Add Questions</button>{bottomAddOpen && <div className="tfqcAddMenuList" role="radiogroup">{["Create Manually", "Generate with AI"].map((option,index) => <button type="button" key={option} role="radio" aria-checked={index === 0} onClick={() => chooseAdd(option)}><span className={`tfqcOptionRadio ${index === 0 ? "tfqcOptionSelected" : ""}`} />{option}</button>)}</div>}</div><div className="tfqcBuilderArrows"><button type="button" className="tfqcRoundNav" aria-label="Previous" onClick={() => setActive(n=>Math.max(0,n-1))}><Icon name="arrowleft.svg"/></button><button type="button" className="tfqcRoundNav" aria-label="Next" onClick={() => { if(active+1<mcqValues.questionCount)setActive(n=>n+1); }}><Icon name="arrowright.svg"/></button></div></div>
+      </div><div className="tfqcBuilderBottom"><div className="tfqcAddMenu tfqcBottomAddMenu"><button type="button" className="tfqcBuilderAction tfqcSubmitQuestion" onClick={() => { setBottomAddOpen(v => !v); setAddOpen(false); }} aria-expanded={bottomAddOpen} aria-haspopup="true"><Icon name="plus.svg" size={21}/>Add Questions</button>{bottomAddOpen && <div className="tfqcAddMenuList" role="radiogroup">{["Create Manually"].map((option,index) => <button type="button" key={option} role="radio" aria-checked={index === 0} onClick={() => chooseAdd(option)}><span className={`tfqcOptionRadio ${index === 0 ? "tfqcOptionSelected" : ""}`} />{option}</button>)}</div>}</div><div className="tfqcBuilderArrows"><button type="button" className="tfqcRoundNav" aria-label="Previous" onClick={() => setActive(n=>Math.max(0,n-1))}><Icon name="arrowleft.svg"/></button><button type="button" className="tfqcRoundNav" aria-label="Next" onClick={() => { if(active+1<mcqValues.questionCount)setActive(n=>n+1); }}><Icon name="arrowright.svg"/></button></div></div>
     </section><aside className="tfqcBuilderAside"><section className="tfqcAsideSection"><h3>Question Settings</h3><div className="tfqcBuilderField"><label htmlFor="tfqcPoints">Points</label><div className="tfqcPointsControl"><input id="tfqcPoints" type="number" min="0" step="1" value={item.points} onChange={e=>update({points:e.target.value})}/><div className="tfqcPointsSteppers"><button type="button" aria-label="Increase points" onClick={()=>update({points:String((Number(item.points)||0)+1)})}><Icon name="arrow-down-01.svg" size={14} className="tfqcArrowUp"/></button><button type="button" aria-label="Decrease points" onClick={()=>update({points:String(Math.max(0,(Number(item.points)||0)-1))})}><Icon name="arrow-down-01.svg" size={14}/></button></div></div></div><div className="tfqcBuilderField"><label>Difficulty</label><NeumoSelect value={item.difficulty} options={["Easy","Medium","Hard"]} onChange={v=>update({difficulty:v})}/></div><div className="tfqcBuilderField"><label>Category</label><NeumoSelect value={item.category} options={CATEGORIES} placeholder="Select Category" onChange={v=>update({category:v})}/></div><div className="tfqcBuilderField"><label>Bloom’s Taxonomy</label><NeumoSelect value={item.bloom} options={BLOOMS} placeholder="Select Bloom’s Level" onChange={v=>update({bloom:v})}/></div><div className="tfqcBuilderField"><label>Tag</label><div className="tfqcTagHolder"><button type="button" className="tfqcAddTag" onClick={()=>setAddingTag(v=>!v)}><Icon name="plus.svg" size={17}/>Add Tag</button>{addingTag && <input className="tfqcTagInput" aria-label="New tag" autoFocus value={tagInput} onChange={e=>setTagInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&tagInput.trim()){e.preventDefault();setTags(old=>[...old,tagInput.trim()]);setTagInput('');setAddingTag(false);}}}/>}</div><div className="tfqcTagRow">{tags.map(tag=><button type="button" key={tag} onClick={()=>setTags(old=>old.filter(v=>v!==tag))}>{tag} <Icon name="cancel.svg" size={14}/></button>)}</div></div><div className="tfqcMandatory"><span>Mandatory</span><button type="button" className={`tfqcSwitch ${item.mandatory ? 'tfqcSwitchOn' : ''}`} role="switch" aria-label="Mandatory Question" aria-checked={item.mandatory} onClick={()=>update({mandatory:!item.mandatory})}><span className="tfqcSwitchText">{item.mandatory?'ON':'OFF'}</span><span className="tfqcSwitchKnob"/></button></div><p className="tfqcAsideHint">This Question is Mandatory</p></section><section className="tfqcAsideSection tfqcBuilderSummary"><h3>Assessment Summary</h3><div className="tfqcStatGrid"><div><strong>{currentDone}/{mcqValues.questionCount}</strong><span>Questions</span></div><div><strong>{questions.reduce((n,q)=>n+(complete(q)?Number(q.points)||0:0),0)}</strong><span>Marks</span></div><div><strong>{duration}</strong><span>Minutes</span></div></div><p>Marks per Question: {mcqValues.marksPerQuestion}</p><div className="tfqcSummaryProgress"><span style={{width:`${Math.min(100,currentDone/mcqValues.questionCount*100)}%`}}/></div><p>Target is {mcqValues.questionCount} questions · {mcqValues.totalMarks} marks. Add questions to get started.</p><div className="tfqcBuilderField"><label>Passing Score</label><div className="tfqcReadonlyValue">{passingScore}</div></div></section></aside></div>
     {notice && <p className="tfqcBuilderNotice" role="status">{notice}</p>}
-    <div className="tfqcBuilderPageFooter"><button type="button" className="tfqcFooterPill" onClick={()=>{setNotice("");setPreviewing(true);}}>Preview Questions</button><div className="tfqcSaveContinueGroup">{saveSuccess && <span className="tfqcSaveSuccessToast" role="status">Successfully saved</span>}<button type="button" className="tfqcFooterPill tfqcFooterContinue" disabled={isSaving} onClick={saveAndContinue}>Save &amp; Continue</button></div></div>
+    <div className="tfqcBuilderPageFooter"><button type="button" className="tfqcFooterPill" disabled={isSaving} onClick={onExit}>Back</button><button type="button" className="tfqcFooterPill" onClick={()=>{setNotice("");setPreviewing(true);}}>Preview Questions</button><div className="tfqcSaveContinueGroup">{saveSuccess && <span className="tfqcSaveSuccessToast" role="status">Successfully saved</span>}<button type="button" className="tfqcFooterPill tfqcFooterContinue" disabled={isSaving} onClick={saveAndContinue}>Save &amp; Continue</button></div></div>
   </div>;
 }
 type MCQDetailsValues = { totalMarks: number; questionCount: number; marksPerQuestion: number };
@@ -424,6 +447,7 @@ export default function TrueFalseContentPage() {
   const router = useRouter();
   const [mcqValues, setMcqValues] = useState<MCQDetailsValues>(DEFAULT_MCQ_VALUES);
   const [questions, setQuestions] = useState<Question[]>([newQuestion()]);
+  const [pageReady, setPageReady] = useState(false);
   const [assessmentDuration,setAssessmentDuration]=useState("—");
   const [passingScore,setPassingScore]=useState("—");
   useEffect(() => {
@@ -448,6 +472,7 @@ export default function TrueFalseContentPage() {
     } catch {
       setQuestions(Array.from({ length: DEFAULT_MCQ_VALUES.questionCount }, () => newQuestion()));
     }
+    setPageReady(true);
   }, []);
   return (
     <main className="tfqcAppShell">
@@ -457,7 +482,7 @@ export default function TrueFalseContentPage() {
           <div className="tfqcHeader"><Header /></div>
           <div className="tfqcScrollArea">
             <div className="tfqcPageContent">
-              <QuestionBuilder questions={questions} setQuestions={setQuestions} mcqValues={mcqValues} duration={assessmentDuration} passingScore={passingScore} onExit={() => router.push("/assessments/create/details")} />
+              {pageReady && <QuestionBuilder questions={questions} setQuestions={setQuestions} mcqValues={mcqValues} duration={assessmentDuration} passingScore={passingScore} onExit={() => router.push("/assessments/create/details")} />}
             </div>
           </div>
         </section>

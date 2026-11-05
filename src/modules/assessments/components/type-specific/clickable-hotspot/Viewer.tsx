@@ -1,4 +1,5 @@
 "use client";
+import {maySubmitCurrentAttempt,nextAttemptCount} from "@/modules/assessments/components/learner/learner-assessment-data";
 
 import Link from "next/link";
 
@@ -905,7 +906,7 @@ function HotspotCanvas({ question, markers, disabled, onMark, onRemove }: {
             disabled={disabled}
             onClick={event => { event.stopPropagation(); onRemove(marker.id); }}>
             <span className="viewerHotspotRegionTarget" aria-hidden="true">
-              <img src="/assets/assessmenticons/hotspot-target.svg" width={20} height={20} alt=""
+              <img src="/assets/assessmenticons/gtarget.svg" width={20} height={20} alt=""
                 onError={event => { event.currentTarget.style.display = "none"; }} />
             </span>
           </button>;
@@ -916,6 +917,7 @@ function HotspotCanvas({ question, markers, disabled, onMark, onRemove }: {
 }
 
 function saveHotspotResult(draft:ViewerDraft, answers:Record<number,PlacedMarker[]>, flagged:number[], remainingSeconds:number, retry:boolean) {
+  if (!maySubmitCurrentAttempt()) throw new Error("The allowed attempts have been used.");
   const original = (()=>{try{return JSON.parse(assessmentStorage.getItem("viewerAssessmentResult")||"{}");}catch{return {};}})();
   const questions = draft.questions.map((q,i)=>{
     const placed = answers[i] ?? [];
@@ -945,13 +947,13 @@ function saveHotspotResult(draft:ViewerDraft, answers:Record<number,PlacedMarker
     retryAttemptsAllowed:Number(original.retryAttemptsAllowed||2),
     retryDurationMinutes:Number(original.retryDurationMinutes||15)};
   assessmentStorage.setItem(retry?"viewerRetryResult":"viewerAssessmentResult",JSON.stringify(result));
-  if(!retry){
+  {
     let prior:unknown=[];
     try{prior=JSON.parse(assessmentStorage.getItem("viewerAttempts")||"[]");}catch{prior=[];}
     assessmentStorage.setItem("viewerAttempts",JSON.stringify([...(Array.isArray(prior)?prior:[]),result]));
     assessmentStorage.setItem("viewerAttemptDraft",JSON.stringify({finished:true}));
     const id=getActiveAssessmentId();const existing=id?getAssessment(id):undefined;
-    if(existing)updateAssessment({attemptCount:(existing.attemptCount||0)+1});
+    if(existing)updateAssessment({attemptCount:nextAttemptCount((Array.isArray(prior)?prior.length:0)+1)});
   }
   return result;
 }
@@ -1360,9 +1362,9 @@ return <main className="superAdminPage institutionAdminPage viewerAppShell viewM
 
                   <div className="viewerExamActions">
 
-                    <button type="button" className="viewerExamButton" disabled={current === 0}
+                    {current > 0 && <button type="button" className="viewerExamButton" disabled={current === 0}
 
-                      onClick={() => goTo(current - 1)}><Icon name="arrowleft.svg" />Previous</button>
+                      onClick={() => goTo(current - 1)}><Icon name="arrowleft.svg" />Previous</button>}
 
                     <button type="button" className="viewerExamButton viewerNext"
 

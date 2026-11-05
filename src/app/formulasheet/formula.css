@@ -28,3 +28,6 @@
 .formulaStar{opacity:1;filter:none}
 .formulaStar.isStarred{filter:none}
 @media(max-width:700px){.formulaAside{position:static;top:auto;max-height:none;overflow:visible}}
+
+/* Formula Sheet scrolls immediately, including after client-side navigation. */
+.formulaApp{height:100dvh!important;min-height:0!important;max-height:100dvh!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain}
