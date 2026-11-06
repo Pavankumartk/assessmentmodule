@@ -47,3 +47,20 @@ node_modules/
 .vercel/
 *.log
 .DS_Store
+
+# Local assessment backups
+/.assessment-image-backups/
+/.assessment-image-based-backups/
+
+# Old temporary scripts
+/scripts/
+/fix_*
+/install_*
+/integrate_*
+/repair_*
+/verify_*
+
+# Old installation documents
+/*.txt
+/AGENTS.md
+/assignment-full-flow.patch
