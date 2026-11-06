@@ -29,8 +29,9 @@ export default function Waiting() {
 
     setTeamId(session.teamId);
 
-    const refresh = () => {
-      const next = findLobby(session.lobbyId);
+    const refresh = async () => {
+      try {
+      const next = await findLobby(session.lobbyId);
 
       setLobby(next || null);
       setLoaded(true);
@@ -40,7 +41,8 @@ export default function Waiting() {
       const firstTeam = next.hostTeam.name.trim().toLowerCase();
 
       if (firstTeam === "nova" || firstTeam === "blaze") {
-        localStorage.setItem("qcFirstRegisteredTeam", firstTeam);
+        try { localStorage.setItem("qcFirstRegisteredTeam", firstTeam); } catch { /* Optional flag. */ }
+        try { sessionStorage.setItem("qcFirstRegisteredTeam", firstTeam); } catch { /* Optional flag. */ }
       }
 
       if (next.status === "ready") {
@@ -50,6 +52,11 @@ export default function Waiting() {
         if (isHost || isGuest) {
           router.replace("/quantum-champs-player/game-mode");
         }
+      }
+      } catch (error) {
+        console.error("Could not load Quantum Champs lobby", error);
+        setMessage("Unable to load the team lobby. Please check browser storage permissions.");
+        setLoaded(true);
       }
     };
 
@@ -78,29 +85,35 @@ export default function Waiting() {
   const novaJoined = !!novaTeam?.id;
   const blazeJoined = !!blazeTeam?.id;
 
-  function accept() {
+  async function accept() {
+    try {
     if (!lobby || !host || !requestPending) return;
 
-    const latest = findLobby(lobby.id);
+    const latest = await findLobby(lobby.id);
 
     if (!latest || latest.status !== "request" || !latest.guestTeam.id || latest.hostTeam.id !== teamId) {
       setMessage("The join request is no longer available.");
       return;
     }
 
-    publish({
+    await publish({
       ...latest,
       status: "ready",
       updatedAt: Date.now(),
     });
 
     setMessage("");
+    } catch (error) {
+      console.error("Could not accept team", error);
+      setMessage("Could not save the team approval. Please try again.");
+    }
   }
 
-  function reject() {
+  async function reject() {
+    try {
     if (!lobby || !host || !requestPending) return;
 
-    const latest = findLobby(lobby.id);
+    const latest = await findLobby(lobby.id);
 
     if (!latest || latest.status !== "request" || latest.hostTeam.id !== teamId) {
       setMessage("The join request is no longer available.");
@@ -111,7 +124,7 @@ export default function Waiting() {
 
     const otherTeamName = latest.hostTeam.name.trim().toLowerCase() === "nova" ? "Blaze" : "Nova";
 
-    publish({
+    await publish({
       ...latest,
       guestTeam: {
         id: "",
@@ -126,6 +139,10 @@ export default function Waiting() {
     });
 
     setMessage(`${rejectedTeamName}'s join request was declined.`);
+    } catch (error) {
+      console.error("Could not reject team", error);
+      setMessage("Could not save the team decision. Please try again.");
+    }
   }
 
   const hostName = lobby?.hostTeam.name || "Nova";

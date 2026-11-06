@@ -38,8 +38,9 @@ export default function GameMode() {
       return;
     }
 
-    const refresh = () => {
-      const next = findLobby(session.lobbyId);
+    const refresh = async () => {
+      try {
+      const next = await findLobby(session.lobbyId);
 
       if (!next) {
         router.replace("/quantum-champs-player/access-code");
@@ -60,6 +61,9 @@ export default function GameMode() {
 
       setLobby(next);
       setLoaded(true);
+      } catch (error) {
+        console.error("Could not load Quantum Champs lobby", error);
+      }
     };
 
     refresh();

@@ -53,12 +53,14 @@ export default function AccessCode() {
       return;
     }
 
-    localStorage.setItem("qcFirstRegisteredTeam", firstTeam);
+    try { localStorage.setItem("qcFirstRegisteredTeam", firstTeam); } catch { /* IndexedDB is authoritative. */ }
+    sessionStorage.setItem("qcFirstRegisteredTeam", firstTeam);
     sessionStorage.setItem("qcJoinedTeam", team);
-    localStorage.setItem(`qcTeamRegistered_${team}`, "true");
+    try { localStorage.setItem(`qcTeamRegistered_${team}`, "true"); } catch { /* Optional compatibility flag. */ }
   }
 
-  function join() {
+  async function join() {
+    try {
     const nextErrors: FieldErrors = {};
 
     const enteredCode = code.trim().toUpperCase();
@@ -85,7 +87,7 @@ export default function AccessCode() {
 
     if (!identity) return;
 
-    const lobbies = readLobbies();
+    const lobbies = await readLobbies();
 
     const existing = lobbies.find((lobby) => lobby.assessmentId === DEMO.assessmentId && lobby.batchId === DEMO.batchId && lobby.status !== "ready");
 
@@ -106,7 +108,7 @@ export default function AccessCode() {
 
       const otherTeam = DEMO.teams.find((item) => item.id !== identity.id);
 
-      publish({
+      await publish({
         id: lobbyId,
         assessmentId: DEMO.assessmentId,
         batchId: DEMO.batchId,
@@ -145,7 +147,7 @@ export default function AccessCode() {
             return;
           }
         } else {
-          publish({
+          await publish({
             ...existing,
             guestTeam: team,
             status: "request",
@@ -168,6 +170,10 @@ export default function AccessCode() {
 
     setErrors({});
     router.push("/quantum-champs-player/waiting");
+    } catch (error) {
+      console.error("Quantum Champs lobby could not be saved", error);
+      setErrors({ code: "Unable to save the team lobby. Enable browser storage and try again." });
+    }
   }
 
   return (
