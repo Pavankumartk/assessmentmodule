@@ -1,5 +1,6 @@
 "use client";
 import { quantumStorage as localStorage, quantumSessionStorage as sessionStorage } from "../quantum-storage";
+import { publishQuantumChampsToMain } from "@/modules/assessments/storage/quantum-champs-publish-bridge";
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -49,7 +50,7 @@ export default function QuantumChampsReview(){
  const questionsPage=()=>router.push("/quantum-champs/QC_Create_Question");
  const setting=(key:string)=>String(evaluation[key]??"—");
  const toggle=(key:string)=> <Badge kind="toggle">{onOff(evaluation[key])}</Badge>;
- const publish=()=>{try{sessionStorage.setItem("quantumChampsPublished","true");sessionStorage.setItem("quantumChampsPublishedAt",new Date().toISOString());setPublished(true);}catch{window.alert("Unable to publish. Please check browser storage.")}};
+  const publish=async()=>{try{await publishQuantumChampsToMain(localStorage);sessionStorage.setItem("quantumChampsPublished","true");sessionStorage.setItem("quantumChampsPublishedAt",new Date().toISOString());setPublished(true);}catch(error){window.alert(error instanceof Error?error.message:"Unable to publish Quantum Champs.");}};
  return <div className="qrv-shell"><div className="qrv-app"><Sidebar/><main className="qrv-main"><Header/><div className="qrv-scroll"><div className="qrv-page">
   <nav className="qrv-breadcrumb"><button className="qrv-back-icon" type="button" onClick={()=>router.push("/assessments")}><ChevronRight size={15}/></button><button type="button" onClick={()=>router.push("/assessments")}>Assessment</button><ChevronRight size={13}/><button type="button" onClick={detailsPage}>Create Assessment</button></nav>
   <div className="qrv-stepper" aria-label="Assessment steps">{["Type","Details","Content","Evaluation","Review"].map((name,i)=><div key={name} className={`qrv-step ${i===4?"is-current":"is-done"}`}><span>{i+1}</span><b>{name}</b></div>)}</div>

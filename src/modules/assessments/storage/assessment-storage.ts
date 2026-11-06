@@ -1,5 +1,6 @@
 /** Browser-only, versioned storage: no API, Prisma, or server dependencies. */
 import {getDemoSession} from "../auth/demo-auth";
+import { getPublishedQuantumListings } from "./quantum-champs-published-registry";
 export type AssessmentStatus = "Draft" | "Published" | "Scheduled";
 export interface StoredAssessment {
   id: string;
@@ -29,17 +30,22 @@ export function setActiveAssessmentId(id: string) {
   if (canUseStorage() && id) localStorage.setItem(ACTIVE_KEY,id);
 }
 export function getAssessments(): StoredAssessment[] {
-  if (!canUseStorage()) return [];
+  if (typeof window === "undefined") return [];
+  const publishedQuantum = getPublishedQuantumListings();
+  let entries: StoredAssessment[] = [];
   try {
     const value = JSON.parse(localStorage.getItem(LIST_KEY) || "[]");
-    return Array.isArray(value) ? value.filter((v) => v && typeof v.id === "string") : [];
-  } catch { return []; }
+    entries = Array.isArray(value) ? value.filter((v) => v && typeof v.id === "string") : [];
+  } catch { /* The published Quantum Champs index remains available. */ }
+  const quantumIds = new Set(publishedQuantum.map(item => item.id));
+  return [...publishedQuantum, ...entries.filter(item => !quantumIds.has(item.id))];
 }
 export function getAssessment(id: string): StoredAssessment | undefined {
   return getAssessments().find((a) => a.id === id);
 }
 export function saveAssessment(record: StoredAssessment): StoredAssessment {
-  const entries = getAssessments();
+  const publishedQuantumIds = new Set(getPublishedQuantumListings().map(item => item.id));
+  const entries = getAssessments().filter(item => !publishedQuantumIds.has(item.id));
   const index = entries.findIndex(a => a.id === record.id);
   if (index < 0) entries.unshift(record); else entries[index] = record;
   localStorage.setItem(LIST_KEY,JSON.stringify(entries)); changed();
@@ -113,6 +119,8 @@ export const assessmentStorage = {
   }
 };
 export function viewerPath(id = getActiveAssessmentId()): string {
+ const record = id ? getAssessment(id) : undefined;
+ if (record?.typeCode === "quantum-champs") return "/quantum-champs-player";
  return id ? `/assessments/${encodeURIComponent(id)}/viewer` : "/assessments";
 }
 export function resultPath(id = getActiveAssessmentId()): string {

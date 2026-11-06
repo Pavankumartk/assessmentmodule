@@ -1,6 +1,7 @@
 "use client";
 
 import {useEffect,useMemo,useState} from "react";
+import { quantumStorage } from "@/app/quantum-champs/quantum-storage";
 import {useRouter} from "next/navigation";
 import {getDemoSession} from "@/modules/assessments/auth/demo-auth";
 import {getAssessment,getAssessments,setActiveAssessmentId,viewerPath,resultPath,assessmentStorage} from "@/modules/assessments/storage/assessment-storage";
@@ -54,6 +55,15 @@ export default function LearnerAssessmentBrowser(){
     if(!latest || !learnerAssessmentData(latest).canStart) {
       const session=getDemoSession();
       if(session)setItems(learnerAssessmentsForTenant(getAssessments(),session.tenantId));
+      return;
+    }
+    if (selected.record.typeCode === "quantum-champs") {
+      try {
+        quantumStorage.setItem("quantumChampsCurrentId", selected.record.id);
+        router.push("/quantum-champs-player");
+      } catch (error) {
+        window.alert(error instanceof Error ? error.message : "Unable to open Quantum Champs.");
+      }
       return;
     }
     setActiveAssessmentId(selected.record.id);
