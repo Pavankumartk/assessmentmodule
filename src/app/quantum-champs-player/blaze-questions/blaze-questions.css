@@ -1,0 +1,946 @@
+.quantum-player-scope .qc-blaze-root,
+.quantum-player-scope .qc-blaze-root *,
+.quantum-player-scope .qc-blaze-root *::before,
+.quantum-player-scope .qc-blaze-root *::after {
+  box-sizing: border-box;
+}
+
+.quantum-player-scope .qc-blaze-root {
+  --u: var(--qc-u);
+  --qc-fredoka: var(--qc-font-fredoka, "Fredoka"), "Fredoka One", "Segoe UI", Arial, sans-serif;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+  background: #dfe6e9;
+  font-family: "Segoe UI", Arial, sans-serif !important;
+  color: #374151;
+}
+
+.quantum-player-scope .qc-blaze-shell {
+  position: absolute;
+  inset: calc(32 * var(--u));
+  overflow: hidden;
+  background: linear-gradient(180deg, #b2def1 0%, #efdde3 50%, #dfe6e9 100%);
+  box-shadow:
+    -4px -4px 4px #ffffff,
+    4px 4px 4px #c4c4c4;
+  border-radius: calc(16 * var(--u));
+}
+
+.quantum-player-scope .qc-blaze-logo {
+  position: absolute;
+  z-index: 5;
+  top: calc(32 * var(--u));
+  left: calc(32 * var(--u));
+  width: calc(70 * var(--u));
+  height: calc(95 * var(--u));
+}
+
+.quantum-player-scope .qc-blaze-logo-crown {
+  position: absolute;
+  left: 10%;
+  top: 0;
+  width: 82%;
+  height: 46%;
+  filter: drop-shadow(0 1px 1px rgba(192, 85, 18, 0.35));
+}
+
+.quantum-player-scope .qc-blaze-logo-shield {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 41.38%;
+  bottom: 0.45%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: calc(10 * var(--u));
+  border-radius: calc(6 * var(--u)) calc(6 * var(--u)) 0 0;
+  clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%);
+  background: conic-gradient(from 0deg at 50% 50%, rgba(255, 255, 255, 0.08) 0deg 90deg, rgba(0, 0, 0, 0.14) 90deg 180deg, rgba(255, 255, 255, 0.08) 180deg 270deg, rgba(0, 0, 0, 0.14) 270deg 360deg), linear-gradient(128.79deg, #67096e -1.23%, #e01e5a 86.72%);
+  color: #ffffff;
+  font-size: calc(11.5 * var(--u));
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.25);
+}
+
+.quantum-player-scope .qc-blaze-status {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: calc(32 * var(--u));
+  display: flex;
+  align-items: center;
+  translate: -50% 0;
+}
+
+.quantum-player-scope .qc-blaze-turn {
+  display: flex;
+  align-items: center;
+  gap: calc(6 * var(--u));
+  width: calc(580 * var(--u));
+  height: calc(70 * var(--u));
+  padding-left: calc(17 * var(--u));
+  border: 1.5px solid transparent;
+  border-radius: 60px;
+  background:
+    linear-gradient(#dfe6e9, #dfe6e9) padding-box,
+    linear-gradient(90deg, #5a2808, #e01e5a) border-box;
+  box-shadow:
+    inset -4px -4px 4px #ffffff,
+    inset 4px 4px 8px #c4c4c4;
+}
+
+.quantum-player-scope .qc-blaze-turn-icon {
+  flex: none;
+  width: calc(46 * var(--u));
+  height: calc(46 * var(--u));
+}
+
+.quantum-player-scope .qc-blaze-turn-text {
+  font-size: calc(28 * var(--u));
+  font-weight: 700;
+  line-height: calc(36 * var(--u));
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  background: linear-gradient(90deg, #5a2808 0%, #e01e5a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.quantum-player-scope .qc-blaze-count {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(8 * var(--u));
+  width: calc(172 * var(--u));
+  height: calc(70 * var(--u));
+  margin-left: calc(-93 * var(--u));
+  border-radius: 60px;
+  background: #dfe6e9;
+  box-shadow:
+    -4px -4px 4px #ffffff,
+    4px 4px 8px #c4c4c4;
+  font-size: max(13px, calc(24 * var(--u)));
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  color: #374151;
+}
+
+.quantum-player-scope .qc-blaze-count strong {
+  font-weight: 700;
+  background: linear-gradient(90deg, #5a2808 0%, #e01e5a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.quantum-player-scope .qc-blaze-xp-pill {
+  position: absolute;
+  z-index: 3;
+  top: calc(37 * var(--u));
+  right: calc(31 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(170 * var(--u));
+  height: calc(50 * var(--u));
+  font-size: max(13px, calc(24 * var(--u)));
+  border-radius: 100px;
+  background: #dfe6e9;
+  box-shadow:
+    inset -2px -2px 2px #ffffff,
+    inset 2px 2px 2px #c4c4c4;
+}
+
+.quantum-player-scope .qc-blaze-xp-inner {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(8 * var(--u));
+  width: calc(170 * var(--u));
+  height: calc(50 * var(--u));
+  font-size: max(13px, calc(24 * var(--u)));
+  border-radius: 200px;
+  background: linear-gradient(90deg, #5a2808 0%, #e01e5a 100%);
+  box-shadow:
+    -2px -2px 2px #ffffff,
+    2px 2px 2px #c4c4c4;
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.quantum-player-scope .qc-blaze-xp-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%);
+  transform: translateX(-120%);
+  pointer-events: none;
+  animation: qc-blaze-sheen 3.4s ease-in-out infinite;
+}
+
+.quantum-player-scope .qc-blaze-xp-icon {
+  flex: none;
+  width: calc(30 * var(--u));
+  height: calc(30 * var(--u));
+}
+
+.quantum-player-scope .qc-blaze-question {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: calc(116 * var(--u));
+  width: calc(1125 * var(--u));
+  height: calc(160 * var(--u));
+  margin-left: calc(-562.5 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1125 160' preserveAspectRatio='none'%3E%3Cpolygon points='562.5,16 1109,53.3 1109,106.7 562.5,144 16,106.7 16,53.3' fill='black' stroke='black' stroke-width='32' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1125 160' preserveAspectRatio='none'%3E%3Cpolygon points='562.5,16 1109,53.3 1109,106.7 562.5,144 16,106.7 16,53.3' fill='black' stroke='black' stroke-width='32' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  background:
+    url("/quantum-champs/question-dots-blaze.png") 0 0 / calc(8 * var(--u)) calc(8 * var(--u)) repeat,
+    #dfe6e9;
+  image-rendering: pixelated;
+}
+
+.quantum-player-scope .qc-blaze-question::before {
+  content: "";
+  position: absolute;
+  left: calc(15 * var(--u));
+  right: calc(15 * var(--u));
+  top: calc(15 * var(--u));
+  bottom: calc(15 * var(--u));
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1095 130' preserveAspectRatio='none'%3E%3Cpolygon points='547.5,16 1079,50.1 1079,79.9 547.5,114 16,79.9 16,50.1' fill='black' stroke='black' stroke-width='32' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1095 130' preserveAspectRatio='none'%3E%3Cpolygon points='547.5,16 1079,50.1 1079,79.9 547.5,114 16,79.9 16,50.1' fill='black' stroke='black' stroke-width='32' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  background: linear-gradient(180deg, #ffffff 0%, #dfe6e9 6%, #dfe6e9 94%, #c4c4c4 100%);
+}
+
+.quantum-player-scope .qc-blaze-question span {
+  position: relative;
+  padding: 0 calc(80 * var(--u));
+  font-size: max(16px, calc(28 * var(--u)));
+  font-weight: 700;
+  line-height: calc(36 * var(--u));
+  letter-spacing: 0.05em;
+  text-align: center;
+  color: #e01e5a;
+}
+
+.quantum-player-scope .qc-blaze-board {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: calc(200 * var(--u));
+  width: calc(1312 * var(--u));
+  height: calc(522 * var(--u));
+  margin-left: calc(-656 * var(--u));
+  padding: calc(96 * var(--u)) calc(80 * var(--u)) 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: calc(24 * var(--u));
+  background: #dfe6e9;
+  box-shadow:
+    inset -2px -2px 2px #ffffff,
+    inset 2px 2px 2px #c4c4c4;
+}
+
+.quantum-player-scope .qc-blaze-board::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url("/quantum-champs/instructions-pattern.png");
+  background-size: calc(32 * var(--u)) calc(40 * var(--u));
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.quantum-player-scope .qc-blaze-board > * {
+  position: relative;
+}
+
+.quantum-player-scope .qc-blaze-options {
+  display: grid;
+  grid-template-columns: repeat(2, calc(560 * var(--u)));
+  grid-template-rows: repeat(2, calc(100 * var(--u)));
+  grid-auto-flow: row;
+  justify-content: center;
+  gap: calc(32 * var(--u));
+}
+
+.quantum-player-scope .qc-blaze-option {
+  display: flex;
+  align-items: center;
+  gap: calc(12 * var(--u));
+  padding: 0 calc(16 * var(--u));
+  border: 0;
+  border-radius: calc(8 * var(--u));
+  background: #dfe6e9;
+  box-shadow:
+    -2px -2px 2px #ffffff,
+    2px 2px 2px #c4c4c4;
+  font-family: inherit !important;
+  font-size: max(15px, calc(28 * var(--u)));
+  font-weight: 400;
+  line-height: calc(32 * var(--u));
+  letter-spacing: 0.05em;
+  text-align: left;
+  color: #374151;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+  animation: qc-blaze-rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.quantum-player-scope .qc-blaze-option[data-letter="a"] {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.quantum-player-scope .qc-blaze-option[data-letter="b"] {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.quantum-player-scope .qc-blaze-option[data-letter="c"] {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.quantum-player-scope .qc-blaze-option[data-letter="d"] {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.quantum-player-scope .qc-blaze-option:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.quantum-player-scope .qc-blaze-option:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.quantum-player-scope .qc-blaze-option:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.quantum-player-scope .qc-blaze-option:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow:
+    -4px -4px 6px #ffffff,
+    4px 4px 8px #c4c4c4;
+}
+
+.quantum-player-scope .qc-blaze-option:active:not(:disabled) {
+  box-shadow:
+    inset -2px -2px 3px #ffffff,
+    inset 2px 2px 4px #c4c4c4;
+}
+
+.quantum-player-scope .qc-blaze-option:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.quantum-player-scope .qc-blaze-option:focus-visible {
+  outline: 3px solid #2d4cc8;
+  outline-offset: 3px;
+}
+
+.quantum-player-scope .qc-blaze-option-letter {
+  flex-shrink: 0;
+  width: calc(40 * var(--u));
+  height: calc(40 * var(--u));
+  font-size: max(12px, calc(24 * var(--u)));
+  min-width: 22px;
+  min-height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #e01e5a;
+  color: #ffffff;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: lowercase;
+}
+
+.quantum-player-scope .qc-blaze-option.qc-blaze-option-eliminated {
+  background: #f2dfe3;
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+.quantum-player-scope .qc-blaze-option-eliminated > span:nth-child(2) {
+  color: #c5223e;
+  text-decoration: line-through;
+  text-decoration-color: #c5223e;
+}
+
+.quantum-player-scope .qc-blaze-option-cross {
+  flex-shrink: 0;
+  width: calc(30 * var(--u));
+  height: calc(30 * var(--u));
+  min-width: 22px;
+  min-height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  border-radius: 50%;
+  background: #dfe6e9;
+  box-shadow:
+    inset -2px -2px 3px #ffffff,
+    inset 2px 2px 4px #c4c4c4;
+  color: #c5223e;
+  font-size: 14px;
+}
+
+.quantum-player-scope .qc-blaze-lifelines {
+  display: flex;
+  justify-content: center;
+  gap: calc(60 * var(--u));
+  margin-top: calc(40 * var(--u));
+}
+
+.quantum-player-scope .qc-blaze-lifelines button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(6 * var(--u));
+  width: calc(144 * var(--u));
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: inherit !important;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.quantum-player-scope .qc-blaze-lifelines b {
+  font-family: var(--qc-fredoka) !important;
+  font-size: max(14px, calc(24 * var(--u)));
+  line-height: calc(26 * var(--u));
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.quantum-player-scope .qc-blaze-lifelines button:nth-child(1) b {
+  color: #67096e;
+}
+
+.quantum-player-scope .qc-blaze-lifelines button:nth-child(2) b {
+  color: #e01e5a;
+}
+
+.quantum-player-scope .qc-blaze-lifelines button:nth-child(3) b {
+  color: #2a7308;
+}
+
+.quantum-player-scope .qc-blaze-lifelines button:hover:not(:disabled) {
+  transform: translateY(-3px);
+}
+
+.quantum-player-scope .qc-blaze-lifelines button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.quantum-player-scope .qc-blaze-lifelines button:focus-visible {
+  outline: 3px solid #2d4cc8;
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+.quantum-player-scope .qc-blaze-life {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(144 * var(--u));
+  height: calc(100 * var(--u));
+  border-radius: 50%;
+  background: #dfe6e9;
+  box-shadow:
+    inset -4px -4px 4px #ffffff,
+    inset 4px 4px 4px #c4c4c4;
+}
+
+.quantum-player-scope .qc-blaze-life span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(116 * var(--u));
+  height: calc(74 * var(--u));
+  border-radius: 50%;
+  box-shadow:
+    -4px -4px 4px #ffffff,
+    4px 4px 4px #c4c4c4;
+  color: #ffffff;
+  font-size: max(15px, calc(28 * var(--u)));
+  font-weight: 700;
+  line-height: calc(32 * var(--u));
+  letter-spacing: 0.05em;
+}
+
+.quantum-player-scope .qc-blaze-life-blitz span {
+  background: linear-gradient(100.79deg, #67096e 27.64%, #e01e5a 58%);
+}
+
+.quantum-player-scope .qc-blaze-life-boost span {
+  background: linear-gradient(100.79deg, #67096e 27.64%, #2d4cc8 58%);
+}
+
+.quantum-player-scope .qc-blaze-life-split span {
+  background: linear-gradient(100.79deg, #52b624 27.64%, #2a7308 58%);
+}
+
+.quantum-player-scope .qc-blaze-notice {
+  margin: calc(16 * var(--u)) 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  color: #e01e5a;
+}
+
+.quantum-player-scope .qc-blaze-shell:has(.qc-blaze-board-result) .qc-blaze-logo {
+  top: calc(32 * var(--u));
+}
+
+.quantum-player-scope .qc-blaze-shell:has(.qc-blaze-board-result) .qc-blaze-question {
+  top: calc(40 * var(--u));
+}
+
+.quantum-player-scope .qc-blaze-board.qc-blaze-board-result {
+  top: calc(120 * var(--u));
+  height: calc(602 * var(--u));
+  padding: 0;
+}
+
+.quantum-player-scope .qc-blaze-board-result > * {
+  position: absolute;
+}
+
+.quantum-player-scope .qc-blaze-rail {
+  position: absolute;
+  top: calc(50 * var(--u));
+  z-index: 1;
+  width: calc(80 * var(--u));
+  height: calc(520 * var(--u));
+  display: flex;
+  flex-direction: column;
+  gap: calc(48 * var(--u));
+}
+
+.quantum-player-scope .qc-blaze-rail-left {
+  left: calc(16 * var(--u));
+}
+
+.quantum-player-scope .qc-blaze-rail-right {
+  right: calc(16 * var(--u));
+}
+
+.quantum-player-scope .qc-blaze-rail-track {
+  position: absolute;
+  left: 50%;
+  top: calc(47 * var(--u));
+  bottom: calc(47 * var(--u));
+  width: calc(32 * var(--u));
+  margin-left: calc(-16 * var(--u));
+  display: flex;
+  justify-content: center;
+  border-radius: 32px;
+  background: #dfe6e9;
+  box-shadow:
+    inset -2px -2px 2px #ffffff,
+    inset 2px 2px 2px #c4c4c4;
+}
+
+.quantum-player-scope .qc-blaze-rail-track i {
+  width: calc(18 * var(--u));
+  height: 100%;
+  border-radius: 32px;
+  background: linear-gradient(0deg, #67096e 12.5%, #e01e5a 50.96%, #248181 100%);
+  box-shadow:
+    -2px -2px 2px #ffffff,
+    2px 2px 2px #c4c4c4;
+  transform-origin: bottom center;
+  animation: qc-blaze-grow 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.quantum-player-scope .qc-blaze-rail > .qc-blaze-rail-track {
+  position: absolute;
+  left: 50%;
+  right: auto;
+  top: calc(47 * var(--u));
+  bottom: calc(47 * var(--u));
+  width: calc(32 * var(--u));
+  margin-left: calc(-16 * var(--u));
+  translate: none;
+}
+
+.quantum-player-scope .qc-blaze-shield {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: calc(80 * var(--u));
+  height: calc(94 * var(--u));
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25));
+}
+
+.quantum-player-scope .qc-blaze-shield::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(50% 0, 88% 7%, 100% 14%, 100% 56%, 88% 76%, 50% 100%, 12% 76%, 0 56%, 0 14%, 12% 7%);
+  background: var(--qc-shield);
+}
+
+.quantum-player-scope .qc-blaze-shield > * {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  translate: -50% -50%;
+}
+
+.quantum-player-scope .qc-blaze-shield svg {
+  width: calc(32 * var(--u));
+  height: calc(32 * var(--u));
+  color: #ffffff;
+  stroke-width: 1.5;
+}
+
+.quantum-player-scope .qc-blaze-shield-nova {
+  --qc-shield: linear-gradient(180deg, #67096e 0%, #248181 100%);
+}
+
+.quantum-player-scope .qc-blaze-shield-nova svg {
+  width: calc(38 * var(--u));
+  height: calc(38 * var(--u));
+  color: #0affff;
+  stroke-width: 2;
+}
+
+.quantum-player-scope .qc-blaze-shield-fire {
+  --qc-shield: linear-gradient(160.48deg, #5a2808 7.22%, #e01e5a 75.33%);
+}
+
+.quantum-player-scope .qc-blaze-shield-fire svg {
+  width: calc(38 * var(--u));
+  height: calc(38 * var(--u));
+  color: #f8bb94;
+}
+
+.quantum-player-scope .qc-blaze-shield-blue {
+  --qc-shield: linear-gradient(180deg, #2d4cc8 0%, #162562 100%);
+}
+
+.quantum-player-scope .qc-blaze-shield-orange {
+  --qc-shield: linear-gradient(180deg, #c05512 45.19%, #280e42 100%);
+}
+
+.quantum-player-scope .qc-blaze-shield-gold {
+  --qc-shield: linear-gradient(180deg, #63560b 0%, #c9ae16 100%);
+}
+
+.quantum-player-scope .qc-blaze-shield-spark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(2 * var(--u));
+  color: #ffffff;
+}
+
+.quantum-player-scope .qc-blaze-shield-spark svg {
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+  stroke-width: 1.75;
+}
+
+.quantum-player-scope .qc-blaze-shield-spark small {
+  font-size: max(10px, calc(18 * var(--u)));
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.quantum-player-scope .qc-blaze-total {
+  left: calc(56 * var(--u));
+  top: calc(485 * var(--u));
+  width: calc(212 * var(--u));
+  height: calc(78 * var(--u));
+  display: flex;
+  align-items: center;
+  padding-left: calc(9 * var(--u));
+  border-radius: 0 50px 50px 0;
+  background: #dfe6e9;
+  box-shadow:
+    inset -2px -2px 2px #ffffff,
+    inset 2px 2px 2px #c4c4c4;
+}
+
+.quantum-player-scope .qc-blaze-total-inner {
+  width: calc(198 * var(--u));
+  height: calc(66 * var(--u));
+  padding-left: calc(46 * var(--u));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 50px 50px 0;
+  background: linear-gradient(96.72deg, #000000 24.9%, #c9ae16 101.27%);
+  color: #ffffff;
+  text-align: center;
+}
+
+.quantum-player-scope .qc-blaze-total-inner strong {
+  font-size: max(12px, calc(24 * var(--u)));
+  line-height: calc(28 * var(--u));
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.quantum-player-scope .qc-blaze-total-inner span {
+  font-size: max(11px, calc(24 * var(--u)));
+  line-height: calc(28 * var(--u));
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.quantum-player-scope .qc-blaze-result-center {
+  left: 50%;
+  top: calc(144 * var(--u));
+  width: calc(682 * var(--u));
+  margin-left: calc(-341 * var(--u));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.quantum-player-scope .qc-blaze-selected {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(12 * var(--u));
+  min-width: calc(308 * var(--u));
+  height: calc(80 * var(--u));
+  padding: 0 calc(28 * var(--u));
+  border-radius: calc(16 * var(--u));
+  background: #dfe6e9;
+  box-shadow:
+    inset -4px -4px 4px #ffffff,
+    inset 4px 4px 4px #c4c4c4;
+  font-size: max(15px, calc(28 * var(--u)));
+  font-weight: 600;
+  line-height: calc(32 * var(--u));
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  color: #e01e5a;
+  animation: qc-blaze-rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.quantum-player-scope .qc-blaze-selected .qc-blaze-option-letter {
+  background: #e01e5a;
+}
+
+.quantum-player-scope .qc-blaze-fact {
+  width: 100%;
+  min-height: calc(164 * var(--u));
+  margin-top: calc(40 * var(--u));
+  overflow: hidden;
+  border-radius: calc(16 * var(--u));
+  background: #dfe6e9;
+  box-shadow:
+    -4px -4px 4px #ffffff,
+    4px 4px 4px #c4c4c4;
+  text-align: center;
+  animation: qc-blaze-rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+
+.quantum-player-scope .qc-blaze-fact > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(60 * var(--u));
+  background: linear-gradient(92.61deg, #5a2808 -4.92%, #e01e5a 96.08%);
+  color: #ffffff;
+  font-size: max(16px, calc(24 * var(--u)));
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.quantum-player-scope .qc-blaze-fact p {
+  margin: 0;
+  padding: calc(18 * var(--u)) calc(14 * var(--u));
+  font-size: max(14px, calc(24 * var(--u)));
+  line-height: calc(32 * var(--u));
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  color: #374151;
+}
+
+.quantum-player-scope .qc-blaze-result-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(16 * var(--u));
+  min-width: calc(502 * var(--u));
+  height: calc(74 * var(--u));
+  margin-top: calc(32 * var(--u));
+  font-size: max(14px, calc(26 * var(--u)));
+  padding: 0 calc(30 * var(--u));
+  border: 1.5px solid;
+  border-radius: 100px;
+  background: #dfe6e9;
+  box-shadow:
+    inset -4px -4px 4px #ffffff,
+    inset 4px 4px 4px #c4c4c4;
+  font-weight: 700;
+  line-height: calc(32 * var(--u));
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  animation: qc-blaze-rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+}
+
+.quantum-player-scope .qc-blaze-result-label svg {
+  flex: none;
+  width: calc(42 * var(--u));
+  height: calc(42 * var(--u));
+}
+
+.quantum-player-scope .qc-blaze-success {
+  border-color: #2a7308;
+  color: #2a7308;
+}
+
+.quantum-player-scope .qc-blaze-failure {
+  border-color: #c5223e;
+  color: #c5223e;
+}
+
+@keyframes qc-blaze-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.quantum-player-scope .qc-blaze-embers {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.quantum-player-scope .qc-blaze-embers span {
+  position: absolute;
+  bottom: calc(-32 * var(--u));
+  left: calc(4% + var(--i) * 8%);
+  font-size: calc(36 * var(--u));
+  line-height: 1;
+  color: #e01e5a;
+  text-shadow:
+    0 0 calc(6 * var(--u)) #ffffff,
+    0 0 calc(18 * var(--u)) rgba(224, 30, 90, 0.85);
+  opacity: 0;
+  animation: qc-blaze-rise 7s linear infinite;
+  animation-delay: calc(var(--i) * -0.63s);
+}
+
+.quantum-player-scope .qc-blaze-embers span:nth-child(3n) {
+  font-size: calc(26 * var(--u));
+  animation-duration: 9s;
+  color: #2d4cc8;
+  text-shadow:
+    0 0 calc(6 * var(--u)) #ffffff,
+    0 0 calc(18 * var(--u)) rgba(45, 76, 200, 0.85);
+}
+
+.quantum-player-scope .qc-blaze-embers span:nth-child(3n + 1) {
+  font-size: calc(46 * var(--u));
+  animation-duration: 8s;
+}
+
+.quantum-player-scope .qc-blaze-embers span:nth-child(4n) {
+  color: #67096e;
+  text-shadow:
+    0 0 calc(6 * var(--u)) #ffffff,
+    0 0 calc(18 * var(--u)) rgba(103, 9, 110, 0.85);
+}
+
+@keyframes qc-blaze-rise {
+  0% {
+    translate: 0 0;
+    scale: 0.6;
+    opacity: 0;
+  }
+  10%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    translate: calc(30 * var(--u)) calc(-900 * var(--u));
+    scale: 1.1;
+    opacity: 0;
+  }
+}
+
+@keyframes qc-blaze-rise-in {
+  from {
+    translate: 0 calc(20 * var(--u));
+    opacity: 0;
+  }
+  to {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+
+@keyframes qc-blaze-sheen {
+  0% {
+    transform: translateX(-120%);
+  }
+  60%,
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quantum-player-scope .qc-blaze-option,
+  .quantum-player-scope .qc-blaze-lifelines button {
+    transition: none;
+  }
+
+  .quantum-player-scope .qc-blaze-embers span,
+  .quantum-player-scope .qc-blaze-option,
+  .quantum-player-scope .qc-blaze-xp-inner::after,
+  .quantum-player-scope .qc-blaze-rail-track i,
+  .quantum-player-scope .qc-blaze-selected,
+  .quantum-player-scope .qc-blaze-fact,
+  .quantum-player-scope .qc-blaze-result-label {
+    animation: none;
+  }
+}

@@ -1,0 +1,96 @@
+/* Quantum Champs Review & Publish — scoped neumorphic design */
+.quantum-creator-scope .qrv-shell{--bg:#dfe6e9;--ink:#374151;--raised:-3px -3px 5px #fff,3px 3px 5px #c4c4c4;--inset:inset 2px 2px 3px #c4c4c4,inset -2px -2px 3px #fff;width:100%;height:100dvh;background:var(--bg);color:var(--ink);font:400 14px/1.5 'Segoe UI',Arial,sans-serif !important}
+.quantum-creator-scope .qrv-shell,.quantum-creator-scope .qrv-shell *,.quantum-creator-scope .qrv-shell *::before,.quantum-creator-scope .qrv-shell *::after{box-sizing:border-box}
+.quantum-creator-scope .qrv-shell button{font:inherit !important;cursor:pointer;color:inherit}
+.quantum-creator-scope .qrv-shell button:focus-visible{outline:2px solid #2d4cc8;outline-offset:2px}
+.quantum-creator-scope .qrv-app{display:flex;height:100dvh;min-width:0;overflow:hidden}
+.quantum-creator-scope .qrv-main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.quantum-creator-scope .qrv-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden}
+.quantum-creator-scope .qrv-page{width:100%;max-width:1650px;margin:0 auto;padding:18px 20px 30px}
+.quantum-creator-scope .qrv-breadcrumb{display:flex;align-items:center;gap:10px;min-height:30px;margin:0 0 20px;font-size:14px}
+.quantum-creator-scope .qrv-breadcrumb button{border:0;background:none;padding:0}
+.quantum-creator-scope .qrv-breadcrumb button:last-child{font-weight:700;color:#2d4cc8}
+.quantum-creator-scope .qrv-back-icon{display:grid!important;place-items:center;width:25px;height:25px;border-radius:5px!important;background:#2d4cc8!important;color:#fff!important;box-shadow:var(--raised)}
+.quantum-creator-scope .qrv-stepper{display:flex;align-items:center;width:min(100%,1060px);margin:0 0 32px;padding:0 1px}
+.quantum-creator-scope .qrv-step{position:relative;display:flex;align-items:center;justify-content:center;gap:12px;flex:1;min-width:0;height:46px;margin-right:-10px;padding:0 16px 0 22px;clip-path:polygon(0 0,calc(100% - 19px) 0,100% 50%,calc(100% - 19px) 100%,0 100%,19px 50%);background:linear-gradient(90deg,#8cb78b,#4d8b4c);color:#347c28;font-size:14px;font-weight:600}
+.quantum-creator-scope .qrv-step::before{content:"";position:absolute;inset:1px;clip-path:inherit;background:var(--bg);z-index:-1}
+.quantum-creator-scope .qrv-step:first-child{clip-path:polygon(0 0,calc(100% - 19px) 0,100% 50%,calc(100% - 19px) 100%,0 100%);padding-left:10px}
+.quantum-creator-scope .qrv-step.is-current{background:linear-gradient(105deg,#496af4,#5376ed);color:#244bca}
+.quantum-creator-scope .qrv-step>span{display:grid;place-items:center;flex:none;width:21px;height:21px;border-radius:50%;background:#edf1f3;box-shadow:var(--inset);font-size:11px}
+.quantum-creator-scope .qrv-intro{margin:0 0 26px}.quantum-creator-scope .qrv-intro h1{margin:0 0 4px;font-size:20px;line-height:27px;font-weight:700}.quantum-creator-scope .qrv-intro p{margin:0;font-size:14px}
+.quantum-creator-scope .qrv-section{margin:0 0 19px;padding:0 13px 15px;border-radius:12px;background:var(--bg);box-shadow:-4px -4px 6px #fff,4px 4px 7px #c4c4c4;overflow:hidden}
+.quantum-creator-scope .qrv-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:55px;margin:0 -13px 16px;padding:8px 15px;background:var(--bg);box-shadow:var(--raised)}
+.quantum-creator-scope .qrv-section-heading>div{display:flex;align-items:center;gap:11px;min-width:0}.quantum-creator-scope .qrv-section-heading b{font-size:15px;font-weight:700}
+.quantum-creator-scope .qrv-heading-icon,.quantum-creator-scope .qrv-panel-icon{display:inline-grid;place-items:center;flex:none;width:32px;height:32px;border-radius:50%;background:var(--bg);box-shadow:var(--raised);color:#78639b}
+.quantum-creator-scope .qrv-heading-icon>span{font-size:13px;font-weight:700}
+.quantum-creator-scope .qrv-edit{display:inline-flex;align-items:center;gap:6px;flex:none;padding:5px 10px;border:0;border-radius:4px;background:var(--bg);box-shadow:var(--raised);font-size:12px!important;color:#2d4cc8!important}
+.quantum-creator-scope .qrv-section-body{padding:0 3px 3px;min-width:0}
+.quantum-creator-scope .qrv-field-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px 17px}
+.quantum-creator-scope .qrv-field-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.quantum-creator-scope .qrv-field{min-width:0;display:flex;flex-direction:column;gap:6px}.quantum-creator-scope .qrv-field.wide{grid-column:1/-1}.quantum-creator-scope .qrv-field.span2{grid-column:span 2}
+.quantum-creator-scope .qrv-field label,.quantum-creator-scope .qrv-sub-label{font-size:12px;font-weight:600;color:#374151}
+.quantum-creator-scope .qrv-field>div{display:flex;align-items:center;min-height:37px;padding:7px 12px;border:0;border-radius:4px;background:var(--bg);box-shadow:var(--inset);font-size:13px;overflow-wrap:anywhere}
+.quantum-creator-scope .qrv-field .qrv-linkish{color:#2d4cc8;text-decoration:underline}
+.quantum-creator-scope .qrv-sub-label{margin:10px 0 8px}
+.quantum-creator-scope .qrv-mode{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;border-radius:7px;box-shadow:var(--inset);margin-bottom:15px}
+.quantum-creator-scope .qrv-mode>span{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;padding:9px 11px;border-radius:5px;box-shadow:var(--raised);font-size:13px}
+.quantum-creator-scope .qrv-grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.quantum-creator-scope .qrv-panel{min-width:0;padding:14px 14px 16px;border:1px solid #b5bec3;border-radius:17px;background:var(--bg)}
+.quantum-creator-scope .qrv-panel-title{display:flex;align-items:center;gap:9px;margin-bottom:14px}.quantum-creator-scope .qrv-panel-icon{width:32px;height:32px;color:#53825e}.quantum-creator-scope .qrv-panel-title b{font-size:13px;font-weight:650;text-transform:uppercase}
+.quantum-creator-scope .qrv-panel-body{display:flex;flex-direction:column;gap:10px;min-width:0}.quantum-creator-scope .qrv-panel-body .qrv-field-grid{gap:10px}
+.quantum-creator-scope .qrv-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:40px;padding:7px 12px;background:var(--bg);border-radius:4px;box-shadow:var(--inset);font-size:12px}
+.quantum-creator-scope .qrv-row>span{min-width:0;flex:1}.quantum-creator-scope .qrv-row strong{font-size:12px;font-weight:600;text-align:right;overflow-wrap:anywhere}
+.quantum-creator-scope .qrv-spaced{margin-top:15px}
+.quantum-creator-scope .qrv-badge{display:inline-flex;align-items:center;justify-content:center;min-width:44px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;box-shadow:var(--raised);white-space:nowrap}
+.quantum-creator-scope .qrv-badge.qrv-toggle{min-width:41px;color:#fff;background:linear-gradient(105deg,#2d4cc8,#a121a4,#e01e5a);box-shadow:2px 2px 3px #c4c4c4,-2px -2px 3px #fff}
+.quantum-creator-scope .qrv-checks{display:flex;flex-direction:column;gap:9px;margin:7px 0}.quantum-creator-scope .qrv-checks>span{display:flex;align-items:center;gap:9px;font-size:12px}.quantum-creator-scope .qrv-checks svg{color:#2e921e;fill:#2e921e;stroke:#fff}
+.quantum-creator-scope .qrv-learner{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:80px;margin-top:19px;padding:12px 16px;border-radius:10px;background:var(--bg);box-shadow:var(--raised)}
+.quantum-creator-scope .qrv-learner-copy{display:flex;align-items:center;gap:12px}.quantum-creator-scope .qrv-learner-copy b{display:block;font-size:14px}.quantum-creator-scope .qrv-learner-copy small{display:block;margin-top:5px;font-size:12px}
+.quantum-creator-scope .qrv-gradient-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:8px 16px;border:1px solid transparent;border-radius:25px;background:linear-gradient(var(--bg),var(--bg)) padding-box,linear-gradient(110deg,#3559ff,#e01e5a) border-box;box-shadow:var(--raised);color:#7231b5!important;font-weight:700!important;white-space:nowrap}
+.quantum-creator-scope .qrv-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:23px 0 0}.quantum-creator-scope .qrv-footer button{min-width:110px;min-height:42px;padding:7px 20px;border:0;border-radius:24px;background:var(--bg);box-shadow:var(--raised);font-weight:700}.quantum-creator-scope .qrv-footer .qrv-publish{color:#267b16}
+.quantum-creator-scope .qrv-modal-backdrop{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px;background:rgba(33,44,57,.5)}.quantum-creator-scope .qrv-modal{position:relative;width:min(100%,450px);padding:32px;border-radius:18px;background:var(--bg);box-shadow:var(--raised);text-align:center}.quantum-creator-scope .qrv-modal h2{font-size:21px}.quantum-creator-scope .qrv-modal p{font-size:14px}.quantum-creator-scope .qrv-close{position:absolute;right:16px;top:12px;border:0;background:transparent;font-size:20px!important}
+@media(max-width:1000px){.quantum-creator-scope .qrv-page{padding:16px 12px 25px}.quantum-creator-scope .qrv-step{font-size:12px;gap:6px}.quantum-creator-scope .qrv-panel{padding:12px}.quantum-creator-scope .qrv-field-grid{gap:12px}}
+@media(max-width:720px){.quantum-creator-scope .qrv-grid2{grid-template-columns:1fr}.quantum-creator-scope .qrv-stepper{overflow-x:auto;padding-bottom:5px}.quantum-creator-scope .qrv-step{flex:0 0 125px}.quantum-creator-scope .qrv-field-grid,.quantum-creator-scope .qrv-field-grid.three{grid-template-columns:repeat(2,minmax(0,1fr))}.quantum-creator-scope .qrv-field.span2{grid-column:1/-1}.quantum-creator-scope .qrv-mode{grid-template-columns:1fr}.quantum-creator-scope .qrv-learner{align-items:flex-start;flex-direction:column}}
+@media(max-width:440px){.quantum-creator-scope .qrv-field-grid,.quantum-creator-scope .qrv-field-grid.three{grid-template-columns:1fr}.quantum-creator-scope .qrv-section-heading b{font-size:13px}.quantum-creator-scope .qrv-panel{border-radius:12px}.quantum-creator-scope .qrv-intro h1{font-size:18px}}
+
+/* Review reference alignment — section-scoped, retaining existing app navigation and behavior. */
+.quantum-creator-scope .qrv-shell{--raised:-3px -3px 5px #fff,3px 3px 5px #c4c4c4;--inset:inset 2px 2px 3px #c4c4c4,inset -2px -2px 3px #fff;font-family:'Segoe UI',Arial,sans-serif !important;font-size:14px}
+.quantum-creator-scope .qrv-section{margin-bottom:22px;padding:0 20px 20px;border-radius:15px;box-shadow:-4px -4px 6px #fff,4px 4px 7px #c4c4c4}
+.quantum-creator-scope .qrv-section-heading{min-height:65px;margin:0 -20px 22px;padding:12px 20px 12px 25px;box-shadow:0 3px 4px #b9c0c3,-2px -2px 4px #fff}
+.quantum-creator-scope .qrv-section-heading b{font-size:16px;font-weight:600;color:#101419}
+.quantum-creator-scope .qrv-section-1 .qrv-heading-icon,.quantum-creator-scope .qrv-section-2 .qrv-heading-icon,.quantum-creator-scope .qrv-section-3 .qrv-heading-icon,.quantum-creator-scope .qrv-section-4 .qrv-heading-icon,.quantum-creator-scope .qrv-section-5 .qrv-heading-icon{display:none}
+.quantum-creator-scope .qrv-edit{font-size:14px!important;padding:6px 12px;border-radius:4px;box-shadow:-2px -2px 3px #fff,2px 2px 4px #c4c4c4}
+.quantum-creator-scope .qrv-section-body{padding:0 2px 3px}
+.quantum-creator-scope .qrv-field-grid,.quantum-creator-scope .qrv-field-grid.three{gap:22px 25px}
+.quantum-creator-scope .qrv-field{gap:10px}
+.quantum-creator-scope .qrv-field label,.quantum-creator-scope .qrv-sub-label{font-size:14px;font-weight:500;line-height:20px}
+.quantum-creator-scope .qrv-field>div{min-height:46px;padding:10px 18px;border-radius:5px;font-size:14px;line-height:23px;box-shadow:inset 2px 2px 3px #c4c4c4,inset -2px -2px 3px #fff}
+.quantum-creator-scope .qrv-sub-label{margin:14px 0 12px}
+.quantum-creator-scope .qrv-mode{padding:18px;gap:22px;margin-bottom:24px;border-radius:6px}
+.quantum-creator-scope .qrv-mode>span{min-height:44px;padding:9px 16px;font-size:14px;box-shadow:var(--inset);border-radius:5px}
+.quantum-creator-scope .qrv-grid2{gap:20px}
+.quantum-creator-scope .qrv-panel{padding:17px 19px 19px;border-radius:19px;border:1px solid #b1bbc0}
+.quantum-creator-scope .qrv-panel-title{gap:13px;margin-bottom:17px;min-height:35px}
+.quantum-creator-scope .qrv-panel-icon{width:35px;height:35px}
+.quantum-creator-scope .qrv-panel-title b{font-size:14px;font-weight:500}
+.quantum-creator-scope .qrv-panel-body{gap:13px}
+.quantum-creator-scope .qrv-panel-body .qrv-field-grid{gap:17px}
+.quantum-creator-scope .qrv-row{min-height:47px;padding:10px 18px;font-size:14px;border-radius:5px;box-shadow:var(--inset)}
+.quantum-creator-scope .qrv-row strong{font-size:14px;font-weight:500}
+.quantum-creator-scope .qrv-spaced{margin-top:20px}
+.quantum-creator-scope .qrv-badge.qrv-toggle{position:relative;min-width:48px;min-height:24px;padding:3px 10px;border:4px solid #dfe6e9;border-radius:30px;background:#dfe6e9;color:#8b148e;font-size:11px;font-weight:600;box-shadow:-2px -2px 4px #fff,2px 2px 4px #b8c1c5,inset 1px 1px 3px #bfc7ca}
+.quantum-creator-scope .qrv-badge.qrv-toggle::after{content:none}
+.quantum-creator-scope .qrv-section-3 .qrv-panel,.quantum-creator-scope .qrv-section-4 .qrv-panel{padding:19px 20px}
+.quantum-creator-scope .qrv-section-3 .qrv-panel-title,.quantum-creator-scope .qrv-section-4 .qrv-panel-title{margin-bottom:18px}
+.quantum-creator-scope .qrv-section-4 .qrv-panel-body>.qrv-row{min-height:49px}
+.quantum-creator-scope .qrv-section-4 .qrv-panel:first-child .qrv-row{min-height:37px;margin:0 0 4px;padding:6px 16px}
+.quantum-creator-scope .qrv-section-4 .qrv-panel:first-child .qrv-row strong{min-width:58%;text-align:left;box-shadow:var(--inset);padding:5px 12px}
+.quantum-creator-scope .qrv-section-7 .qrv-panel{padding:17px 18px}
+.quantum-creator-scope .qrv-section-7 .qrv-grid2{row-gap:26px}
+.quantum-creator-scope .qrv-section-8 .qrv-results-inset{border:1px solid #b4bec2;border-radius:18px;padding:18px}
+.quantum-creator-scope .qrv-section-8 .qrv-grid2{gap:14px 25px}
+.quantum-creator-scope .qrv-section-8 .qrv-grid2>div{display:flex;flex-direction:column;gap:13px}
+.quantum-creator-scope .qrv-section-8 .qrv-row{min-height:47px}
+.quantum-creator-scope .qrv-section-8 .qrv-row strong:not(:has(.qrv-badge)){padding:5px 12px;border-radius:4px;box-shadow:var(--inset)}
+@media(max-width:1000px){.quantum-creator-scope .qrv-section{padding:0 13px 15px}.quantum-creator-scope .qrv-section-heading{margin:0 -13px 18px;padding:10px 15px}.quantum-creator-scope .qrv-field-grid,.quantum-creator-scope .qrv-field-grid.three{gap:16px}.quantum-creator-scope .qrv-panel{padding:13px}.quantum-creator-scope .qrv-field>div{font-size:13px}.quantum-creator-scope .qrv-row{font-size:12px;padding:8px 10px}.quantum-creator-scope .qrv-row strong{font-size:12px}}
+@media(max-width:720px){.quantum-creator-scope .qrv-section-8 .qrv-grid2{grid-template-columns:1fr}.quantum-creator-scope .qrv-section-8 .qrv-results-inset{padding:10px}.quantum-creator-scope .qrv-section-heading b{font-size:14px}}

@@ -1,0 +1,429 @@
+.quantum-player-scope .qc-ai-root,
+.quantum-player-scope .qc-ai-root *,
+.quantum-player-scope .qc-ai-root *::before,
+.quantum-player-scope .qc-ai-root *::after {
+  box-sizing: border-box;
+}
+
+.quantum-player-scope .qc-ai-root {
+  --u: var(--qc-u);
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+  background: #dfe6e9;
+  font-family: "Segoe UI", Arial, sans-serif !important;
+  color: #374151;
+}
+
+.quantum-player-scope .qc-ai-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.quantum-player-scope .qc-ai-container {
+  position: absolute;
+  inset: calc(32 * var(--u));
+  overflow: hidden;
+  background: linear-gradient(180deg, #b2def1 0%, #efdde3 50%, #dfe6e9 100%);
+  box-shadow:
+    -4px -4px 4px #ffffff,
+    4px 4px 4px #c4c4c4;
+  border-radius: calc(16 * var(--u));
+}
+
+.quantum-player-scope .qc-ai-logo {
+  position: absolute;
+  z-index: 1;
+  top: calc(32 * var(--u));
+  left: calc(32 * var(--u));
+  width: calc(70 * var(--u));
+  height: calc(95 * var(--u));
+}
+
+.quantum-player-scope .qc-ai-logo-crown {
+  position: absolute;
+  left: 10%;
+  top: 0;
+  width: 82%;
+  height: 46%;
+  filter: drop-shadow(0 1px 1px rgba(192, 85, 18, 0.35));
+}
+
+.quantum-player-scope .qc-ai-logo-shield {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 41.38%;
+  bottom: 0.45%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: calc(10 * var(--u));
+  border-radius: calc(6 * var(--u)) calc(6 * var(--u)) 0 0;
+  clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%);
+  background: conic-gradient(from 0deg at 50% 50%, rgba(255, 255, 255, 0.08) 0deg 90deg, rgba(0, 0, 0, 0.14) 90deg 180deg, rgba(255, 255, 255, 0.08) 180deg 270deg, rgba(0, 0, 0, 0.14) 270deg 360deg), linear-gradient(128.79deg, #67096e -1.23%, #e01e5a 86.72%);
+  color: #ffffff;
+  font-size: calc(11.5 * var(--u));
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.25);
+}
+
+.quantum-player-scope .qc-ai-column {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: calc(50 * var(--u));
+  width: calc(1100 * var(--u));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  translate: -50% 0;
+}
+
+.quantum-player-scope .qc-ai-title-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(470 * var(--u));
+  height: calc(80 * var(--u));
+  border-radius: 50px;
+  background: #dfe6e9;
+  box-shadow:
+    inset -4px -4px 4px #ffffff,
+    inset 4px 4px 8px #c4c4c4;
+}
+
+.quantum-player-scope .qc-ai-title {
+  margin: 0;
+  padding: 0 0.06em;
+  font-size: calc(32 * var(--u));
+  font-weight: 700;
+  line-height: calc(40 * var(--u));
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  background: linear-gradient(90deg, #2d4cc8 0%, #e01e5a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25));
+}
+
+.quantum-player-scope .qc-ai-card {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: calc(430 * var(--u));
+  margin-top: calc(32 * var(--u));
+  overflow: hidden;
+  border-radius: calc(60 * var(--u));
+  background: #dfe6e9;
+  box-shadow:
+    -4px -4px 4px #ffffff,
+    4px 4px 4px #c4c4c4;
+}
+
+.quantum-player-scope .qc-ai-card::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  padding: 3px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2d4cc8 0%, #67096e 50%, #e01e5a 100%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  clip-path: inset(0 0 calc(100% - 60 * var(--u)) 0);
+  pointer-events: none;
+}
+
+.quantum-player-scope .qc-ai-card::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='29' height='29' viewBox='0 0 29 29'%3E%3Cpath d='M14.5 4L17.5 11.5L25 14.5L17.5 17.5L14.5 25L11.5 17.5L4 14.5L11.5 11.5Z' fill='%23ffffff'/%3E%3C/svg%3E");
+  background-size: calc(48 * var(--u)) calc(48 * var(--u));
+  pointer-events: none;
+}
+
+.quantum-player-scope .qc-ai-card-content {
+  position: relative;
+  z-index: 1;
+  padding: calc(48 * var(--u)) calc(64 * var(--u)) 0;
+}
+
+.quantum-player-scope .qc-ai-card-heading {
+  margin: 0;
+  font-size: calc(32 * var(--u));
+  font-weight: 700;
+  line-height: calc(40 * var(--u));
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  color: #374151;
+}
+
+.quantum-player-scope .qc-ai-points {
+  display: flex;
+  flex-direction: column;
+  gap: calc(16 * var(--u));
+  margin-top: calc(28 * var(--u));
+  min-height: calc(36 * var(--u));
+}
+
+.quantum-player-scope .qc-ai-point {
+  display: flex;
+  align-items: center;
+  gap: calc(21 * var(--u));
+  min-height: calc(28 * var(--u));
+}
+
+.quantum-player-scope .qc-ai-point p {
+  margin: 0;
+  font-size: calc(26 * var(--u));
+  line-height: calc(36 * var(--u));
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: #374151;
+}
+
+.quantum-player-scope .qc-ai-check {
+  flex: none;
+  width: max(22px, calc(36 * var(--u)));
+  height: max(22px, calc(36 * var(--u)));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #dfe6e9;
+  box-shadow:
+    4px 4px 4px #c4c4c4,
+    -4px -4px 4px #ffffff;
+}
+
+.quantum-player-scope .qc-ai-check svg {
+  display: block;
+  width: 72%;
+  height: 72%;
+}
+
+.quantum-player-scope .qc-ai-highlight {
+  width: max-content;
+  max-width: 100%;
+  margin: calc(32 * var(--u)) auto 0;
+  padding: 0 0.06em;
+  font-size: calc(32 * var(--u));
+  font-weight: 700;
+  line-height: calc(40 * var(--u));
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  text-align: center;
+  background: linear-gradient(90deg, #e01e5a 18.75%, #67096e 89.42%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.quantum-player-scope .qc-ai-description {
+  margin: calc(16 * var(--u)) 0 0;
+  font-size: calc(22 * var(--u));
+  line-height: calc(32 * var(--u));
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-align: center;
+  color: #374151;
+}
+
+.quantum-player-scope .qc-ai-next {
+  position: relative;
+  overflow: hidden;
+  width: calc(220 * var(--u));
+  height: calc(76 * var(--u));
+  border-radius: 100px;
+  margin-top: calc(50 * var(--u));
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(#dfe6e9, #dfe6e9) padding-box,
+    linear-gradient(90deg, #2d4cc8, #e01e5a) border-box;
+  box-shadow:
+    -4px -4px 4px #ffffff,
+    4px 4px 8px #c4c4c4;
+  font-family: inherit !important;
+  cursor: pointer;
+  transition:
+    transform 0.35s ease-in-out,
+    box-shadow 0.35s ease-in-out;
+}
+
+.quantum-player-scope .qc-ai-next span {
+  font-size: calc(28 * var(--u));
+  line-height: calc(36 * var(--u));
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: linear-gradient(90deg, #2d4cc8 0%, #e01e5a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.quantum-player-scope .qc-ai-next:hover {
+  transform: scale(1.06);
+  box-shadow:
+    -5px -5px 10px #ffffff,
+    5px 5px 10px #c4c4c4;
+}
+
+.quantum-player-scope .qc-ai-next:active {
+  transform: scale(0.96);
+  box-shadow:
+    inset -3px -3px 6px #ffffff,
+    inset 3px 3px 6px #c4c4c4;
+}
+
+.quantum-player-scope .qc-ai-next:focus-visible {
+  outline: 3px solid #2d4cc8;
+  outline-offset: 4px;
+}
+
+.quantum-player-scope .qc-ai-next::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.8) 50%, transparent 70%);
+  transform: translateX(-120%);
+  pointer-events: none;
+  animation: qc-ai-sheen 3s ease-in-out infinite;
+}
+
+.quantum-player-scope .qc-ai-point {
+  animation: qc-ai-slide 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.quantum-player-scope .qc-ai-point:nth-child(1) {
+  animation-delay: 0.2s;
+}
+
+.quantum-player-scope .qc-ai-point:nth-child(2) {
+  animation-delay: 0.45s;
+}
+
+.quantum-player-scope .qc-ai-point:nth-child(3) {
+  animation-delay: 0.7s;
+}
+
+.quantum-player-scope .qc-ai-embers {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.quantum-player-scope .qc-ai-embers span {
+  position: absolute;
+  bottom: calc(-32 * var(--u));
+  left: calc(4% + var(--i) * 8%);
+  font-size: calc(36 * var(--u));
+  line-height: 1;
+  color: #e01e5a;
+  text-shadow:
+    0 0 calc(6 * var(--u)) #ffffff,
+    0 0 calc(18 * var(--u)) rgba(224, 30, 90, 0.85);
+  opacity: 0;
+  animation: qc-ai-rise 7s linear infinite;
+  animation-delay: calc(var(--i) * -0.63s);
+}
+
+.quantum-player-scope .qc-ai-embers span:nth-child(3n) {
+  font-size: calc(26 * var(--u));
+  animation-duration: 9s;
+  color: #2d4cc8;
+  text-shadow:
+    0 0 calc(6 * var(--u)) #ffffff,
+    0 0 calc(18 * var(--u)) rgba(45, 76, 200, 0.85);
+}
+
+.quantum-player-scope .qc-ai-embers span:nth-child(3n + 1) {
+  font-size: calc(46 * var(--u));
+  animation-duration: 8s;
+}
+
+.quantum-player-scope .qc-ai-embers span:nth-child(4n) {
+  color: #67096e;
+  text-shadow:
+    0 0 calc(6 * var(--u)) #ffffff,
+    0 0 calc(18 * var(--u)) rgba(103, 9, 110, 0.85);
+}
+
+@keyframes qc-ai-rise {
+  0% {
+    translate: 0 0;
+    scale: 0.6;
+    opacity: 0;
+  }
+  10%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    translate: calc(30 * var(--u)) calc(-900 * var(--u));
+    scale: 1.1;
+    opacity: 0;
+  }
+}
+
+@keyframes qc-ai-sheen {
+  0% {
+    transform: translateX(-120%);
+  }
+  60%,
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes qc-ai-slide {
+  from {
+    translate: calc(-40 * var(--u)) 0;
+    opacity: 0;
+  }
+  to {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quantum-player-scope .qc-ai-next {
+    transition: none;
+  }
+
+  .quantum-player-scope .qc-ai-embers span,
+  .quantum-player-scope .qc-ai-point,
+  .quantum-player-scope .qc-ai-next::after {
+    animation: none;
+  }
+}

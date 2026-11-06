@@ -1,0 +1,1132 @@
+/* MCQ Content — standalone Step 3; uses existing Header and Sidebar components. */
+.quantum-creator-scope .mcqcAppShell { width: 100%; min-width: 0; height: 100dvh; background: #DFE6E9; color: #374151; font-family: "Segoe UI", Arial, sans-serif !important; }
+.quantum-creator-scope .mcqcAppShell *, .quantum-creator-scope .mcqcAppShell *::before, .quantum-creator-scope .mcqcAppShell *::after { box-sizing: border-box; }
+.quantum-creator-scope .mcqcLayout { display: flex; height: 100dvh; min-width: 0; overflow: hidden; }
+.quantum-creator-scope .mcqcMainContent { flex: 1 1 auto; display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
+.quantum-creator-scope .mcqcHeader { flex: 0 0 auto; }
+.quantum-creator-scope .mcqcScrollArea { flex: 1 1 auto; min-height: 0; min-width: 0; overflow-x: hidden; overflow-y: auto; }
+.quantum-creator-scope .mcqcPageContent { width: 100%; min-width: 0; padding: 22px 24px 32px; }
+.quantum-creator-scope .mcqcIcon { display: block; flex: 0 0 auto; object-fit: contain; }
+.quantum-creator-scope .mcqcBreadcrumb { min-height: 30px; display: flex; align-items: center; gap: 14px; margin-bottom: 24px; font-size: 16px; line-height: 24px; letter-spacing: .02em; }
+.quantum-creator-scope .mcqcBreadcrumb a { text-decoration: none; color: #2F3547; }
+.quantum-creator-scope .mcqcBreadcrumb .mcqcBreadcrumbCurrent { color: #2D4CC8; font-weight: 700; }
+.quantum-creator-scope .mcqcWizard { display: flex; width: min(100%, 900px); height: 50px; margin: 0 0 36px; padding: 0; list-style: none; isolation: isolate; }
+.quantum-creator-scope .mcqcWizardStep { --tip: 23px; position: relative; flex: 1 1 0; display: flex; align-items: center; justify-content: center; min-width: 0; height: 50px; gap: 10px; margin-left: calc(-1 * var(--tip)); padding: 0 10px 0 26px; clip-path: polygon(0 0,calc(100% - var(--tip)) 0,100% 50%,calc(100% - var(--tip)) 100%,0 100%,var(--tip) 50%); background: #c5cdd1; color: #374151; font-size: 14px; font-weight: 600; letter-spacing: .03em; white-space: nowrap; }
+.quantum-creator-scope .mcqcWizardStep::before { content: ""; position: absolute; inset: 1px; background: #DFE6E9; box-shadow: inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4; clip-path: inherit; z-index: 0; }
+.quantum-creator-scope .mcqcWizardStep > span { z-index: 1; position: relative; }
+.quantum-creator-scope .mcqcWizardStep:first-child { margin-left: 0; padding-left: 8px; clip-path: polygon(0 0,calc(100% - var(--tip)) 0,100% 50%,calc(100% - var(--tip)) 100%,0 100%); }
+.quantum-creator-scope .mcqcWizardStep:nth-child(1) { z-index: 5; }.quantum-creator-scope .mcqcWizardStep:nth-child(2) { z-index: 4; }.quantum-creator-scope .mcqcWizardStep:nth-child(3) { z-index: 3; }.quantum-creator-scope .mcqcWizardStep:nth-child(4) { z-index: 2; }.quantum-creator-scope .mcqcWizardStep:nth-child(5) { z-index: 1; }
+.quantum-creator-scope .mcqcWizardDone { background: #2A7308; color: #2A7308; }.quantum-creator-scope .mcqcWizardActive { background: #2D4CC8; color: #2D4CC8; font-weight: 700; }
+.quantum-creator-scope .mcqcWizardNumber { display: grid; place-items: center; width: 21px; height: 21px; flex: 0 0 21px; border-radius: 50%; background: #DFE6E9; box-shadow: inset -2px -2px 2px #fff,inset 2px 2px 2px rgba(196,196,196,.8); }
+.quantum-creator-scope .mcqcWizardNumber > span { display: grid; place-items: center; width: 13px; height: 13px; border-radius: 50%; background: #DFE6E9; box-shadow: 2px 2px 2px #C6C6C9,-2px -2px 2px #fff; font-size: 12px; color: #374151; }
+.quantum-creator-scope .mcqcWizardDone .mcqcWizardNumber > span { color: #2A7308; }.quantum-creator-scope .mcqcWizardActive .mcqcWizardNumber > span { color: #2D4CC8; }
+.quantum-creator-scope .mcqcPageTitle { margin: 0 0 34px; }.quantum-creator-scope .mcqcPageTitle h1 { margin: 0 0 8px; font-size: 20px; line-height: 28px; font-weight: 700; letter-spacing: .02em; }.quantum-creator-scope .mcqcPageTitle p { margin: 0; font-size: 16px; line-height: 24px; letter-spacing: .03em; }
+.quantum-creator-scope .mcqcColumns { display: grid; grid-template-columns: minmax(0,1fr) minmax(260px,304px); align-items: stretch; gap: 24px; min-width: 0; }.quantum-creator-scope .mcqcLeftColumn { display: flex; flex-direction: column; gap: 32px; min-width: 0; }
+.quantum-creator-scope .mcqcQuestionsPanel { min-height: 656px; min-width: 0; padding: 24px; border-radius: 16px; background: #DFE6E9; box-shadow: -4px -4px 4px #fff,4px 4px 4px #C4C4C4; }.quantum-creator-scope .mcqcQuestionsPanel h2 { margin: 0; font-size: 20px; line-height: 28px; font-weight: 700; }
+.quantum-creator-scope .mcqcEmptyState { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 555px; width: 100%; text-align: center; }.quantum-creator-scope .mcqcEmptyIcon { margin: 5px 0 30px; width: min(129px,30vw); height: auto; aspect-ratio: 1; filter: drop-shadow(0 4px 14px rgba(0,0,0,.2)); }
+.quantum-creator-scope .mcqcEmptyState h3 { margin: 0 0 14px; font-size: clamp(23px,2.5vw,32px); font-weight: 700; line-height: 1.25; color: #2D4CC8; letter-spacing: .02em; }.quantum-creator-scope .mcqcEmptyState p { margin: 0 0 42px; font-size: clamp(17px,1.8vw,24px); line-height: 32px; }
+.quantum-creator-scope .mcqcActions { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 24px; width: 100%; margin-bottom: 32px; }.quantum-creator-scope .mcqcActions button,.quantum-creator-scope .mcqcCreateButton,.quantum-creator-scope .mcqcBack,.quantum-creator-scope .mcqcConfigure { display: inline-flex; justify-content: center; align-items: center; gap: 10px; min-height: 50px; padding: 10px 20px; border: 0; border-radius: 36px; background: #DFE6E9; box-shadow: -4px -4px 8px #fff,4px 4px 8px rgba(196,196,196,.8); color: #374151; font: 600 16px/24px "Segoe UI",Arial,sans-serif !important; white-space: nowrap; cursor: pointer; transition: box-shadow .18s ease; }.quantum-creator-scope .mcqcActions button:active,.quantum-creator-scope .mcqcCreateButton:active,.quantum-creator-scope .mcqcBack:active,.quantum-creator-scope .mcqcConfigure:active { box-shadow: inset -3px -3px 4px #fff,inset 3px 3px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcBack { width: 150px; min-height: 48px; border-radius: 24px; font-size: 18px; font-weight: 700; }
+.quantum-creator-scope .mcqcSummaryPanel { display: flex; flex-direction: column; align-self: stretch; gap: 22px; min-width: 0; padding: 16px 14px; border-radius: 16px; background: #DFE6E9; box-shadow: -4px -4px 4px #fff,4px 4px 4px #C4C4C4; }.quantum-creator-scope .mcqcSummarySection,.quantum-creator-scope .mcqcSettingsSection { border: 1px solid #ced4d8; border-radius: 5px; padding: 16px 12px; }.quantum-creator-scope .mcqcSummaryPanel h2 { margin: 0 0 18px; font-size: 16px; line-height: 24px; font-weight: 600; }
+.quantum-creator-scope .mcqcSummaryRow,.quantum-creator-scope .mcqcSettingRow { display: flex; gap: 12px; min-width: 0; align-items: center; min-height: 42px; color: #374151; font-size: 14px; line-height: 20px; }.quantum-creator-scope .mcqcSummaryRow span,.quantum-creator-scope .mcqcSettingRow > span { flex: 1 1 auto; min-width: 0; }.quantum-creator-scope .mcqcSummaryRow strong { font-size: 14px; font-weight: 600; white-space: nowrap; }
+.quantum-creator-scope .mcqcSettingsSection { display: flex; flex-direction: column; gap: 8px; }.quantum-creator-scope .mcqcSettingsSection h2 { margin-bottom: 8px; }.quantum-creator-scope .mcqcSettingRow { min-height: 44px; gap: 10px; }
+.quantum-creator-scope .mcqcSwitch { position: relative; width: 61px; height: 28px; flex: 0 0 61px; border: 0; border-radius: 32px; padding: 0; background: #DFE6E9; box-shadow: -4px -4px 4px rgba(255,255,255,.5),4px 4px 4px #C4C4C4; cursor: pointer; }.quantum-creator-scope .mcqcSwitch::before { content: ""; position: absolute; left: 4px; top: 4px; width: 53px; height: 20px; border-radius: 32px; background: #DFE6E9; box-shadow: inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4; }.quantum-creator-scope .mcqcSwitchOn::before { background: linear-gradient(113.24deg,#2D4CC8 21.1%,#E01E5A 65.02%); box-shadow: none; }
+.quantum-creator-scope .mcqcSwitchText { position: absolute; top: 4px; right: 9px; z-index: 1; color: #2F3547; font: 400 12px/20px "Segoe UI",Arial,sans-serif !important; letter-spacing: .03em; }.quantum-creator-scope .mcqcSwitchOn .mcqcSwitchText { right: auto; left: 11px; color: #fff; }.quantum-creator-scope .mcqcSwitchKnob { position: absolute; top: 4px; left: 4px; width: 20px; height: 20px; z-index: 2; background: #606162; border-radius: 50%; }.quantum-creator-scope .mcqcSwitchOn .mcqcSwitchKnob { left: 37px; background: #DFE6E9; box-shadow: 0 -2px 4px rgba(0,0,0,.1),0 4px 4px rgba(0,0,0,.25); }
+.quantum-creator-scope .mcqcConfigure { width: 170px; max-width: 100%; margin: 20px auto 4px; font-weight: 700; }.quantum-creator-scope .mcqcMessage { margin: 14px 0 0; font-size: 14px; color: #2D4CC8; }
+@media (max-width: 1200px) { .quantum-creator-scope .mcqcPageContent { padding: 20px 18px 28px; }.quantum-creator-scope .mcqcColumns { grid-template-columns: minmax(0,1fr) minmax(235px,275px); gap: 18px; }.quantum-creator-scope .mcqcQuestionsPanel { padding: 20px; }.quantum-creator-scope .mcqcActions { gap: 12px; }.quantum-creator-scope .mcqcActions button { font-size: 14px; padding-inline: 14px; } }
+@media (max-width: 950px) { .quantum-creator-scope .mcqcColumns { grid-template-columns: minmax(0,1fr); }.quantum-creator-scope .mcqcSummaryPanel { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }.quantum-creator-scope .mcqcEmptyState { min-height: 470px; }.quantum-creator-scope .mcqcQuestionsPanel { min-height: 570px; }.quantum-creator-scope .mcqcWizardStep { --tip: 15px; gap: 6px; padding-left: 17px; font-size: 12px; } }
+@media (max-width: 700px) { .quantum-creator-scope .mcqcPageContent { padding: 18px 14px 25px; }.quantum-creator-scope .mcqcBreadcrumb { gap: 8px; font-size: 14px; margin-bottom: 20px; }.quantum-creator-scope .mcqcWizard { width: 100%; height: 44px; margin-bottom: 30px; }.quantum-creator-scope .mcqcWizardStep { --tip: 10px; height: 44px; gap: 3px; padding: 0 2px 0 11px; font-size: clamp(9px,2.2vw,11px); letter-spacing: 0; }.quantum-creator-scope .mcqcWizardStep:first-child { padding-left: 3px; }.quantum-creator-scope .mcqcWizardNumber { width: 18px; height: 18px; flex-basis: 18px; }.quantum-creator-scope .mcqcWizardNumber > span { width: 12px; height: 12px; font-size: 10px; }.quantum-creator-scope .mcqcPageTitle h1 { font-size: 19px; }.quantum-creator-scope .mcqcPageTitle p { font-size: 14px; }.quantum-creator-scope .mcqcQuestionsPanel { min-height: 460px; padding: 16px; }.quantum-creator-scope .mcqcQuestionsPanel h2 { font-size: 18px; }.quantum-creator-scope .mcqcEmptyState { min-height: 395px; }.quantum-creator-scope .mcqcEmptyIcon { width: 86px; }.quantum-creator-scope .mcqcEmptyState h3 { font-size: 22px; }.quantum-creator-scope .mcqcEmptyState p { margin-bottom: 22px; font-size: 16px; line-height: 22px; }.quantum-creator-scope .mcqcActions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }.quantum-creator-scope .mcqcActions button { min-width: 0; min-height: 44px; padding: 8px; white-space: normal; font-size: 12px; gap: 5px; }.quantum-creator-scope .mcqcCreateButton { min-height: 44px; font-size: 14px; }.quantum-creator-scope .mcqcSummaryPanel { grid-template-columns: minmax(0,1fr); }.quantum-creator-scope .mcqcBack { width: 140px; min-height: 46px; }.quantum-creator-scope .mcqcLeftColumn { gap: 22px; } }
+@media (max-width: 380px) { .quantum-creator-scope .mcqcWizardStep { --tip: 8px; gap: 2px; padding-left: 9px; font-size: 8px; }.quantum-creator-scope .mcqcWizardNumber { width: 15px; height: 15px; flex-basis: 15px; }.quantum-creator-scope .mcqcWizardNumber > span { width: 10px; height: 10px; font-size: 9px; } }
+@media (prefers-reduced-motion: reduce) { .quantum-creator-scope .mcqcActions button,.quantum-creator-scope .mcqcCreateButton,.quantum-creator-scope .mcqcBack,.quantum-creator-scope .mcqcConfigure { transition: none; } }
+/* Create Questions extension — the existing Content screen rules above are unchanged. */
+.quantum-creator-scope .mcqcBuilder { min-width: 0; }.quantum-creator-scope .mcqcBuilderTop { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px; margin-bottom:24px; }.quantum-creator-scope .mcqcBuilderCrumb { display:flex; flex-wrap:wrap; align-items:center; gap:10px; min-height:32px; font-size:16px; }.quantum-creator-scope .mcqcBuilderCrumb a,.quantum-creator-scope .mcqcBuilderCrumb button { color:#2F3547; text-decoration:none; background:none; border:0; padding:0; font:inherit !important; cursor:pointer; }.quantum-creator-scope .mcqcBuilderCrumb strong { color:#2D4CC8; }.quantum-creator-scope .mcqcBuilderWelcome { display:flex; align-items:center; justify-content:center; gap:12px; min-width:0; padding:16px 18px; background:#DFE6E9; border-radius:10px; box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4; text-align:center; }.quantum-creator-scope .mcqcBuilderWelcome h2 { margin:0 0 6px; font-size:22px; line-height:28px; font-weight:700; background:linear-gradient(90deg,#2D4CC8,#E01E5A); color:transparent; background-clip:text; }.quantum-creator-scope .mcqcBuilderWelcome p { margin:0; font-size:16px; line-height:24px; }
+.quantum-creator-scope .mcqcBuilderGrid { display:grid; grid-template-columns:minmax(0,1fr) 304px; gap:24px; align-items:start; }.quantum-creator-scope .mcqcBuilderMain,.quantum-creator-scope .mcqcBuilderAside { min-width:0; background:#DFE6E9; border-radius:16px; padding:24px; box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4; }.quantum-creator-scope .mcqcBuilderMain { display:flex; flex-direction:column; gap:24px; }.quantum-creator-scope .mcqcQuestionNumbers { display:flex; align-items:center; gap:12px; overflow-x:auto; overscroll-behavior-x:contain; max-width:100%; padding:7px 4px 12px; scrollbar-width:thin; scrollbar-color:#b0bfc7 #dfe6e9; }.quantum-creator-scope .mcqcQuestionNumber { width:42px; height:42px; flex:0 0 42px; border:0; border-radius:9px; color:#374151; background:#D5DADC; box-shadow:inset 2px 2px 3px #bfc5c8,inset -2px -2px 3px #fff; font:700 15px 'Segoe UI',Arial,sans-serif !important; cursor:pointer; }.quantum-creator-scope .mcqcQuestionNumber.is-partial { background:#F1B566; color:#604019; }.quantum-creator-scope .mcqcQuestionNumber.is-complete { background:#2A7308; color:#fff; }.quantum-creator-scope .mcqcQuestionNumber.is-active { background:#2D4CC8; color:#fff; box-shadow:-3px -3px 4px #fff,3px 3px 5px #b0b6bb; }
+.quantum-creator-scope .mcqcQuestionForm { display:flex; flex-direction:column; gap:24px; border:1px solid #AEAEAE; padding:18px; border-radius:16px; min-width:0; }.quantum-creator-scope .mcqcBuilderField { display:flex; flex-direction:column; gap:12px; min-width:0; position:relative; }.quantum-creator-scope .mcqcBuilderField > label,.quantum-creator-scope .mcqcFormHeading > label { font-size:16px; line-height:24px; font-weight:600; letter-spacing:.02em; }.quantum-creator-scope .mcqcBuilderField small { font-size:12px; font-weight:400; margin-left:8px; }.quantum-creator-scope .mcqcBuilderField textarea,.quantum-creator-scope .mcqcBuilderField input,.quantum-creator-scope .mcqcSelectTrigger { width:100%; min-width:0; background:#DFE6E9; border:0; border-radius:8px; color:#374151; font:400 16px/24px 'Segoe UI',Arial,sans-serif !important; box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4; outline:0; }.quantum-creator-scope .mcqcBuilderField textarea { display:block; resize:vertical; min-height:150px; padding:18px 20px; }.quantum-creator-scope .mcqcBuilderField input { min-height:50px; padding:12px 16px; }.quantum-creator-scope .mcqcBuilderField textarea:focus-visible,.quantum-creator-scope .mcqcBuilderField input:focus-visible,.quantum-creator-scope .mcqcSelectTrigger:focus-visible { outline:2px solid #2D4CC8; outline-offset:2px; }
+.quantum-creator-scope .mcqcSelectRoot { position:relative; min-width:0; }.quantum-creator-scope .mcqcSelectTrigger { min-height:58px; padding:12px 18px 12px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px; text-align:left; cursor:pointer; }.quantum-creator-scope .mcqcSelectTrigger > span { min-width:0; overflow-wrap:anywhere; }.quantum-creator-scope .mcqcSelectList { position:absolute; top:calc(100% + 8px); left:0; width:100%; max-height:260px; overflow-y:auto; z-index:50; padding:10px; border-radius:12px; background:#DFE6E9; box-shadow:-4px -4px 8px #fff,5px 5px 12px #b8c1c6; scrollbar-width:thin; }.quantum-creator-scope .mcqcSelectItem { display:flex; align-items:center; width:100%; min-height:42px; gap:12px; padding:9px 11px; border:0; border-radius:7px; background:transparent; text-align:left; color:#374151; font:400 14px/20px 'Segoe UI',Arial,sans-serif !important; cursor:pointer; }.quantum-creator-scope .mcqcSelectItem:hover { box-shadow:inset 2px 2px 3px #C4C4C4,inset -2px -2px 3px #fff; }.quantum-creator-scope .mcqcOptionRadio { width:24px; height:24px; flex:0 0 24px; display:grid; place-items:center; border-radius:50%; box-shadow:inset 2px 2px 3px #C4C4C4,inset -2px -2px 3px #fff; }.quantum-creator-scope .mcqcOptionRadio::after { content:''; width:12px; height:12px; border:1px solid #C6C6C9; border-radius:50%; }.quantum-creator-scope .mcqcOptionSelected { box-shadow:-3px -3px 3px #fff,3px 3px 4px #C4C4C4; }.quantum-creator-scope .mcqcOptionSelected::after { background:#2D4CC8; border-color:#2D4CC8; }
+.quantum-creator-scope .mcqcRichToolbar { display:flex; flex-wrap:nowrap; gap:7px; overflow-x:auto; padding:8px; border-radius:6px; box-shadow:-3px -3px 4px #fff,3px 3px 4px #C4C4C4; scrollbar-width:thin; }.quantum-creator-scope .mcqcRichToolbar button { width:36px; height:36px; flex:0 0 36px; display:grid; place-items:center; padding:4px; border:0; border-radius:5px; background:#DFE6E9; box-shadow:-2px -2px 2px #fff,2px 2px 3px #C4C4C4; cursor:pointer; }.quantum-creator-scope .mcqcFormHeading { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; }.quantum-creator-scope .mcqcFormHeading span { font-size:13px; font-weight:400; }.quantum-creator-scope .mcqcAnswerOptions { display:flex; flex-direction:column; gap:12px; }.quantum-creator-scope .mcqcAnswerRow { display:flex; align-items:center; gap:12px; min-width:0; }.quantum-creator-scope .mcqcAnswerRow input { flex:1; width:0; }.quantum-creator-scope .mcqcAnswerRadio { flex:0 0 24px; width:24px; height:24px; border:0; border-radius:50%; display:grid; place-items:center; background:#DFE6E9; box-shadow:inset 2px 2px 2px #C4C4C4,inset -2px -2px 2px #fff; cursor:pointer; }.quantum-creator-scope .mcqcAnswerRadio span { width:12px; height:12px; border:1px solid #C6C6C9; border-radius:50%; }.quantum-creator-scope .mcqcAnswerRadio.selected span { background:#2D4CC8; border-color:#2D4CC8; }.quantum-creator-scope .mcqcIconButton { flex:0 0 32px; width:32px; height:32px; display:grid; place-items:center; border:0; border-radius:7px; background:#DFE6E9; box-shadow:-2px -2px 3px #fff,2px 2px 3px #C4C4C4; cursor:pointer; }.quantum-creator-scope .mcqcIconButton:disabled { opacity:.4; cursor:not-allowed; }.quantum-creator-scope .mcqcBuilderAction { display:inline-flex; justify-content:center; align-items:center; gap:8px; border:0; border-radius:28px; background:#DFE6E9; min-height:46px; padding:10px 18px; font:600 15px 'Segoe UI',Arial,sans-serif !important; color:#374151; box-shadow:-4px -4px 7px #fff,4px 4px 7px #C4C4C4; cursor:pointer; white-space:nowrap; }.quantum-creator-scope .mcqcBuilderFooter { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:14px; }.quantum-creator-scope .mcqcBuilderFooter > button:first-child { margin-right:auto; }.quantum-creator-scope .mcqcAddMenu { position:relative; }.quantum-creator-scope .mcqcAddMenuList { position:absolute; bottom:calc(100% + 8px); right:0; min-width:220px; max-width:calc(100vw - 32px); padding:8px; z-index:20; background:#DFE6E9; border-radius:10px; box-shadow:-4px -4px 8px #fff,5px 5px 10px #B8C1C6; }.quantum-creator-scope .mcqcAddMenuList button { display:block; width:100%; border:0; border-radius:6px; padding:12px; background:transparent; color:#374151; font:400 14px 'Segoe UI',Arial,sans-serif !important; text-align:left; cursor:pointer; }.quantum-creator-scope .mcqcAddMenuList button:hover { box-shadow:inset 2px 2px 3px #C4C4C4,inset -2px -2px 3px #fff; }
+.quantum-creator-scope .mcqcBuilderAside { display:flex; flex-direction:column; gap:24px; }.quantum-creator-scope .mcqcBuilderAside h3 { margin:0; font-size:20px; line-height:28px; }.quantum-creator-scope .mcqcDifficulty { display:flex; flex-wrap:wrap; gap:9px; }.quantum-creator-scope .mcqcDifficulty button { flex:1 1 auto; padding:10px; min-height:42px; border:0; border-radius:8px; background:#DFE6E9; box-shadow:-3px -3px 4px #fff,3px 3px 4px #C4C4C4; font:600 14px 'Segoe UI',Arial,sans-serif !important; cursor:pointer; }.quantum-creator-scope .mcqcDifficulty button.chosen { color:#2D4CC8; box-shadow:inset -3px -3px 3px #fff,inset 3px 3px 4px #C4C4C4; }.quantum-creator-scope .mcqcTagRow { display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:8px; border-radius:8px; box-shadow:inset -3px -3px 3px #fff,inset 3px 3px 3px #C4C4C4; }.quantum-creator-scope .mcqcTagRow button { border:0; border-radius:5px; padding:5px 7px; background:#DFE6E9; color:#2D4CC8; cursor:pointer; }.quantum-creator-scope .mcqcTagRow input { flex:1 1 80px; width:85px; min-height:32px; padding:5px; box-shadow:none; }.quantum-creator-scope .mcqcMandatory { display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:15px; font-weight:600; }
+@media (max-width:1100px) { .quantum-creator-scope .mcqcBuilderGrid { grid-template-columns:minmax(0,1fr) 255px; gap:15px; }.quantum-creator-scope .mcqcBuilderMain,.quantum-creator-scope .mcqcBuilderAside { padding:17px; }.quantum-creator-scope .mcqcBuilderWelcome { width:100%; } }
+@media (max-width:850px) { .quantum-creator-scope .mcqcBuilderGrid { grid-template-columns:minmax(0,1fr); }.quantum-creator-scope .mcqcBuilderAside { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; }.quantum-creator-scope .mcqcBuilderAside h3 { grid-column:1/-1; }.quantum-creator-scope .mcqcBuilderTop { flex-direction:column; }.quantum-creator-scope .mcqcBuilderWelcome { order:2; } }
+@media (max-width:600px) { .quantum-creator-scope .mcqcBuilderCrumb { font-size:12px; gap:5px; }.quantum-creator-scope .mcqcBuilderCrumb .mcqcIcon { width:15px; height:15px; }.quantum-creator-scope .mcqcBuilderWelcome { padding:12px; }.quantum-creator-scope .mcqcBuilderWelcome h2 { font-size:18px; line-height:24px; }.quantum-creator-scope .mcqcBuilderWelcome p { font-size:13px; }.quantum-creator-scope .mcqcBuilderMain,.quantum-creator-scope .mcqcBuilderAside { padding:13px; border-radius:12px; }.quantum-creator-scope .mcqcQuestionForm { padding:12px; gap:20px; }.quantum-creator-scope .mcqcBuilderAside { grid-template-columns:minmax(0,1fr); gap:20px; }.quantum-creator-scope .mcqcBuilderField > label,.quantum-creator-scope .mcqcFormHeading > label { font-size:14px; }.quantum-creator-scope .mcqcSelectTrigger { min-height:50px; padding:9px 13px; font-size:14px; }.quantum-creator-scope .mcqcBuilderField textarea { font-size:14px; }.quantum-creator-scope .mcqcQuestionNumbers { gap:8px; }.quantum-creator-scope .mcqcQuestionNumber { width:38px; height:38px; flex-basis:38px; }.quantum-creator-scope .mcqcBuilderFooter { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; }.quantum-creator-scope .mcqcBuilderFooter > button:first-child { margin:0; }.quantum-creator-scope .mcqcBuilderAction { min-width:0; width:100%; padding:9px; font-size:13px; }.quantum-creator-scope .mcqcAnswerRow { gap:7px; }.quantum-creator-scope .mcqcAnswerRow input { min-height:44px; padding:8px; font-size:13px; } }
+
+/* Question builder: Figma-proportioned additions, original Content CSS above retained. */
+.quantum-creator-scope .mcqcBuilderTop { margin-bottom:20px; }.quantum-creator-scope .mcqcBuilderCrumb { flex:1 1 400px; }.quantum-creator-scope .mcqcBuilderWelcome { width:min(372px,100%); min-height:104px; border:1px solid #2D4CC8; border-right-color:#E01E5A; padding:13px; }.quantum-creator-scope .mcqcBuilderWelcome h2 { background:linear-gradient(90deg,#2D4CC8,#E01E5A); background-clip:text; -webkit-background-clip:text; color:transparent; font-size:21px; white-space:normal; }.quantum-creator-scope .mcqcBuilderWelcome p { font-size:14px; }.quantum-creator-scope .mcqcBuilderGrid { grid-template-columns:minmax(0,1fr) 304px; align-items:start; }.quantum-creator-scope .mcqcBuilderMain { gap:22px; }.quantum-creator-scope .mcqcQuestionsHeading { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }.quantum-creator-scope .mcqcQuestionsHeading h2 { margin:0 0 6px; font-size:20px; line-height:28px; }.quantum-creator-scope .mcqcQuestionsHeading p { margin:0; font-size:16px; }.quantum-creator-scope .mcqcTopAdd { display:flex; align-items:center; justify-content:center; gap:9px; min-width:120px; height:48px; border:1px solid #2D4CC8; border-radius:30px; background:#DFE6E9; color:#2D4CC8; box-shadow:-3px -3px 6px #fff,3px 3px 5px #C4C4C4; font:600 18px 'Segoe UI',Arial,sans-serif !important; cursor:pointer; }.quantum-creator-scope .mcqcNumberNavigation { min-width:0; display:flex; align-items:center; gap:14px; }.quantum-creator-scope .mcqcNumberScroller { flex:1; min-width:0; overflow:hidden; }.quantum-creator-scope .mcqcQuestionNumbers { padding:5px 3px 11px; gap:12px; }.quantum-creator-scope .mcqcQuestionNumber { position:relative; width:67px; height:54px; flex:0 0 67px; border:1px solid #939da4; border-radius:4px; background:#DFE6E9; color:#606162; font-size:20px; box-shadow:-2px -2px 3px #fff,2px 2px 4px #aeb5b9; }.quantum-creator-scope .mcqcQuestionNumber .mcqcNumberValue { display:block; }.quantum-creator-scope .mcqcQuestionNumber small { display:block; font-size:11px; line-height:14px; color:inherit; }.quantum-creator-scope .mcqcQuestionNumber.is-complete { border-color:#2A7308; color:#2A7308; }.quantum-creator-scope .mcqcQuestionNumber.is-partial { border-color:#cf560e; color:#cf560e; }.quantum-creator-scope .mcqcQuestionNumber.is-active { border-color:#2D4CC8; color:#2D4CC8; background:#d7e0fc; }.quantum-creator-scope .mcqcNumberStatus { position:absolute; right:3px; top:2px; display:grid; place-items:center; width:13px; height:13px; color:#fff; border-radius:50%; background:#2A7308; font-size:10px; line-height:1; }.quantum-creator-scope .is-partial .mcqcNumberStatus { background:#c9560e; }.quantum-creator-scope .mcqcRoundNav { display:grid; place-items:center; flex:0 0 42px; width:42px; height:42px; border:0; border-radius:50%; background:#DFE6E9; box-shadow:-3px -3px 5px #fff,3px 3px 5px #c4c4c4; cursor:pointer; }.quantum-creator-scope .mcqcQuestionProgress { height:16px; padding:3px 7px; margin-top:-10px; border-radius:20px; box-shadow:inset 2px 2px 3px #c4c4c4,inset -2px -2px 3px #fff; }.quantum-creator-scope .mcqcQuestionProgress span { display:block; height:100%; border-radius:20px; background:#2A7308; }.quantum-creator-scope .mcqcQuestionForm { padding:16px; gap:28px; }.quantum-creator-scope .mcqcBuilderField > label { font-size:16px; }.quantum-creator-scope .mcqcEditorSurface { padding:10px; border-radius:8px; box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 5px #C4C4C4; }.quantum-creator-scope .mcqcEditorSurface textarea { margin-top:14px; padding:12px 4px; box-shadow:none; min-height:60px; height:75px; resize:vertical; }.quantum-creator-scope .mcqcRichToolbar { padding:7px; }.quantum-creator-scope .mcqcBuilderField > label small { float:right; }.quantum-creator-scope .mcqcAnswerOptions { gap:14px; }.quantum-creator-scope .mcqcAnswerSection { min-width:0; }.quantum-creator-scope .mcqcAnswerExpand,.quantum-creator-scope .mcqcAddOptions { width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:56px; padding:12px 20px; border:0; border-radius:7px; background:#DFE6E9; box-shadow:-3px -3px 5px #fff,3px 3px 5px #c4c4c4; color:#374151; font:600 16px 'Segoe UI',Arial,sans-serif !important; cursor:pointer; }.quantum-creator-scope .mcqcRotated { transform:rotate(180deg); }.quantum-creator-scope .mcqcAnswerContent { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin:10px 0 5px; padding:13px; border-radius:8px; box-shadow:inset -3px -3px 4px #fff,inset 3px 3px 4px #C4C4C4; }.quantum-creator-scope .mcqcAnswerContent input:not([type=radio]) { flex:1 1 150px; padding:9px 12px; min-height:42px; }.quantum-creator-scope .mcqcCorrectOption { display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer; }.quantum-creator-scope .mcqcCorrectOption input { accent-color:#2D4CC8; }.quantum-creator-scope .mcqcRemoveOption { border:0; color:#c9560e; background:transparent; cursor:pointer; }.quantum-creator-scope .mcqcAddOptions { justify-content:center; min-height:48px; margin-top:24px; }.quantum-creator-scope .mcqcBuilderBottom { display:flex; justify-content:center; align-items:center; position:relative; min-height:52px; }.quantum-creator-scope .mcqcBuilderArrows { position:absolute; right:0; display:flex; gap:12px; }.quantum-creator-scope .mcqcSubmitQuestion { min-width:204px; color:#2D4CC8; border:1px solid #2D4CC8!important; font-size:18px; }.quantum-creator-scope .mcqcBuilderAside { display:flex; flex-direction:column; gap:14px; padding:16px; }.quantum-creator-scope .mcqcAsideSection { padding:14px 12px; border:1px solid #cbd3d8; border-radius:5px; display:flex; flex-direction:column; gap:12px; }.quantum-creator-scope .mcqcAsideSection h3 { margin:0; font-size:16px; line-height:24px; }.quantum-creator-scope .mcqcBuilderAside .mcqcBuilderField { gap:6px; }.quantum-creator-scope .mcqcBuilderAside .mcqcBuilderField > label { font-size:14px; line-height:20px; }.quantum-creator-scope .mcqcBuilderAside .mcqcSelectTrigger,.quantum-creator-scope .mcqcBuilderAside input { min-height:38px; padding:7px 12px; font-size:14px; }.quantum-creator-scope .mcqcBuilderAside .mcqcSelectItem { font-size:14px; }.quantum-creator-scope .mcqcBuilderAside .mcqcSelectList { max-height:325px; padding:9px; }.quantum-creator-scope .mcqcBuilderAside .mcqcOptionRadio { width:24px; height:24px; flex:0 0 24px; }.quantum-creator-scope .mcqcTagHolder { display:flex; flex-wrap:wrap; gap:8px; }.quantum-creator-scope .mcqcAddTag { display:flex; align-items:center; gap:5px; border:0; padding:7px; border-radius:5px; color:#2A7308; background:#DFE6E9; box-shadow:-2px -2px 3px #fff,2px 2px 3px #c4c4c4; cursor:pointer; }.quantum-creator-scope .mcqcTagInput { width:100%; }.quantum-creator-scope .mcqcTagRow { display:flex; flex-wrap:wrap; gap:7px; }.quantum-creator-scope .mcqcTagRow button { font-size:11px; padding:4px 8px; color:#2A7308; border:1px solid #91b67f; border-radius:4px; background:#e1ecd8; }.quantum-creator-scope .mcqcMandatory { margin-top:3px; font-size:14px; font-weight:600; }.quantum-creator-scope .mcqcAsideHint { margin:-10px 0 0; font-size:11px; }.quantum-creator-scope .mcqcBuilderSummary { margin-top:0; }.quantum-creator-scope .mcqcStatGrid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }.quantum-creator-scope .mcqcStatGrid div { min-width:0; text-align:center; }.quantum-creator-scope .mcqcStatGrid strong { display:grid; place-items:center; height:48px; box-shadow:-2px -2px 3px #fff,2px 2px 3px #c4c4c4; border-radius:7px; color:#2D4CC8; font-size:24px; }.quantum-creator-scope .mcqcStatGrid div:first-child strong { color:#67096E; }.quantum-creator-scope .mcqcStatGrid div:last-child strong { color:#2A7308; }.quantum-creator-scope .mcqcStatGrid span { display:block; margin-top:6px; font-size:12px; color:#2D4CC8; }.quantum-creator-scope .mcqcSummaryProgress { height:4px; background:#b8c0c5; }.quantum-creator-scope .mcqcSummaryProgress span { display:block; height:100%; background:linear-gradient(90deg,#2D4CC8,#E01E5A); }.quantum-creator-scope .mcqcBuilderSummary > p { margin:0; font-size:11px; line-height:17px; }.quantum-creator-scope .mcqcBuilderPageFooter { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-top:36px; }.quantum-creator-scope .mcqcBuilderPageFooter > div { display:flex; gap:24px; }.quantum-creator-scope .mcqcFooterPill { min-width:135px; height:48px; border:0; border-radius:28px; background:#DFE6E9; box-shadow:-4px -4px 5px #fff,4px 4px 6px #c4c4c4; font:600 16px 'Segoe UI',Arial,sans-serif !important; color:#374151; cursor:pointer; }.quantum-creator-scope .mcqcFooterContinue { color:#2A7308; }.quantum-creator-scope .mcqcBuilderNotice { margin:12px 0; font-size:14px; color:#2D4CC8; }.quantum-creator-scope .mcqcAddMenuList { min-width:230px; }.quantum-creator-scope .mcqcAddMenuList button { display:flex; align-items:center; gap:10px; }.quantum-creator-scope .mcqcAddMenuList .mcqcOptionRadio { flex:0 0 24px; }
+@media (max-width:1100px) { .quantum-creator-scope .mcqcBuilderGrid { grid-template-columns:minmax(0,1fr) 270px; gap:17px; }.quantum-creator-scope .mcqcBuilderMain { padding:16px; }.quantum-creator-scope .mcqcBuilderAside { padding:12px; } }
+@media (max-width:850px) { .quantum-creator-scope .mcqcBuilderGrid { grid-template-columns:minmax(0,1fr); }.quantum-creator-scope .mcqcBuilderAside { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }.quantum-creator-scope .mcqcBuilderWelcome { margin-left:auto; }.quantum-creator-scope .mcqcBuilderPageFooter { margin-top:24px; } }
+@media (max-width:600px) { .quantum-creator-scope .mcqcBuilderTop { gap:14px; }.quantum-creator-scope .mcqcBuilderWelcome { min-height:84px; }.quantum-creator-scope .mcqcBuilderWelcome h2 { font-size:18px; line-height:24px; }.quantum-creator-scope .mcqcBuilderCrumb { flex-basis:100%; font-size:12px; gap:7px; }.quantum-creator-scope .mcqcBuilderMain { padding:12px; gap:16px; }.quantum-creator-scope .mcqcBuilderAside { display:flex; padding:12px; }.quantum-creator-scope .mcqcQuestionsHeading h2 { font-size:17px; line-height:24px; }.quantum-creator-scope .mcqcQuestionsHeading p { font-size:12px; }.quantum-creator-scope .mcqcTopAdd { min-width:88px; height:42px; font-size:15px; }.quantum-creator-scope .mcqcNumberNavigation { gap:6px; }.quantum-creator-scope .mcqcRoundNav { width:32px; height:32px; flex-basis:32px; }.quantum-creator-scope .mcqcQuestionNumber { width:55px; height:53px; flex-basis:55px; }.quantum-creator-scope .mcqcQuestionNumbers { gap:8px; }.quantum-creator-scope .mcqcQuestionForm { padding:12px; gap:22px; }.quantum-creator-scope .mcqcBuilderField > label { font-size:14px; }.quantum-creator-scope .mcqcBuilderBottom { justify-content:flex-start; padding-bottom:56px; }.quantum-creator-scope .mcqcBuilderArrows { right:0; bottom:0; }.quantum-creator-scope .mcqcSubmitQuestion { min-width:0; padding:10px 14px; font-size:15px; }.quantum-creator-scope .mcqcBuilderPageFooter { flex-direction:column; align-items:stretch; }.quantum-creator-scope .mcqcBuilderPageFooter > div { gap:10px; }.quantum-creator-scope .mcqcFooterPill { flex:1; min-width:0; padding:0 12px; font-size:14px; }.quantum-creator-scope .mcqcAnswerExpand,.quantum-creator-scope .mcqcAddOptions { min-height:46px; font-size:14px; padding:8px 12px; }.quantum-creator-scope .mcqcBuilderAside .mcqcSelectList { max-height:245px; } }
+
+/* Reference refinements: preserve all existing MCQ Content markup, assets and layout. */
+.quantum-creator-scope .mcqcBuilder .mcqcPointsControl { position:relative; display:flex; align-items:center; width:100%; min-width:0; height:44px; border-radius:7px; background:#DFE6E9; box-shadow:inset -3px -3px 4px #fff,inset 3px 3px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcBuilder .mcqcPointsControl input { flex:1; width:100%; height:100%; min-height:0; padding:7px 39px 7px 13px; border:0; border-radius:7px; box-shadow:none; background:transparent; outline:0; }
+.quantum-creator-scope .mcqcBuilder .mcqcPointsControl:focus-within { outline:2px solid #2D4CC8; outline-offset:2px; }
+.quantum-creator-scope .mcqcPointsControl input::-webkit-inner-spin-button,.quantum-creator-scope .mcqcPointsControl input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+.quantum-creator-scope .mcqcPointsControl input[type=number] { -moz-appearance:textfield; appearance:textfield; }
+.quantum-creator-scope .mcqcPointsSteppers { position:absolute; right:8px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; justify-content:center; width:24px; height:34px; gap:0; border-radius:3px; background:#DFE6E9; box-shadow:-1px -1px 2px #fff,1px 1px 2px #C4C4C4; }
+.quantum-creator-scope .mcqcPointsSteppers button { display:grid; place-items:center; flex:1; width:100%; min-height:0; padding:0; border:0; background:transparent; cursor:pointer; }
+.quantum-creator-scope .mcqcPointsSteppers .mcqcArrowUp { transform:rotate(180deg); }
+.quantum-creator-scope .mcqcPointsSteppers button:active { box-shadow:inset 1px 1px 2px #C4C4C4,inset -1px -1px 2px #fff; }
+/* Tag chips: no outside border; inset tag area and pale green chip fill. */
+.quantum-creator-scope .mcqcBuilder .mcqcTagRow { display:flex; align-items:center; flex-wrap:wrap; gap:8px; min-height:44px; padding:7px 9px; border:0; outline:0; border-radius:8px; background:#DFE6E9; box-shadow:inset -3px -3px 4px #fff,inset 3px 3px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcBuilder .mcqcTagRow button { display:inline-flex; gap:6px; align-items:center; min-height:26px; padding:4px 10px; border:1px solid #8cb66c; border-radius:5px; background:#E2EED9; color:#2A7308; font:400 13px/18px 'Segoe UI',Arial,sans-serif !important; box-shadow:none; }
+.quantum-creator-scope .mcqcBuilder .mcqcTagRow button span { color:#2A7308; font-size:16px; line-height:14px; }
+/* Summary figures and labels share the same purple, blue and green. */
+.quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid > div { min-width:0; text-align:center; }
+.quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid strong { display:grid; place-items:center; height:52px; background:#DFE6E9; box-shadow:-3px -3px 4px #fff,3px 3px 4px #C4C4C4; border-radius:7px; font-size:25px; font-weight:700; }
+.quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid span { display:block; margin-top:9px; font:500 14px/20px 'Segoe UI',Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid > div:nth-child(1) strong,.quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid > div:nth-child(1) span { color:#67096E; }
+.quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid > div:nth-child(2) strong,.quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid > div:nth-child(2) span { color:#2D4CC8; }
+.quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid > div:nth-child(3) strong,.quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid > div:nth-child(3) span { color:#2A7308; }
+.quantum-creator-scope .mcqcBuilderSummary .mcqcSummaryProgress { position:relative; height:4px; margin-top:10px; background:linear-gradient(90deg,#67096E 0%,#2D4CC8 51%,#E01E5A 100%); border-radius:8px; overflow:hidden; }
+.quantum-creator-scope .mcqcBuilderSummary .mcqcSummaryProgress > span { position:absolute; left:0; top:0; height:100%; background:#2A7308; border-radius:8px; }
+/* Raised circular arrows stay legible on navigation and become subdued only when disabled. */
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav { display:grid; place-items:center; border:1px solid rgba(255,255,255,.6); border-radius:50%; background:#DFE6E9; color:#2F3547; box-shadow:-3px -3px 5px #fff,3px 3px 5px #C4C4C4; cursor:pointer; opacity:1; }
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav .mcqcIcon { opacity:1; visibility:visible; filter:contrast(1.4); }
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:disabled { opacity:.48; cursor:not-allowed; }
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:not(:disabled):hover { box-shadow:inset -2px -2px 3px #fff,inset 2px 2px 3px #C4C4C4; }
+/* Neumorphic scroll tracks for all editor scrollable areas. */
+.quantum-creator-scope .mcqcBuilder .mcqcQuestionNumbers,.quantum-creator-scope .mcqcBuilder .mcqcNumberScroller,.quantum-creator-scope .mcqcBuilder .mcqcRichToolbar,.quantum-creator-scope .mcqcBuilder .mcqcSelectList { scrollbar-width:thin; scrollbar-color:#a3b2bc #DFE6E9; }
+.quantum-creator-scope .mcqcBuilder .mcqcQuestionNumbers::-webkit-scrollbar,.quantum-creator-scope .mcqcBuilder .mcqcNumberScroller::-webkit-scrollbar,.quantum-creator-scope .mcqcBuilder .mcqcRichToolbar::-webkit-scrollbar { height:9px; }
+.quantum-creator-scope .mcqcBuilder .mcqcSelectList::-webkit-scrollbar { width:8px; }
+.quantum-creator-scope .mcqcBuilder .mcqcQuestionNumbers::-webkit-scrollbar-track,.quantum-creator-scope .mcqcBuilder .mcqcNumberScroller::-webkit-scrollbar-track,.quantum-creator-scope .mcqcBuilder .mcqcRichToolbar::-webkit-scrollbar-track,.quantum-creator-scope .mcqcBuilder .mcqcSelectList::-webkit-scrollbar-track { background:#DFE6E9; border-radius:12px; box-shadow:inset 2px 2px 3px #C4C4C4,inset -2px -2px 3px #fff; }
+.quantum-creator-scope .mcqcBuilder .mcqcQuestionNumbers::-webkit-scrollbar-thumb,.quantum-creator-scope .mcqcBuilder .mcqcNumberScroller::-webkit-scrollbar-thumb,.quantum-creator-scope .mcqcBuilder .mcqcRichToolbar::-webkit-scrollbar-thumb,.quantum-creator-scope .mcqcBuilder .mcqcSelectList::-webkit-scrollbar-thumb { border:1px solid #DFE6E9; border-radius:12px; background:#a3b2bc; box-shadow:inset -1px -1px 2px #8c9ca6,inset 1px 1px 2px #fff; }
+@media (max-width:600px) { .quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid { gap:8px; }.quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid strong { height:46px; font-size:21px; }.quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid span { font-size:12px; }.quantum-creator-scope .mcqcBuilder .mcqcTagRow { padding:7px; }.quantum-creator-scope .mcqcBuilder .mcqcRoundNav { flex-shrink:0; } }
+/* Create Questions: reference screenshot proportions (scaled naturally with the available width). */
+.quantum-creator-scope .mcqcBuilder { font:400 14px/20px "Segoe UI",Arial,sans-serif !important; color:#374151; }
+.quantum-creator-scope .mcqcBuilderTop { gap:16px; margin-bottom:16px; align-items:flex-start; }
+.quantum-creator-scope .mcqcBuilderCrumb { gap:8px; min-height:32px; font-size:14px; line-height:20px; letter-spacing:.02em; }
+.quantum-creator-scope .mcqcBuilderWelcome { width:min(320px,100%); min-height:90px; padding:12px 15px; gap:9px; border:1px solid #2D4CC8; border-right-color:#E01E5A; border-radius:9px; }
+.quantum-creator-scope .mcqcBuilderWelcome h2 { font-size:18px; line-height:25px; letter-spacing:.02em; }
+.quantum-creator-scope .mcqcBuilderWelcome p { font-size:13px; line-height:20px; }
+.quantum-creator-scope .mcqcBuilderGrid { grid-template-columns:minmax(0,1fr) minmax(230px,264px); align-items:start; gap:16px; }
+.quantum-creator-scope .mcqcBuilderMain { padding:20px 21px; gap:18px; border-radius:15px; }
+.quantum-creator-scope .mcqcBuilderAside { padding:12px; gap:12px; border-radius:12px; }
+.quantum-creator-scope .mcqcQuestionsHeading { align-items:center; }
+.quantum-creator-scope .mcqcQuestionsHeading h2 { font-size:17px; line-height:23px; margin-bottom:6px; }
+.quantum-creator-scope .mcqcQuestionsHeading p { font-size:13px; line-height:19px; }
+.quantum-creator-scope .mcqcTopAdd { min-width:112px; height:44px; font-size:16px; }
+.quantum-creator-scope .mcqcNumberNavigation { gap:10px; }
+.quantum-creator-scope .mcqcQuestionNumbers { gap:12px; padding:5px 3px 11px; }
+.quantum-creator-scope .mcqcQuestionNumber { flex:0 0 66px; width:66px; height:48px; background:#DFE6E9; color:#606162; border:1px solid #A6AFB5; border-radius:4px; font-size:17px; box-shadow:-2px -2px 3px #fff,2px 2px 4px #AEB5B9; }
+.quantum-creator-scope .mcqcQuestionNumber.is-complete { background:#DFE6E9; border-color:#2A7308; color:#2A7308; }
+.quantum-creator-scope .mcqcQuestionNumber.is-partial { background:#DFE6E9; border-color:#CE580B; color:#CE580B; }
+.quantum-creator-scope .mcqcQuestionNumber.is-active { background:#D9E2FB; border-color:#2D4CC8; color:#2D4CC8; }
+.quantum-creator-scope .mcqcQuestionNumber small { font-size:10px; line-height:13px; }
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav { width:38px; height:38px; flex:0 0 38px; background:#DFE6E9; border:1px solid #fff; box-shadow:-3px -3px 4px #fff,3px 3px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:disabled { opacity:.46; }
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:not(:disabled) .mcqcIcon { filter:contrast(1.7); opacity:1; }
+.quantum-creator-scope .mcqcQuestionProgress { height:15px; margin-top:-8px; }
+.quantum-creator-scope .mcqcQuestionForm { padding:18px 14px 22px; gap:24px; border:1px solid #AEAEAE; border-radius:15px; }
+.quantum-creator-scope .mcqcBuilderField { gap:12px; }
+.quantum-creator-scope .mcqcBuilder .mcqcBuilderField > label,.quantum-creator-scope .mcqcBuilder .mcqcFormHeading > label { font:600 14px/20px "Segoe UI",Arial,sans-serif !important; letter-spacing:.02em; }
+.quantum-creator-scope .mcqcBuilder .mcqcSelectTrigger { min-height:50px; padding:9px 15px 9px 20px; font:400 14px/22px "Segoe UI",Arial,sans-serif !important; border-radius:7px; box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcEditorSurface { padding:9px; border-radius:7px; }
+.quantum-creator-scope .mcqcBuilder .mcqcRichToolbar { gap:6px; padding:6px; }
+.quantum-creator-scope .mcqcBuilder .mcqcRichToolbar button { width:32px; height:32px; flex-basis:32px; }
+.quantum-creator-scope .mcqcEditorSurface textarea { min-height:58px; height:62px; margin-top:9px; padding:10px 4px; font-size:13px; line-height:20px; }
+.quantum-creator-scope .mcqcBuilder .mcqcAnswerExpand { min-height:51px; padding:10px 18px; font:600 14px/20px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcAnswerOptions { gap:11px; }
+.quantum-creator-scope .mcqcBuilder .mcqcAddOptions { min-height:44px; margin-top:18px; font:600 14px/20px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilderBottom { min-height:48px; }
+.quantum-creator-scope .mcqcSubmitQuestion { min-width:180px; height:44px; min-height:44px; font-size:15px; }
+.quantum-creator-scope .mcqcBuilder .mcqcAsideSection { padding:13px 11px; gap:11px; }
+.quantum-creator-scope .mcqcBuilder .mcqcAsideSection h3 { font:600 16px/23px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilderAside .mcqcBuilderField { gap:6px; }
+.quantum-creator-scope .mcqcBuilderAside .mcqcBuilderField > label { font:600 13px/19px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilderAside .mcqcSelectTrigger { min-height:33px; height:33px; padding:4px 11px; font-size:13px; line-height:19px; }
+.quantum-creator-scope .mcqcBuilder .mcqcPointsControl { min-height:33px; height:33px; }
+.quantum-creator-scope .mcqcBuilder .mcqcPointsControl input { min-height:0; height:100%; font-size:13px; padding:4px 35px 4px 10px; }
+.quantum-creator-scope .mcqcPointsSteppers { height:27px; right:5px; width:22px; }
+.quantum-creator-scope .mcqcBuilder .mcqcSelectItem { min-height:38px; font-size:13px; line-height:20px; }
+.quantum-creator-scope .mcqcBuilder .mcqcSelectList { max-height:245px; }
+.quantum-creator-scope .mcqcBuilder .mcqcTagRow { min-height:34px; padding:5px 7px; gap:6px; }
+.quantum-creator-scope .mcqcBuilder .mcqcTagRow button { font-size:11px; min-height:22px; padding:2px 7px; }
+.quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid { gap:12px; }
+.quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid strong { height:48px; font-size:23px; }
+.quantum-creator-scope .mcqcBuilderSummary .mcqcStatGrid span { margin-top:7px; font:500 12px/18px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilderPageFooter { margin-top:36px; }
+.quantum-creator-scope .mcqcBuilderPageFooter .mcqcFooterPill { min-width:135px; height:44px; padding:8px 17px; border-radius:25px; font:700 15px/22px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilder .mcqcQuestionNumbers,.quantum-creator-scope .mcqcBuilder .mcqcNumberScroller,.quantum-creator-scope .mcqcBuilder .mcqcRichToolbar,.quantum-creator-scope .mcqcBuilder .mcqcSelectList { scrollbar-width:thin; scrollbar-color:#A3B2BC #DFE6E9; }
+@media (max-width:1100px) { .quantum-creator-scope .mcqcBuilderGrid { grid-template-columns:minmax(0,1fr) 244px; gap:14px; }.quantum-creator-scope .mcqcBuilderMain { padding:16px; }.quantum-creator-scope .mcqcBuilderAside { padding:11px; } }
+@media (max-width:850px) { .quantum-creator-scope .mcqcBuilderGrid { grid-template-columns:minmax(0,1fr); }.quantum-creator-scope .mcqcBuilderAside { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }.quantum-creator-scope .mcqcBuilderTop { flex-direction:column; }.quantum-creator-scope .mcqcBuilderWelcome { margin-left:0; }.quantum-creator-scope .mcqcBuilderPageFooter { margin-top:24px; } }
+@media (max-width:600px) { .quantum-creator-scope .mcqcBuilderTop { gap:12px; }.quantum-creator-scope .mcqcBuilderCrumb { flex-basis:auto; font-size:12px; gap:5px; }.quantum-creator-scope .mcqcBuilderWelcome { min-height:75px; padding:11px; width:100%; }.quantum-creator-scope .mcqcBuilderWelcome h2 { font-size:17px; line-height:22px; }.quantum-creator-scope .mcqcBuilderWelcome p { font-size:12px; line-height:18px; }.quantum-creator-scope .mcqcBuilderMain,.quantum-creator-scope .mcqcBuilderAside { padding:12px; gap:14px; }.quantum-creator-scope .mcqcQuestionsHeading h2 { font-size:16px; }.quantum-creator-scope .mcqcTopAdd { min-width:85px; height:39px; font-size:14px; }.quantum-creator-scope .mcqcNumberNavigation { gap:6px; }.quantum-creator-scope .mcqcQuestionNumber { width:54px; height:47px; flex-basis:54px; }.quantum-creator-scope .mcqcQuestionNumbers { gap:8px; }.quantum-creator-scope .mcqcBuilder .mcqcRoundNav { width:33px; height:33px; flex-basis:33px; }.quantum-creator-scope .mcqcQuestionForm { padding:12px; gap:20px; }.quantum-creator-scope .mcqcBuilderAside { display:flex; }.quantum-creator-scope .mcqcBuilderPageFooter { margin-top:22px; }.quantum-creator-scope .mcqcBuilderPageFooter .mcqcFooterPill { min-width:0; height:42px; font-size:13px; padding:7px 11px; }.quantum-creator-scope .mcqcBuilder .mcqcAnswerExpand { min-height:46px; }.quantum-creator-scope .mcqcBuilder .mcqcSelectTrigger { min-height:46px; }.quantum-creator-scope .mcqcBuilderAside .mcqcSelectTrigger { min-height:36px; height:36px; }.quantum-creator-scope .mcqcBuilderBottom { padding-bottom:48px; } }
+
+/* Targeted corrections: dropdown direction, responsive settings and options. */
+.quantum-creator-scope .mcqcBuilder .mcqcAddMenu { position:relative; z-index:30; }
+.quantum-creator-scope .mcqcBuilder .mcqcAddMenuList { top:calc(100% + 8px); bottom:auto; right:0; left:auto; width:max-content; min-width:228px; max-width:min(310px,calc(100vw - 28px)); max-height:min(280px,50dvh); overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:#aab8c1 #dfe6e9; box-sizing:border-box; }
+.quantum-creator-scope .mcqcBuilder .mcqcAddMenuList button { min-height:43px; white-space:normal; overflow-wrap:break-word; }
+.quantum-creator-scope .mcqcBuilder .mcqcBuilderAside { min-width:0; width:100%; }
+.quantum-creator-scope .mcqcBuilder .mcqcAsideSection { min-width:0; width:100%; box-sizing:border-box; }
+.quantum-creator-scope .mcqcBuilderAside .mcqcBuilderField,.quantum-creator-scope .mcqcBuilderAside .mcqcSelectRoot,.quantum-creator-scope .mcqcBuilderAside .mcqcSelectTrigger,.quantum-creator-scope .mcqcBuilderAside .mcqcPointsControl { min-width:0; width:100%; max-width:100%; box-sizing:border-box; }
+.quantum-creator-scope .mcqcBuilderAside .mcqcSelectTrigger { display:flex; gap:8px; justify-content:space-between; }
+.quantum-creator-scope .mcqcBuilderAside .mcqcSelectTrigger > span { min-width:0; flex:1; overflow-wrap:anywhere; }
+.quantum-creator-scope .mcqcBuilderAside .mcqcSelectTrigger > .mcqcIcon { flex:0 0 auto; }
+@media (max-width:850px) { .quantum-creator-scope .mcqcBuilder .mcqcBuilderAside { display:flex; flex-direction:column; gap:14px; }.quantum-creator-scope .mcqcBuilder .mcqcAsideSection { width:100%; }.quantum-creator-scope .mcqcBuilderGrid { grid-template-columns:minmax(0,1fr); }.quantum-creator-scope .mcqcBuilder .mcqcAddMenuList { right:0; } }
+@media (max-width:600px) { .quantum-creator-scope .mcqcBuilder .mcqcBuilderAside { padding:12px; gap:13px; }.quantum-creator-scope .mcqcBuilder .mcqcAsideSection { padding:14px 12px; gap:12px; }.quantum-creator-scope .mcqcBuilderAside .mcqcBuilderField { gap:7px; }.quantum-creator-scope .mcqcBuilderAside .mcqcBuilderField > label { font-size:14px; line-height:20px; }.quantum-creator-scope .mcqcBuilderAside .mcqcSelectTrigger { min-height:42px; height:auto; padding:9px 12px; font-size:14px; line-height:20px; }.quantum-creator-scope .mcqcBuilderAside .mcqcPointsControl { min-height:42px; height:42px; }.quantum-creator-scope .mcqcBuilder .mcqcAddMenuList { right:0; left:auto; max-width:min(260px,calc(100vw - 36px)); } }
+
+/* Bottom Add Questions: same dropdown as the upper Add button, positioned below. */
+.quantum-creator-scope .mcqcBuilder .mcqcBottomAddMenu { position:relative; z-index:35; display:inline-flex; justify-content:center; }
+.quantum-creator-scope .mcqcBuilder .mcqcBottomAddMenu .mcqcAddMenuList { top:calc(100% + 8px); bottom:auto; left:50%; right:auto; transform:translateX(-50%); }
+@media (max-width:600px) { .quantum-creator-scope .mcqcBuilder .mcqcBottomAddMenu .mcqcAddMenuList { left:0; right:auto; transform:none; } }
+
+/* Expanded answer sections: Figma reference, scoped to question builder only. */
+.quantum-creator-scope .mcqcBuilder .mcqcAnswerSection { min-width:0; border-radius:8px; }
+.quantum-creator-scope .mcqcBuilder .mcqcAnswerContent { display:flex; flex-direction:column; gap:11px; min-width:0; padding:12px 11px 14px; background:#DFE6E9; box-shadow:inset 3px 3px 5px #C4C4C4,inset -3px -3px 5px #fff; border-radius:0 0 8px 8px; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionSubLabel { display:flex; align-items:center; justify-content:space-between; gap:10px; font:600 14px/20px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionSubLabel small { font-size:12px; font-weight:400; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor { min-width:0; padding:8px; border-radius:7px; background:#DFE6E9; box-shadow:inset 3px 3px 5px #C4C4C4,inset -3px -3px 5px #fff; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar { padding:5px; gap:7px; min-height:45px; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar button { width:32px; height:32px; flex:0 0 32px; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor textarea { display:block; width:100%; height:70px; min-height:70px; resize:vertical; margin:8px 0 0; padding:10px 7px; background:transparent; color:#374151; border:0; border-radius:4px; box-shadow:none; outline:0; font:400 13px/20px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilder .mcqcCorrectOption { display:flex; align-items:center; gap:8px; font:600 13px/19px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilder .mcqcCorrectOption input,.quantum-creator-scope .mcqcBuilder .mcqcHintChecks input { width:16px; height:16px; min-height:0; margin:0; accent-color:#2A7308; box-shadow:none; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionDetail { min-width:0; border-radius:6px; background:#DFE6E9; box-shadow:-3px -3px 4px #fff,3px 3px 5px #C4C4C4; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionDetailHead { display:flex; align-items:center; gap:10px; width:100%; min-height:41px; padding:8px 12px; background:transparent; border:0; border-radius:6px; color:#374151; font:600 13px/19px "Segoe UI",Arial,sans-serif !important; cursor:pointer; text-align:left; }
+.quantum-creator-scope .mcqcBuilder .mcqcDetailHeading { display:flex; align-items:center; flex:1; gap:8px; min-width:0; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionDetailHead small { margin-left:auto; font:400 11px/16px "Segoe UI",Arial,sans-serif !important; white-space:nowrap; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionDetailBody { padding:6px 10px 12px; min-width:0; }
+.quantum-creator-scope .mcqcBuilder .mcqcHintChecks { display:grid; gap:8px; margin-top:10px; }
+.quantum-creator-scope .mcqcBuilder .mcqcHintChecks label { display:flex; align-items:center; gap:8px; font:400 12px/18px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilder .mcqcAnswerExpand[aria-expanded="true"] { border-radius:7px 7px 0 0; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionToolbar,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor textarea { scrollbar-width:thin; scrollbar-color:#a3b2bc #dfe6e9; }
+@media (max-width:600px) { .quantum-creator-scope .mcqcBuilder .mcqcAnswerContent { padding:10px 8px; }.quantum-creator-scope .mcqcBuilder .mcqcOptionDetailHead { padding:8px; }.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar { overflow-x:auto; }.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor textarea { font-size:13px; } }
+
+/* Option accordion: full-width vertical sections, matching the supplied reference. */
+.quantum-creator-scope .mcqcBuilder .mcqcAnswerContent { display:flex; flex-direction:column; flex-wrap:nowrap; align-items:stretch; justify-content:flex-start; width:100%; margin:0; padding:14px 12px 16px; gap:14px; border-radius:0 0 8px 8px; }
+.quantum-creator-scope .mcqcBuilder .mcqcAnswerContent > * { width:100%; max-width:100%; min-width:0; flex:0 0 auto; align-self:stretch; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionSubLabel { justify-content:space-between; font-size:14px; line-height:22px; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionSubLabel small { margin-left:auto; font-size:12px; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor { display:flex; flex-direction:column; width:100%; padding:8px 10px 10px; box-sizing:border-box; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar { width:100%; max-width:100%; min-width:0; min-height:46px; overflow-x:auto; overflow-y:hidden; flex-wrap:nowrap; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor textarea { box-sizing:border-box; width:100%; max-width:100%; min-width:0; height:95px; min-height:95px; margin:8px 0 0; padding:12px 8px; font-size:14px; line-height:21px; }
+.quantum-creator-scope .mcqcBuilder .mcqcCorrectOption { display:flex; align-items:center; justify-content:flex-start; width:100%; gap:10px; white-space:normal; font-size:14px; line-height:22px; }
+.quantum-creator-scope .mcqcBuilder .mcqcCorrectOption input { display:block; flex:0 0 18px; width:18px; height:18px; min-width:18px; min-height:18px; margin:0; padding:0; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionDetail { display:block; width:100%; min-width:0; margin:0; border-radius:7px; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionDetailHead { width:100%; min-height:44px; padding:10px 14px; justify-content:space-between; font-size:14px; }
+.quantum-creator-scope .mcqcBuilder .mcqcDetailHeading { flex:1 1 auto; min-width:0; justify-content:flex-start; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionDetailHead small { margin-left:auto; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionDetailBody { width:100%; padding:10px 12px 14px; }
+.quantum-creator-scope .mcqcBuilder .mcqcHintChecks { width:100%; }
+@media (max-width:600px) { .quantum-creator-scope .mcqcBuilder .mcqcAnswerContent { padding:10px 8px 12px; gap:12px; }.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor { padding:7px; }.quantum-creator-scope .mcqcBuilder .mcqcOptionDetailHead { padding:9px 10px; gap:7px; }.quantum-creator-scope .mcqcBuilder .mcqcOptionDetailHead small { font-size:11px; }.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor textarea { min-height:85px; height:85px; }.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar { gap:5px; } }
+
+/* Option editors: Figma typography, compact toolbar and square selection controls. */
+.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar { display:flex; align-items:center; gap:7px; padding:6px 8px; min-height:48px; overflow-x:auto; overflow-y:hidden; scrollbar-width:thin; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar button { flex:0 0 34px; width:34px; height:34px; min-width:34px; padding:5px; font:600 16px/22px "Segoe UI",Arial,sans-serif !important; border-radius:4px; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar button.mcqcToolbarSelect { display:inline-flex; align-items:center; justify-content:space-between; flex:0 0 auto; width:auto; gap:9px; padding:5px 9px; font:400 14px/22px "Segoe UI",Arial,sans-serif !important; white-space:nowrap; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar .mcqcToolbarFont { min-width:84px; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar .mcqcToolbarSize { min-width:53px; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar .mcqcIcon { width:18px; height:18px; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor textarea { resize:none; font:400 16px/24px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionSubLabel { font:600 16px/24px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionSubLabel small { font:400 12px/20px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilder .mcqcCorrectOption,.quantum-creator-scope .mcqcBuilder .mcqcHintChecks label { font:600 14px/20px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilder .mcqcCorrectOption input[type="checkbox"],.quantum-creator-scope .mcqcBuilder .mcqcHintChecks input[type="checkbox"] { appearance:none; -webkit-appearance:none; display:grid; place-items:center; flex:0 0 24px; width:24px; height:24px; min-width:24px; min-height:24px; padding:0; margin:0; border:0; border-radius:4px; background:#DFE6E9; box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px rgba(196,196,196,.8); cursor:pointer; }
+.quantum-creator-scope .mcqcBuilder .mcqcCorrectOption input[type="checkbox"]:checked,.quantum-creator-scope .mcqcBuilder .mcqcHintChecks input[type="checkbox"]:checked { box-shadow:-4px -4px 4px #fff,4px 4px 4px rgba(196,196,196,.8); }
+.quantum-creator-scope .mcqcBuilder .mcqcCorrectOption input[type="checkbox"]:checked::after,.quantum-creator-scope .mcqcBuilder .mcqcHintChecks input[type="checkbox"]:checked::after { content:""; display:block; width:16px; height:16px; border-radius:3px; background:#2D4CC8; clip-path:polygon(0 0,100% 0,100% 100%,0 100%); }
+.quantum-creator-scope .mcqcBuilder .mcqcCorrectOption input[type="checkbox"]:checked::after { background:#2A7308; }
+.quantum-creator-scope .mcqcBuilder .mcqcCorrectOption input[type="checkbox"]:checked,.quantum-creator-scope .mcqcBuilder .mcqcHintChecks input[type="checkbox"]:checked { position:relative; }
+.quantum-creator-scope .mcqcBuilder .mcqcCorrectOption input[type="checkbox"]:checked::before,.quantum-creator-scope .mcqcBuilder .mcqcHintChecks input[type="checkbox"]:checked::before { content:""; position:absolute; left:8px; top:6px; width:6px; height:10px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); z-index:1; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionDetailHead { font:600 16px/24px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionDetailHead small { font:400 12px/20px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionDetailHead .mcqcIcon { flex-shrink:0; }
+@media (max-width:700px) { .quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar { gap:5px; padding:5px; }.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar button { flex-basis:30px; width:30px; min-width:30px; height:30px; }.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar button.mcqcToolbarSelect { padding-inline:7px; font-size:12px; }.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar .mcqcToolbarFont { min-width:74px; }.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar .mcqcToolbarSize { min-width:46px; }.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor textarea { font-size:14px; line-height:22px; }.quantum-creator-scope .mcqcBuilder .mcqcOptionDetailHead { font-size:14px; } }
+
+/* Main question editor: same Segoe UI, family and size controls as option editors. */
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar { display:flex; align-items:center; gap:6px; min-width:0; min-height:45px; padding:5px 7px; overflow-x:auto; overflow-y:hidden; flex-wrap:nowrap; scrollbar-width:thin; scrollbar-color:#aab8c1 #DFE6E9; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar button { flex:0 0 32px; width:32px; height:32px; min-width:32px; padding:5px; border:0; border-radius:3px; background:#DFE6E9; box-shadow:-2px -2px 2px #fff,2px 2px 2px #C4C4C4; font:600 16px/22px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar button.mcqcToolbarSelect { flex:0 0 auto; width:auto; display:inline-flex; align-items:center; justify-content:space-between; gap:8px; padding:4px 9px; font:400 14px/22px "Segoe UI",Arial,sans-serif !important; white-space:nowrap; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcToolbarFont { min-width:83px; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcToolbarSize { min-width:52px; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar .mcqcIcon { width:18px; height:18px; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface textarea { font:400 16px/24px "Segoe UI",Arial,sans-serif !important; resize:none; }
+.quantum-creator-scope .mcqcBuilder .mcqcDetailHeading { gap:9px; font:600 16px/24px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilder .mcqcOptionDetailHead { gap:12px; }
+/* Uniform rich-text editors: question, option text, feedback, explanation and hint. */
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor { width:100%; min-width:0; padding:8px; border-radius:8px; background:#DFE6E9; box-shadow:inset 3px 3px 5px #C4C4C4,inset -3px -3px 5px #fff; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar { display:flex; align-items:center; flex-wrap:wrap; gap:7px; width:100%; min-width:0; min-height:46px; padding:6px 8px; overflow:visible; border-radius:5px; background:#DFE6E9; box-shadow:-3px -3px 4px #fff,3px 3px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar button,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar button { display:inline-flex; align-items:center; justify-content:center; flex:0 0 32px; width:32px; min-width:32px; height:32px; padding:5px; border:0; border-radius:4px; background:#DFE6E9; box-shadow:-2px -2px 2px #fff,2px 2px 2px #C4C4C4; font:600 16px/22px "Segoe UI",Arial,sans-serif !important; cursor:pointer; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar button.mcqcToolbarSelect,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar button.mcqcToolbarSelect { display:inline-flex; justify-content:space-between; align-items:center; flex:0 0 auto; width:auto; gap:8px; padding:4px 9px; font:400 14px/22px "Segoe UI",Arial,sans-serif !important; white-space:nowrap; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcToolbarFont,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcToolbarFont { min-width:84px; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcToolbarSize,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcToolbarSize { min-width:52px; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar .mcqcIcon,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar .mcqcIcon { width:18px; height:18px; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface textarea,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor textarea { display:block; box-sizing:border-box; width:100%; max-width:100%; min-width:0; height:95px; min-height:95px; margin:8px 0 0; padding:12px 8px; border:0; border-radius:4px; background:transparent; box-shadow:none; outline:0; resize:none; color:#374151; font:400 16px/24px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface textarea:focus-visible,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor textarea:focus-visible { outline:2px solid #2D4CC8; outline-offset:-2px; }
+@media (max-width:700px) { .quantum-creator-scope .mcqcBuilder .mcqcEditorSurface,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor { padding:6px; } .quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar { gap:5px; padding:5px; } .quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar button,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar button { width:30px; min-width:30px; height:30px; flex-basis:30px; } .quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar button.mcqcToolbarSelect,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar button.mcqcToolbarSelect { padding:4px 7px; font-size:12px; flex-basis:auto; } .quantum-creator-scope .mcqcBuilder .mcqcEditorSurface textarea,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor textarea { min-height:90px; height:90px; font-size:14px; line-height:22px; } }
+/* Keep every rich-text toolbar on exactly one row, including Hint. */
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar { display:flex; flex-direction:row; flex-wrap:nowrap; align-items:center; justify-content:flex-start; gap:10px; min-width:0; width:100%; min-height:44px; padding:5px 6px; overflow-x:auto; overflow-y:hidden; white-space:nowrap; scrollbar-width:thin; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar button,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar button { flex:0 0 31px; width:31px; min-width:31px; height:32px; padding:4px; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar button.mcqcToolbarSelect,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar button.mcqcToolbarSelect { flex:0 0 auto; width:auto; white-space:nowrap; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcToolbarFont,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcToolbarFont { min-width:80px; }
+.quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcToolbarSize,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcToolbarSize { min-width:50px; }
+@media (max-width:700px) { .quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar { flex-wrap:nowrap; gap:4px; padding:5px; } .quantum-creator-scope .mcqcBuilder .mcqcEditorSurface .mcqcOptionToolbar button,.quantum-creator-scope .mcqcBuilder .mcqcOptionEditor .mcqcOptionToolbar button { flex:0 0 30px; min-width:30px; width:30px; } }
+/* Remove Option: raised action aligned to the right edge of the expanded answer. */
+.quantum-creator-scope .mcqcBuilder .mcqcAnswerContent .mcqcRemoveOption { display:inline-flex; align-items:center; justify-content:center; align-self:flex-end; width:max-content; max-width:100%; min-height:36px; margin:6px 0 0 auto; padding:7px 16px; border:1px solid #d95e23; border-radius:8px; background:#DFE6E9; color:#c9560e; box-shadow:-3px -3px 4px #fff,3px 3px 5px #C4C4C4; font:600 14px/20px 'Segoe UI',Arial,sans-serif !important; white-space:nowrap; cursor:pointer; }
+.quantum-creator-scope .mcqcBuilder .mcqcAnswerContent .mcqcRemoveOption:active { box-shadow:inset -2px -2px 3px #fff,inset 2px 2px 3px #C4C4C4; }
+/* Available previous/next arrows must be dark and visible; only disabled arrows are faded. */
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:not(:disabled) { opacity:1; color:#141B34; }
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:not(:disabled) .mcqcIcon { opacity:1!important; visibility:visible!important; filter:brightness(0) saturate(100%) invert(8%) sepia(24%) saturate(1258%) hue-rotate(190deg) brightness(95%) contrast(93%)!important; }
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:disabled { opacity:.43; cursor:not-allowed; }
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:disabled .mcqcIcon { opacity:.5; filter:grayscale(1); }
+@media(max-width:600px) { .quantum-creator-scope .mcqcBuilder .mcqcAnswerContent .mcqcRemoveOption { min-height:34px; padding:6px 12px; font-size:13px; } }
+/* Question navigation: first question has a softly dimmed Previous arrow;
+   from question 2 onward Previous and Next have identical enabled contrast. */
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:disabled { opacity:1; background:#DFE6E9; box-shadow:-3px -3px 4px #fff,3px 3px 4px #C4C4C4; cursor:not-allowed; }
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:disabled .mcqcIcon { opacity:.58!important; visibility:visible!important; filter:grayscale(1) brightness(0) saturate(100%) invert(65%) sepia(6%) saturate(320%) hue-rotate(165deg)!important; }
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:not(:disabled) { opacity:1; background:#DFE6E9; box-shadow:-3px -3px 4px #fff,3px 3px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:not(:disabled) .mcqcIcon { opacity:1!important; visibility:visible!important; filter:brightness(0) saturate(100%) invert(8%) sepia(24%) saturate(1258%) hue-rotate(190deg) brightness(95%) contrast(93%)!important; }
+/* Previous arrow on Question 1: same clearly visible dark icon as the Next arrow; button stays disabled. */
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:disabled .mcqcIcon { opacity:1!important; visibility:visible!important; filter:brightness(0) saturate(100%) invert(9%) sepia(16%) saturate(1102%) hue-rotate(183deg) brightness(94%) contrast(95%)!important; }
+/* Once Previous is enabled it gets the same dark arrow treatment as Next. */
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:not(:disabled) .mcqcIcon { opacity:1!important; visibility:visible!important; filter:brightness(0) saturate(100%) invert(9%) sepia(16%) saturate(1102%) hue-rotate(183deg) brightness(94%) contrast(95%)!important; }
+
+/* Both navigation arrows always use the same visible appearance. */
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav,.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:not(:disabled) { opacity:1!important; color:#141B34; cursor:pointer; }
+.quantum-creator-scope .mcqcBuilder .mcqcRoundNav .mcqcIcon,.quantum-creator-scope .mcqcBuilder .mcqcRoundNav:not(:disabled) .mcqcIcon { opacity:1!important; visibility:visible!important; filter:brightness(0) saturate(100%) invert(9%) sepia(16%) saturate(1102%) hue-rotate(183deg) brightness(94%) contrast(95%)!important; }
+
+/* Create Questions breadcrumb: no preceding back-icon button; links remain responsive. */
+.quantum-creator-scope .mcqcAppShell .mcqcBuilderCrumb > .mcqcBreadcrumbReturn,
+.quantum-creator-scope .mcqcAppShell .mcqcBreadcrumb > .mcqcBreadcrumbReturn { display:none!important; }
+.quantum-creator-scope .mcqcBuilderCrumb { min-width:0; flex-wrap:wrap; }
+@media (max-width:600px) { .quantum-creator-scope .mcqcBuilderCrumb { column-gap:6px; row-gap:8px; } }
+
+/* Connected Preview Questions — scoped so the original builder remains unchanged. */
+.quantum-creator-scope .mcqcPreview { color:#374151; font:400 14px/1.5 "Segoe UI",Arial,sans-serif !important; min-width:0; }
+.quantum-creator-scope .mcqcPreviewCrumb { display:flex; align-items:center; flex-wrap:wrap; gap:9px; margin:0 0 18px; font-size:14px; }
+.quantum-creator-scope .mcqcPreviewCrumb a,.quantum-creator-scope .mcqcPreviewCrumb button { border:0; padding:0; background:transparent; color:#374151; text-decoration:none; font:inherit !important; cursor:pointer; }
+.quantum-creator-scope .mcqcPreviewCrumb strong { color:#2D4CC8; }
+.quantum-creator-scope .mcqcPreviewCard { padding:20px; border-radius:16px; background:#DFE6E9; box-shadow:-4px -4px 5px #fff,4px 4px 5px #C4C4C4; min-width:0; }
+.quantum-creator-scope .mcqcPreviewCard>header h2 { font-size:18px; margin:0 0 4px; }.quantum-creator-scope .mcqcPreviewCard>header p { margin:0 0 14px; }
+.quantum-creator-scope .mcqcPreviewControls { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:18px; margin-bottom:16px; }
+.quantum-creator-scope .mcqcPreviewTotals { display:flex; flex-wrap:wrap; gap:10px; padding:10px; border-radius:9px; box-shadow:-3px -3px 5px #fff,3px 3px 5px #C4C4C4; }
+.quantum-creator-scope .mcqcPreviewTotals>div { min-width:100px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid #D0D7DB; border-radius:5px; padding:6px 10px; }
+.quantum-creator-scope .mcqcPreviewTotals strong { font-size:14px; }.quantum-creator-scope .mcqcPreviewTotals span { font-size:12px; }.quantum-creator-scope .mcqcPreviewTotals .mcqcPreviewReady { min-width:155px; flex-direction:row; gap:8px; justify-content:flex-start; }
+.quantum-creator-scope .mcqcPreviewReady strong,.quantum-creator-scope .mcqcGreen { color:#2A7308; }.quantum-creator-scope .mcqcPreviewReady small { display:block; }.quantum-creator-scope .mcqcOrange { color:#CC670D; }
+.quantum-creator-scope .mcqcPreviewTools { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }.quantum-creator-scope .mcqcPreviewFilter { position:relative; }.quantum-creator-scope .mcqcPreviewFilter>button,.quantum-creator-scope .mcqcPreviewLearner { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:38px; padding:7px 14px; border:0; border-radius:6px; background:#DFE6E9; box-shadow:inset -3px -3px 3px #fff,inset 3px 3px 3px #C4C4C4; font:inherit !important; color:#374151; cursor:pointer; }
+.quantum-creator-scope .mcqcPreviewLearner { box-shadow:-3px -3px 4px #fff,3px 3px 4px #C4C4C4; color:#2D4CC8; font-weight:600; }.quantum-creator-scope .mcqcPreviewFilter>div { position:absolute; top:100%; left:0; z-index:20; min-width:160px; padding:6px; border-radius:8px; background:#DFE6E9; box-shadow:3px 3px 7px #C4C4C4,-3px -3px 7px #fff; }.quantum-creator-scope .mcqcPreviewFilter>div button { display:block; width:100%; border:0; padding:9px; text-align:left; background:transparent; cursor:pointer; }
+.quantum-creator-scope .mcqcPreviewQuestion { padding:16px; border:1px solid #B4BDC2; border-radius:16px; min-width:0; }.quantum-creator-scope .mcqcPreviewMeta { display:flex; justify-content:flex-end; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px; }.quantum-creator-scope .mcqcPreviewMeta>span,.quantum-creator-scope .mcqcPreviewMeta>button { min-height:31px; padding:6px 12px; border:1px solid #C6CFD4; border-radius:22px; background:#DFE6E9; font-size:12px; }.quantum-creator-scope .mcqcPreviewMeta>button { display:flex; align-items:center; gap:6px; cursor:pointer; color:#374151; }
+.quantum-creator-scope .mcqcPreviewPanel { margin-bottom:17px; border-radius:6px; overflow:hidden; box-shadow:-3px -3px 4px #fff,3px 3px 4px #C4C4C4; }.quantum-creator-scope .mcqcPreviewPanel>h3,.quantum-creator-scope .mcqcPreviewSectionHead { width:100%; margin:0; padding:12px 16px; text-align:left; font:600 14px/21px "Segoe UI",Arial,sans-serif !important; background:#DFE6E9; border:0; box-shadow:0 2px 4px #C4C4C4; color:#374151; }.quantum-creator-scope .mcqcPreviewPanel>p { margin:0; min-height:58px; padding:18px 16px; font-size:14px; }.quantum-creator-scope .mcqcPreviewSectionHead { display:flex; align-items:center; justify-content:space-between; cursor:pointer; }
+.quantum-creator-scope .mcqcPreviewAnswers,.quantum-creator-scope .mcqcPreviewLearning { padding:12px; display:grid; gap:8px; }.quantum-creator-scope .mcqcPreviewAnswer { display:flex; gap:9px; align-items:center; min-width:0; padding:8px 12px; border:1px solid #D3DBD9; border-radius:5px; box-shadow:-2px -2px 3px #fff,2px 2px 3px #C4C4C4; }.quantum-creator-scope .mcqcPreviewAnswer.correct { border-color:#6C9C58; color:#28750B; }.quantum-creator-scope .mcqcPreviewAnswer.incorrect { color:#A4333D; }.quantum-creator-scope .mcqcAnswerLetter { padding:1px 6px; box-shadow:inset 1px 1px 2px #C4C4C4,inset -1px -1px 2px #fff; }.quantum-creator-scope .mcqcPreviewAnswerText { flex:1; min-width:0; overflow-wrap:anywhere; }.quantum-creator-scope .mcqcPreviewAnswer small { padding:3px 8px; border:1px solid currentColor; border-radius:15px; white-space:nowrap; }
+.quantum-creator-scope .mcqcPreviewLearning section { padding:12px; border-radius:6px; box-shadow:-2px -2px 4px #fff,2px 2px 4px #C4C4C4; }.quantum-creator-scope .mcqcPreviewLearning h4 { display:flex; align-items:center; gap:8px; margin:0 0 12px; font-size:14px; }.quantum-creator-scope .mcqcPreviewLearning section>p { margin:8px 0; padding:0 24px; white-space:pre-wrap; }.quantum-creator-scope .mcqcPreviewFeedbackItem { margin:7px 0 7px 26px; border:1px solid #D0D7DB; }.quantum-creator-scope .mcqcPreviewFeedbackItem>button { width:100%; display:flex; align-items:center; gap:9px; border:0; padding:8px 10px; background:#DFE6E9; color:#374151; font:inherit !important; text-align:left; cursor:pointer; }.quantum-creator-scope .mcqcPreviewFeedbackItem>button .mcqcIcon:last-child { margin-left:auto; }.quantum-creator-scope .mcqcPreviewFeedbackItem p { padding:12px 14px; margin:0; white-space:pre-wrap; }
+.quantum-creator-scope .mcqcPreviewSettings { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; padding:14px; }.quantum-creator-scope .mcqcPreviewSettings>div { min-width:0; }.quantum-creator-scope .mcqcPreviewSettings>div>span { display:block; margin-bottom:7px; font-size:13px; }.quantum-creator-scope .mcqcPreviewSettings strong { display:flex; align-items:center; gap:8px; min-height:38px; padding:7px 9px; border-radius:5px; box-shadow:inset -3px -3px 3px #fff,inset 3px 3px 3px #C4C4C4; font-size:13px; font-weight:600; overflow-wrap:anywhere; }.quantum-creator-scope .mcqcPreviewSettings .mcqcIcon { flex-shrink:0; }
+.quantum-creator-scope .mcqcPreviewBottom { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-top:20px; }.quantum-creator-scope .mcqcPreviewBottom button,.quantum-creator-scope .mcqcPreviewEmpty button { min-height:40px; border:0; border-radius:25px; padding:9px 18px; background:#DFE6E9; box-shadow:-3px -3px 5px #fff,3px 3px 5px #C4C4C4; color:#374151; font:600 14px "Segoe UI",Arial,sans-serif !important; cursor:pointer; }.quantum-creator-scope .mcqcPreviewBottom .mcqcPreviewSave { color:#2D4CC8; }.quantum-creator-scope .mcqcPreviewPager { display:flex; align-items:center; gap:10px; }.quantum-creator-scope .mcqcPreviewPager button:disabled { opacity:.45; cursor:default; }.quantum-creator-scope .mcqcPreviewEmpty { text-align:center; padding:25px; }
+@media(max-width:850px) { .quantum-creator-scope .mcqcPreviewSettings { grid-template-columns:repeat(2,minmax(0,1fr)); }.quantum-creator-scope .mcqcPreviewControls { align-items:flex-start; } }
+@media(max-width:600px) { .quantum-creator-scope .mcqcPreviewCard { padding:12px; }.quantum-creator-scope .mcqcPreviewQuestion { padding:10px; }.quantum-creator-scope .mcqcPreviewCrumb { font-size:12px; gap:5px; }.quantum-creator-scope .mcqcPreviewControls { gap:12px; }.quantum-creator-scope .mcqcPreviewTotals { width:100%; }.quantum-creator-scope .mcqcPreviewTotals>div { flex:1 1 75px; min-width:0; }.quantum-creator-scope .mcqcPreviewTotals .mcqcPreviewReady { flex:1 1 135px; }.quantum-creator-scope .mcqcPreviewTools { width:100%; gap:9px; }.quantum-creator-scope .mcqcPreviewSettings { gap:10px; }.quantum-creator-scope .mcqcPreviewAnswer small { font-size:10px; white-space:normal; }.quantum-creator-scope .mcqcPreviewAnswer { padding:8px 6px; gap:5px; }.quantum-creator-scope .mcqcPreviewBottom { justify-content:center; }.quantum-creator-scope .mcqcPreviewFeedbackItem { margin-left:0; }.quantum-creator-scope .mcqcPreviewLearning,.quantum-creator-scope .mcqcPreviewAnswers { padding:8px; }.quantum-creator-scope .mcqcPreviewLearning section { padding:9px; } }
+
+/* Figma Preview Questions corrections — scoped to preview; builder and shared layout untouched. */
+.quantum-creator-scope .mcqcPreview { font-family:"Segoe UI",Arial,sans-serif !important; font-size:16px; line-height:1.5; color:#374151; }
+.quantum-creator-scope .mcqcPreviewCrumb { font-size:16px; line-height:24px; gap:8px; margin-bottom:20px; letter-spacing:.02em; }
+.quantum-creator-scope .mcqcPreviewCard { border-radius:16px; padding:24px; box-shadow:-8px -8px 16px #FFFFFF,8px 8px 16px #C4C4C4; }
+.quantum-creator-scope .mcqcPreviewCard>header h2 { font-size:20px; line-height:28px; font-weight:700; margin-bottom:7px; }
+.quantum-creator-scope .mcqcPreviewCard>header p { font-size:16px; line-height:24px; margin-bottom:18px; }
+.quantum-creator-scope .mcqcPreviewControls { margin-bottom:20px; gap:20px; }
+.quantum-creator-scope .mcqcPreviewTotals { padding:8px 12px; gap:12px; box-shadow:-4px -4px 8px #fff,4px 4px 8px #C4C4C4; }
+.quantum-creator-scope .mcqcPreviewTotals>div { min-height:55px; }.quantum-creator-scope .mcqcPreviewTotals strong { font-size:16px; }.quantum-creator-scope .mcqcPreviewTotals span { font-size:14px; }
+.quantum-creator-scope .mcqcPreviewQuestion { padding:18px; border:1px solid #B7C1C5; border-radius:16px; }
+.quantum-creator-scope .mcqcPreviewMeta { gap:16px; margin-bottom:20px; }.quantum-creator-scope .mcqcPreviewMeta>span,.quantum-creator-scope .mcqcPreviewMeta>button { font-size:14px; }
+.quantum-creator-scope .mcqcPreviewPanel { margin-bottom:20px; box-shadow:-4px -4px 8px #fff,4px 4px 8px #C4C4C4; }
+.quantum-creator-scope .mcqcPreviewPanel>h3,.quantum-creator-scope .mcqcPreviewSectionHead { font:600 18px/26px "Segoe UI",Arial,sans-serif !important; padding:13px 16px; box-shadow:0 3px 5px #C4C4C4; }
+.quantum-creator-scope .mcqcPreviewPanel>p { font-size:16px; line-height:24px; padding:18px 16px; }
+.quantum-creator-scope .mcqcPreviewAnswers,.quantum-creator-scope .mcqcPreviewLearning { padding:14px; gap:12px; }
+.quantum-creator-scope .mcqcPreviewAnswer { min-height:45px; padding:9px 13px; font-size:16px; gap:12px; box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcPreviewAnswer.correct { border-color:#6A994E; color:#267208; }.quantum-creator-scope .mcqcPreviewAnswer.incorrect { color:#B62B38; }
+.quantum-creator-scope .mcqcPreviewAnswer small { font-size:12px; line-height:18px; }
+.quantum-creator-scope .mcqcPreviewLearning section { padding:15px; box-shadow:-4px -4px 8px #fff,4px 4px 8px #C4C4C4; }
+.quantum-creator-scope .mcqcPreviewLearning h4 { font-size:18px; font-weight:600; line-height:26px; gap:10px; }
+.quantum-creator-scope .mcqcPreviewFeedbackItem { margin:9px 0 9px 26px; border:1px solid #D1D6D9; }
+.quantum-creator-scope .mcqcPreviewFeedbackItem>button { padding:12px; gap:11px; font:400 16px/24px "Segoe UI",Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcPreviewFeedbackItem p,.quantum-creator-scope .mcqcPreviewLearning section>p { font-size:16px; line-height:24px; }
+.quantum-creator-scope .mcqcPreviewSettings { gap:16px; padding:16px; }.quantum-creator-scope .mcqcPreviewSettings>div>span { font-size:16px; margin-bottom:9px; }
+.quantum-creator-scope .mcqcPreviewSettings strong { min-height:48px; font:600 16px/24px "Segoe UI",Arial,sans-serif !important; padding:9px 12px; box-shadow:inset -4px -4px 4px #FFFFFF,inset 4px 4px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcPreviewBottom { justify-content:space-between; margin-top:22px; }.quantum-creator-scope .mcqcPreviewBottom button { min-height:48px; padding:10px 22px; font-size:18px; box-shadow:-4px -4px 4px #FFFFFF,4px 4px 8px #C4C4C4; }
+.quantum-creator-scope .mcqcPreviewStatusIcon { display:inline-grid; place-items:center; flex:0 0 auto; border:2px solid currentColor; border-radius:50%; font-family:"Segoe UI",Arial,sans-serif !important; font-weight:800; line-height:1; background:#DFE6E9; box-shadow:-2px -2px 3px #fff,2px 2px 3px #C4C4C4; }
+.quantum-creator-scope .mcqcPreviewStatusIcon.is-correct { color:#287B10; }.quantum-creator-scope .mcqcPreviewStatusIcon.is-wrong { color:#C12A3A; }
+.quantum-creator-scope .mcqcPreviewFeedbackItem .mcqcPreviewStatusIcon,.quantum-creator-scope .mcqcPreviewLearning h4 .mcqcPreviewStatusIcon { opacity:1; }
+@media(max-width:850px) { .quantum-creator-scope .mcqcPreviewSettings { grid-template-columns:repeat(2,minmax(0,1fr)); }.quantum-creator-scope .mcqcPreviewCard { padding:18px; } }
+@media(max-width:600px) { .quantum-creator-scope .mcqcPreviewCard { padding:12px; }.quantum-creator-scope .mcqcPreviewQuestion { padding:10px; }.quantum-creator-scope .mcqcPreviewCrumb { font-size:12px; line-height:20px; }.quantum-creator-scope .mcqcPreviewPanel>h3,.quantum-creator-scope .mcqcPreviewSectionHead { font-size:15px; line-height:22px; padding:11px 12px; }.quantum-creator-scope .mcqcPreviewLearning h4 { font-size:15px; line-height:22px; }.quantum-creator-scope .mcqcPreviewAnswer,.quantum-creator-scope .mcqcPreviewFeedbackItem>button,.quantum-creator-scope .mcqcPreviewFeedbackItem p,.quantum-creator-scope .mcqcPreviewLearning section>p { font-size:13px; line-height:19px; }.quantum-creator-scope .mcqcPreviewAnswer { gap:6px; padding:7px; }.quantum-creator-scope .mcqcPreviewAnswer small { font-size:10px; }.quantum-creator-scope .mcqcPreviewSettings { grid-template-columns:minmax(0,1fr); gap:10px; }.quantum-creator-scope .mcqcPreviewSettings>div>span,.quantum-creator-scope .mcqcPreviewSettings strong { font-size:14px; }.quantum-creator-scope .mcqcPreviewBottom button { font-size:14px; min-height:44px; }.quantum-creator-scope .mcqcPreviewMeta { gap:7px; }.quantum-creator-scope .mcqcPreviewMeta>span,.quantum-creator-scope .mcqcPreviewMeta>button { font-size:11px; }.quantum-creator-scope .mcqcPreviewTotals>div { min-width:0; }.quantum-creator-scope .mcqcPreviewLearning section { padding:10px; } }
+
+/* Preview-only Figma measurements: compact settings, pills, status glyphs. */
+.quantum-creator-scope .mcqcPreview, .quantum-creator-scope .mcqcPreview button {font-family:"Segoe UI",Arial,sans-serif !important;}
+.quantum-creator-scope .mcqcPreviewReadyCheck {display:grid;place-items:center;flex:0 0 18px;width:18px;height:18px;border-radius:2px;color:#fff;background:#2A7308;font:700 13px/18px "Segoe UI",Arial,sans-serif !important;box-shadow:-2px -2px 2px #fff,2px 2px 2px rgba(196,196,196,.8);}
+.quantum-creator-scope .mcqcPreviewReady {display:flex;align-items:center;gap:8px;}
+.quantum-creator-scope .mcqcPreviewReady strong {font-weight:600;color:#2A7308;}
+.quantum-creator-scope .mcqcPreviewMeta {display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:24px;}
+.quantum-creator-scope .mcqcPreviewMeta > span,.quantum-creator-scope .mcqcPreviewMeta > button {display:inline-flex;align-items:center;justify-content:center;min-height:40px;height:40px;padding:0 14px;border:0;border-radius:32px;background:#DFE6E9;box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4;color:#2F3547;font:400 14px/20px "Segoe UI",Arial,sans-serif !important;letter-spacing:.03em;white-space:nowrap;}
+.quantum-creator-scope .mcqcPreviewMeta > span:first-child {min-width:142px;}.quantum-creator-scope .mcqcPreviewMeta > span:nth-child(2) {min-width:165px;gap:4px;}.quantum-creator-scope .mcqcPreviewMeta > button {min-width:81px;gap:8px;cursor:pointer;}
+.quantum-creator-scope .mcqcPreviewMeta b.mcqcGreen {color:#2A7308;font-weight:600;}.quantum-creator-scope .mcqcPreviewMeta b.mcqcOrange {font-weight:600;}
+.quantum-creator-scope .mcqcPreviewStatusIcon {width:24px!important;height:24px!important;border:0!important;border-radius:50%;background:#DFE6E9;box-shadow:4px 4px 4px #C4C4C4,-4px -4px 4px #fff;font:800 15px/24px "Segoe UI",Arial,sans-serif!important;text-align:center;opacity:1!important;}
+.quantum-creator-scope .mcqcPreviewStatusIcon.is-correct {color:#fff;background:radial-gradient(circle at center,#2A7308 0 49%,#DFE6E9 53% 100%);}
+.quantum-creator-scope .mcqcPreviewStatusIcon.is-wrong {color:#fff;background:radial-gradient(circle at center,#A91E2C 0 49%,#DFE6E9 53% 100%);}
+.quantum-creator-scope .mcqcPreviewAnswer.incorrect .mcqcPreviewStatusIcon {background:#DFE6E9;color:#C6C6C9;box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4;font-size:0!important;}
+.quantum-creator-scope .mcqcPreviewAnswer.incorrect .mcqcPreviewStatusIcon::after {content:"";width:12px;height:12px;border:1.5px solid #C6C6C9;border-radius:50%;display:block;margin:6px auto;}
+.quantum-creator-scope .mcqcPreviewFeedbackItem {margin:8px 0 8px 26px;border:0;border-radius:4px;background:#DFE6E9;box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4;overflow:hidden;}
+.quantum-creator-scope .mcqcPreviewFeedbackItem > button {display:flex;align-items:center;min-height:44px;width:100%;padding:8px 14px;gap:12px;background:#DFE6E9;box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4;font:600 16px/24px "Segoe UI",Arial,sans-serif !important;}
+.quantum-creator-scope .mcqcPreviewFeedbackItem > button .mcqcIcon {margin-left:auto;opacity:1;}
+.quantum-creator-scope .mcqcPreviewFeedbackItem > p {margin:0;padding:15px 30px;font:400 14px/22px "Segoe UI",Arial,sans-serif !important;letter-spacing:.02em;}
+.quantum-creator-scope .mcqcPreviewSettings {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;padding:14px 16px;align-items:start;}
+.quantum-creator-scope .mcqcPreviewSettings > div {min-width:0;}.quantum-creator-scope .mcqcPreviewSettings > div > span {font:400 14px/20px "Segoe UI",Arial,sans-serif !important;margin-bottom:7px;letter-spacing:.02em;}
+.quantum-creator-scope .mcqcPreviewSettings strong {min-height:40px;display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:4px;background:#DFE6E9;box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4;font:600 14px/20px "Segoe UI",Arial,sans-serif !important;overflow-wrap:anywhere;}
+.quantum-creator-scope .mcqcPreviewSettings strong .mcqcIcon {width:18px;height:18px;flex:0 0 18px;visibility:visible;opacity:1;}
+@media(max-width:900px) {.quantum-creator-scope .mcqcPreviewSettings {grid-template-columns:repeat(3,minmax(0,1fr));}.quantum-creator-scope .mcqcPreviewMeta {gap:10px;}}
+@media(max-width:600px) {.quantum-creator-scope .mcqcPreviewSettings {grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:12px;}.quantum-creator-scope .mcqcPreviewSettings > div > span {font-size:12px;}.quantum-creator-scope .mcqcPreviewSettings strong {font-size:12px;min-height:40px;padding:7px;}.quantum-creator-scope .mcqcPreviewMeta {justify-content:flex-start;gap:8px;}.quantum-creator-scope .mcqcPreviewMeta > span,.quantum-creator-scope .mcqcPreviewMeta > button {font-size:12px;min-height:36px;height:36px;padding:0 10px;min-width:0!important;}.quantum-creator-scope .mcqcPreviewFeedbackItem {margin-left:0;}.quantum-creator-scope .mcqcPreviewFeedbackItem > button {font-size:13px;padding:8px;}.quantum-creator-scope .mcqcPreviewFeedbackItem > p {padding:12px;font-size:13px;}}
+@media(max-width:370px) {.quantum-creator-scope .mcqcPreviewSettings {grid-template-columns:minmax(0,1fr);}}
+
+/* Figma status marks: raised 24px circle, green tick / red cross; 18px Ready square. */
+.quantum-creator-scope .mcqcPreview .mcqcPreviewStatusIcon {position:relative;display:inline-grid;place-items:center;width:24px!important;height:24px!important;flex:0 0 24px;border:0!important;border-radius:50%;background:#DFE6E9!important;box-shadow:4px 4px 4px #C4C4C4,-4px -4px 4px #FFFFFF!important;opacity:1!important;font-size:0!important;}
+.quantum-creator-scope .mcqcPreview .mcqcPreviewStatusIcon::before {content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:#2A7308;}
+.quantum-creator-scope .mcqcPreview .mcqcPreviewStatusIcon.is-correct::after {content:"";position:absolute;width:7px;height:4px;border-left:1.8px solid #fff;border-bottom:1.8px solid #fff;transform:translateY(-1px) rotate(-45deg);}
+.quantum-creator-scope .mcqcPreview .mcqcPreviewStatusIcon.is-wrong::before {background:#A91E2C;}
+.quantum-creator-scope .mcqcPreview .mcqcPreviewStatusIcon.is-wrong::after {content:"×";position:absolute;inset:0;display:grid;place-items:center;color:#FFFFFF;font:700 14px/24px "Segoe UI",Arial,sans-serif !important;}
+.quantum-creator-scope .mcqcPreview .mcqcPreviewAnswer.incorrect .mcqcPreviewStatusIcon {background:#DFE6E9!important;box-shadow:inset -2px -2px 2px #FFFFFF,inset 2px 2px 2px #C4C4C4!important;}
+.quantum-creator-scope .mcqcPreview .mcqcPreviewAnswer.incorrect .mcqcPreviewStatusIcon::before {width:12px;height:12px;background:transparent;border:1.5px solid #C6C6C9;}
+.quantum-creator-scope .mcqcPreview .mcqcPreviewAnswer.incorrect .mcqcPreviewStatusIcon::after {content:none;}
+.quantum-creator-scope .mcqcPreview .mcqcPreviewReadyCheck {position:relative;display:inline-grid;place-items:center;width:18px;height:18px;flex:0 0 18px;border-radius:2px;background:#DFE6E9;box-shadow:-2px -2px 2px #fff,2px 2px 2px rgba(196,196,196,.8);font-size:0;}
+.quantum-creator-scope .mcqcPreview .mcqcPreviewReadyCheck::before {content:"";width:14px;height:14px;background:#2A7308;border-radius:2px;}
+.quantum-creator-scope .mcqcPreview .mcqcPreviewReadyCheck::after {content:"";position:absolute;width:7px;height:4px;border-left:1.5px solid #FFFFFF;border-bottom:1.5px solid #FFFFFF;transform:translateY(-1px) rotate(-45deg);}
+
+/* Preview Question Settings: four fields on row one; Tags on row two. */
+.quantum-creator-scope .mcqcPreviewSettings { grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
+.quantum-creator-scope .mcqcPreviewSettings > div:nth-child(4) { grid-column:1 / span 2; grid-row:2; } /* Tags */
+.quantum-creator-scope .mcqcPreviewSettings > div:nth-child(5) { grid-column:4; grid-row:1; } /* Mandatory */
+@media (max-width:900px) {
+  .quantum-creator-scope .mcqcPreviewSettings { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  .quantum-creator-scope .mcqcPreviewSettings > div:nth-child(4) { grid-column:1 / -1; grid-row:3; }
+  .quantum-creator-scope .mcqcPreviewSettings > div:nth-child(5) { grid-column:2; grid-row:2; }
+}
+@media (max-width:480px) {
+  .quantum-creator-scope .mcqcPreviewSettings { grid-template-columns:minmax(0,1fr); }
+  .quantum-creator-scope .mcqcPreviewSettings > div:nth-child(4) { grid-column:1; grid-row:5; }
+  .quantum-creator-scope .mcqcPreviewSettings > div:nth-child(5) { grid-column:1; grid-row:4; }
+}
+
+/* Center the wrong-feedback cross geometrically inside its raised circle. */
+.quantum-creator-scope .mcqcPreview .mcqcPreviewStatusIcon.is-wrong::after {content:"";inset:auto;left:50%;top:50%;display:block;width:10px;height:10px;transform:translate(-50%,calc(-30% - 2px));background:linear-gradient(45deg,transparent calc(50% - 1px),#fff calc(50% - 1px),#fff calc(50% + 1px),transparent calc(50% + 1px)),linear-gradient(-45deg,transparent calc(50% - 1px),#fff calc(50% - 1px),#fff calc(50% + 1px),transparent calc(50% + 1px));}
+
+/* Smaller wrong-answer X only; circle and shadow remain unchanged. */
+.quantum-creator-scope .mcqcPreview .mcqcPreviewStatusIcon.is-wrong::after {width:9px;height:9px;}
+
+/* Question-number scrollbar only: fixed short thumb, while the numbers remain horizontally scrollable. */
+.quantum-creator-scope .mcqcBuilder .mcqcQuestionNumbers { scrollbar-width:none; padding-bottom:5px; }
+.quantum-creator-scope .mcqcBuilder .mcqcQuestionNumbers::-webkit-scrollbar { display:none; height:0; }
+.quantum-creator-scope .mcqcNumberShortTrack { position:relative; width:100%; height:9px; margin-top:9px; border-radius:12px; background:#DFE6E9; box-shadow:inset 2px 2px 3px #C4C4C4,inset -2px -2px 3px #FFFFFF; }
+.quantum-creator-scope .mcqcNumberShortThumb { position:absolute; top:0; width:var(--mcqc-scroll-thumb, min(67px,26%)); height:9px; border-radius:12px; background:#7C878D; transition:left .08s linear; }
+@media(max-width:600px) { .quantum-creator-scope .mcqcNumberScroller { --mcqc-scroll-thumb:min(38px,26%); } }
+
+/* Question Type dropdown: matching field width, expandable reference groups. */
+.quantum-creator-scope .mcqcTypeRoot { width:100%; min-width:0; }
+.quantum-creator-scope .mcqcTypeDropdown { position:absolute; z-index:100; left:0; right:0; top:calc(100% + 7px); width:100%; min-width:0; max-height:min(490px,65vh); overflow-y:auto; overscroll-behavior:contain; padding:12px 14px; border-radius:12px; background:#DFE6E9; box-shadow:-4px -4px 8px #FFFFFF,5px 5px 10px #B8C1C6; scrollbar-width:thin; scrollbar-color:#ABB7BF #DFE6E9; }
+.quantum-creator-scope .mcqcTypeSearch { display:flex; align-items:center; gap:12px; min-width:0; min-height:52px; padding:8px 13px; border-radius:8px; background:#DFE6E9; box-shadow:inset -3px -3px 4px #FFFFFF,inset 3px 3px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcTypeSearch input { flex:1 1 0; min-width:0; width:100%; height:34px; padding:0; border:0; outline:0; background:transparent; box-shadow:none!important; font:400 16px/24px 'Segoe UI',Arial,sans-serif !important; color:#374151; }
+.quantum-creator-scope .mcqcTypeSearch input::-webkit-search-cancel-button { cursor:pointer; }
+.quantum-creator-scope .mcqcTypeGroups { margin-top:12px; }
+.quantum-creator-scope .mcqcTypeGroup { border-top:1px solid #C8D2D7; }
+.quantum-creator-scope .mcqcTypeHeading { display:flex; justify-content:space-between; align-items:center; gap:12px; width:100%; min-height:61px; padding:12px 10px; border:0; background:transparent; text-align:left; color:#2D4CC8; font:700 17px/24px 'Segoe UI',Arial,sans-serif !important; cursor:pointer; }
+.quantum-creator-scope .mcqcTypeHeading > span { min-width:0; overflow-wrap:anywhere; }
+.quantum-creator-scope .mcqcTypeHeading > .mcqcIcon { margin-left:auto; }
+.quantum-creator-scope .mcqcTypeOptions { padding:0 0 12px; }
+.quantum-creator-scope .mcqcTypeOption { display:flex; align-items:center; gap:14px; min-height:49px; width:100%; padding:9px 10px; border:0; border-radius:6px; background:transparent; text-align:left; color:#2F3547; font:400 16px/24px 'Segoe UI',Arial,sans-serif !important; cursor:pointer; }
+.quantum-creator-scope .mcqcTypeOption:hover,.quantum-creator-scope .mcqcTypeOption:focus-visible { background:rgba(255,255,255,.3); outline:0; }
+.quantum-creator-scope .mcqcTypeOption > span:last-child { min-width:0; overflow-wrap:anywhere; }
+.quantum-creator-scope .mcqcTypeOption .mcqcOptionRadio { flex:0 0 26px; width:26px; height:26px; border-radius:50%; }
+.quantum-creator-scope .mcqcTypeOption .mcqcOptionSelected::after { width:13px; height:13px; background:#2D4CC8; border-color:#2D4CC8; }
+.quantum-creator-scope .mcqcTypeEmpty { padding:12px; margin:0; font-size:14px; }
+@media(max-width:600px) { .quantum-creator-scope .mcqcTypeDropdown { max-height:min(440px,60vh); padding:10px; }.quantum-creator-scope .mcqcTypeSearch { min-height:45px; }.quantum-creator-scope .mcqcTypeSearch input { font-size:14px; }.quantum-creator-scope .mcqcTypeHeading { font-size:15px; min-height:52px; }.quantum-creator-scope .mcqcTypeOption { font-size:14px; line-height:21px; gap:10px; padding:8px; }.quantum-creator-scope .mcqcTypeOption .mcqcOptionRadio { flex-basis:24px; width:24px; height:24px; } }
+
+/* Question Type only: slightly shorter search input and visible selected tick. */
+.quantum-creator-scope .mcqcTypeSearch { min-height:44px; padding:5px 13px; }
+.quantum-creator-scope .mcqcTypeSearch input { height:30px; min-height:0; }
+.quantum-creator-scope .mcqcTypeOption .mcqcOptionSelected { position:relative; }
+.quantum-creator-scope .mcqcTypeOption .mcqcOptionSelected::after { width:17px; height:17px; border:0; background:#2D4CC8; border-radius:50%; }
+.quantum-creator-scope .mcqcTypeOption .mcqcOptionSelected::before { content:""; position:absolute; z-index:1; top:9px; left:10px; width:7px; height:5px; border-left:2px solid #fff; border-bottom:2px solid #fff; transform:rotate(-45deg); pointer-events:none; }
+@media(max-width:600px) { .quantum-creator-scope .mcqcTypeSearch { min-height:42px; padding:5px 11px; }.quantum-creator-scope .mcqcTypeSearch input { height:28px; }.quantum-creator-scope .mcqcTypeOption .mcqcOptionSelected::before { top:8px; left:9px; } }
+
+/* Combined Content save and continue, compact inline success popup. */
+.quantum-creator-scope .mcqcBuilderPageFooter .mcqcSaveContinueGroup {display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap;}
+.quantum-creator-scope .mcqcSaveSuccessToast {display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:7px 18px;border:1.5px solid #C05512;border-radius:24px;color:#C05512;background:#DFE6E9;font:600 14px/20px "Segoe UI",Arial,sans-serif !important;box-shadow:-2px -2px 3px #fff,2px 2px 3px #C4C4C4;white-space:nowrap;}
+.quantum-creator-scope .mcqcBuilderPageFooter .mcqcSaveContinueGroup .mcqcFooterContinue {min-width:190px;color:#2A7308;}
+.quantum-creator-scope .mcqcBuilderPageFooter .mcqcSaveContinueGroup .mcqcFooterContinue:disabled {opacity:.75;cursor:default;}
+@media(max-width:600px){.quantum-creator-scope .mcqcBuilderPageFooter .mcqcSaveContinueGroup{justify-content:stretch;gap:9px;}.quantum-creator-scope .mcqcSaveSuccessToast{font-size:12px;min-height:36px;padding:7px 12px;}.quantum-creator-scope .mcqcBuilderPageFooter .mcqcSaveContinueGroup .mcqcFooterContinue{min-width:0;flex:1 1 170px;}}
+
+/* Short Answer screenshot layout; existing MCQ styles above are preserved. */
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderTop{min-height:160px;align-items:flex-start;position:relative;margin-bottom:18px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderWelcome{position:absolute;left:50%;top:42px;transform:translateX(-50%);min-width:370px;min-height:104px;border:1px solid #2D4CC8;box-shadow:none;border-radius:11px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderGrid{grid-template-columns:minmax(0,1fr) 304px;gap:24px;align-items:start}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderMain{min-height:590px;padding:24px;gap:28px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcQuestionForm{padding:16px;gap:24px;border-color:#aeb6b9}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderField{gap:12px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderField>label,.quantum-creator-scope .mcqcShortBuilder .mcqcFormHeading label{font-weight:600;font-size:16px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcEditorSurface{box-shadow:inset -3px -3px 4px #fff,inset 3px 3px 5px #C4C4C4;border-radius:8px;padding:12px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcEditorSurface textarea{min-height:72px;padding:16px 4px;box-shadow:none;resize:vertical}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortToolbar{margin:0 0 8px;gap:8px;max-width:100%;background:#DFE6E9}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortAnswerTrigger{min-height:58px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortAnswerFields{display:grid;gap:12px;padding:14px;border-radius:8px;box-shadow:inset 2px 2px 4px #C4C4C4,inset -2px -2px 4px #fff}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortAnswerFields label{display:grid;gap:8px;font-size:14px;font-weight:600}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortAnswerFields textarea{width:100%;min-height:80px;padding:12px;border:0;border-radius:8px;background:#DFE6E9;color:#374151;box-shadow:inset -3px -3px 3px #fff,inset 3px 3px 3px #C4C4C4}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortAdd{display:flex;align-items:center;justify-content:center;gap:12px;align-self:center;min-height:54px;padding:10px 28px;border:1px solid #2D4CC8;border-radius:40px;background:#DFE6E9;color:#2D4CC8;font-size:20px;font-weight:600;box-shadow:-4px -4px 7px #fff,4px 4px 7px #C4C4C4;cursor:pointer}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderAside{min-height:618px;padding:16px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcAsideSection{min-height:580px;display:flex;flex-direction:column;gap:14px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcAsideSection h3{margin:0 0 4px;font-size:18px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderAside .mcqcBuilderField input[type=number]{min-height:38px;padding:6px 14px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderAside .mcqcSelectTrigger{min-height:38px;padding:7px 14px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderAside .mcqcBuilderField{gap:6px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooter{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-top:20px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooterRight{display:flex;gap:28px;align-items:center;margin-right:24%}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooter .mcqcFooterPill{min-width:150px;min-height:50px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooter .mcqcFooterContinue{color:#207600}
+@media(max-width:1000px){.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderGrid{grid-template-columns:minmax(0,1fr) 265px;gap:16px}.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooterRight{margin-right:0}}
+@media(max-width:760px){.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderTop{min-height:190px}.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderWelcome{top:65px;min-width:0;width:min(100%,370px)}.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderGrid{grid-template-columns:1fr}.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderMain,.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderAside{min-height:0}.quantum-creator-scope .mcqcShortBuilder .mcqcAsideSection{min-height:0}.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooter{flex-wrap:wrap}.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooterRight{gap:12px}.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooter .mcqcFooterPill{min-width:120px}}
+
+/* Figma Short Answer alignment refinements — scoped to Short Answer only. */
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderTop{height:178px;min-height:178px;margin-bottom:0}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderWelcome{top:52px;width:372px;min-width:0;height:104px;min-height:104px;padding:16px 18px;box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4;border:1px solid #2D4CC8}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderWelcome h2{font-size:22px;white-space:nowrap}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderGrid{grid-template-columns:minmax(0,1fr) 304px;gap:24px;align-items:start}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderMain{min-height:594px;padding:24px;gap:32px;border-radius:16px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcQuestionForm{min-height:458px;padding:16px;gap:28px;border:1px solid #AEAEAE;border-radius:16px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderField{gap:16px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcSelectTrigger{min-height:58px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcWriteField .mcqcFormHeading{width:100%;align-items:center}
+.quantum-creator-scope .mcqcShortBuilder .mcqcWriteField .mcqcFormHeading span{margin-left:auto}
+.quantum-creator-scope .mcqcShortBuilder .mcqcEditorSurface{min-height:150px;padding:14px 16px 10px;box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4}
+.quantum-creator-scope .mcqcShortBuilder .mcqcEditorSurface textarea{min-height:58px;padding:16px 0 6px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortToolbar{height:54px;align-items:center;margin:0;gap:8px;padding:6px 8px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortAddMenu{align-self:center;display:flex;justify-content:center;position:relative}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortAddMenu .mcqcAddMenuList{top:calc(100% + 8px);left:50%;transform:translateX(-50%);width:max-content;min-width:250px;z-index:30}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortAdd{min-width:230px;height:54px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderAside{min-height:618px;padding:16px;border-radius:12px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcAsideSection{min-height:582px;padding:16px 12px;gap:12px;border:1px solid #D0D5D8;border-radius:5px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcAsideSection h3{font-size:18px;margin:0 0 4px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderAside .mcqcBuilderField{gap:6px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderAside .mcqcSelectTrigger{min-height:36px;height:36px;padding:5px 14px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderAside .mcqcBuilderField input[type=number]{height:36px;min-height:36px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooter{margin-top:18px;min-height:52px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooterRight{gap:28px;margin-right:24%}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooter .mcqcFooterPill{min-height:50px}
+@media(max-width:1000px){.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderGrid{grid-template-columns:minmax(0,1fr) 265px;gap:16px}.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooterRight{margin-right:0}}
+@media(max-width:760px){.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderTop{height:190px;min-height:190px}.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderWelcome{top:65px;width:min(100%,372px)}.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderGrid{grid-template-columns:1fr}.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderMain,.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderAside,.quantum-creator-scope .mcqcShortBuilder .mcqcAsideSection{min-height:0}.quantum-creator-scope .mcqcShortBuilder .mcqcQuestionForm{min-height:0}.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooter{flex-wrap:wrap}.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooterRight{gap:12px}}
+
+/* Short Answer Figma corrections: toolbar, Answer Settings, Preview button only. */
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortToolbar{display:flex;align-items:center;justify-content:flex-start;flex-wrap:nowrap;gap:8px;width:100%;height:54px;padding:6px 12px;overflow-x:auto;overflow-y:hidden;box-sizing:border-box;white-space:nowrap;border-radius:6px;box-shadow:-3px -3px 4px #fff,3px 3px 4px #c4c4c4}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortToolbar>button{flex:0 0 36px;width:36px;min-width:36px;height:36px;padding:5px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortToolbar>button.mcqcToolbarSelect{flex:0 0 auto;width:auto;display:inline-flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;padding:5px 12px;font:400 14px/20px 'Segoe UI',Arial,sans-serif !important;white-space:nowrap}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortToolbar>button.mcqcToolbarFont{min-width:134px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortToolbar>button.mcqcToolbarSize{min-width:80px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortToolbar>button.mcqcToolbarSelect .mcqcIcon{flex-shrink:0}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortAnswerTrigger{display:flex;align-items:center;justify-content:space-between;width:100%;height:58px;min-height:58px;padding:0 24px;text-align:left;font:400 16px/24px 'Segoe UI',Arial,sans-serif !important;box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #c4c4c4;border-radius:8px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortAnswerTrigger>span{min-width:0}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortAnswerTrigger>.mcqcIcon{flex-shrink:0;margin-left:16px}
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooter>.mcqcFooterPill{flex:0 0 auto;min-width:210px;width:210px;height:50px;min-height:50px;padding:0 16px;white-space:nowrap;border-radius:28px;font:600 16px/24px 'Segoe UI',Arial,sans-serif !important;box-shadow:-4px -4px 6px #fff,4px 4px 6px #c4c4c4}
+@media(max-width:600px){.quantum-creator-scope .mcqcShortBuilder .mcqcShortToolbar{gap:6px;padding:6px}.quantum-creator-scope .mcqcShortBuilder .mcqcShortToolbar>button.mcqcToolbarFont{min-width:100px}.quantum-creator-scope .mcqcShortBuilder .mcqcShortToolbar>button.mcqcToolbarSize{min-width:64px}.quantum-creator-scope .mcqcShortBuilder .mcqcShortFooter>.mcqcFooterPill{width:auto;min-width:170px}.quantum-creator-scope .mcqcShortBuilder .mcqcShortAnswerTrigger{padding:0 14px;font-size:14px}}
+
+/* Answer Settings only: measurements from the supplied Figma export.
+   Outer surface 918px; section 886px; inner content 854px at design width.
+   Icon slots remain empty until SA_ICON_PATHS is filled in page.tsx. */
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortAnswerSettings { width:100%; max-width:918px; }
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortAnswerSettings > .mcqcFormHeading { display:flex; align-items:center; justify-content:space-between; }
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortAnswerSettings .mcqcFormHeading > span { font:400 14px/24px 'Segoe UI',Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcShortBuilder .mcqcShortAnswerSettings > .mcqcShortAnswerTrigger { height:57px; min-height:57px; padding:0 24px; border:0; border-radius:4px; font:600 18px/28px 'Segoe UI',Arial,sans-serif !important; letter-spacing:.02em; color:#2F3547; background:#DFE6E9; box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderField > .saExpanded { display:flex; flex-direction:column; gap:24px; width:100%; min-width:0; margin-top:-16px; padding:19px 16px 22px; border:0; border-radius:0 0 8px 8px; background:#DFE6E9; box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcShortBuilder .saExpanded, .quantum-creator-scope .mcqcShortBuilder .saExpanded * { box-sizing:border-box; }
+.quantum-creator-scope .mcqcShortBuilder .saExpanded { font:400 16px/24px 'Segoe UI',Arial,sans-serif !important; letter-spacing:.02em; color:#374151; }
+.quantum-creator-scope .mcqcShortBuilder .saExpanded button,.quantum-creator-scope .mcqcShortBuilder .saExpanded select,.quantum-creator-scope .mcqcShortBuilder .saExpanded textarea { font-family:inherit !important; letter-spacing:inherit; }
+.quantum-creator-scope .mcqcShortBuilder .saExpanded button { cursor:pointer; }
+.quantum-creator-scope .mcqcShortBuilder .saExpanded :is(button,select,textarea,input):focus-visible { outline:2px solid #2D4CC8; outline-offset:3px; }
+.quantum-creator-scope .mcqcShortBuilder .saPathIcon { display:inline-flex; flex:none; align-items:center; justify-content:center; vertical-align:middle; }
+.quantum-creator-scope .mcqcShortBuilder .saPathIcon img { display:block; width:100%; height:100%; object-fit:contain; }
+.quantum-creator-scope .mcqcShortBuilder .saArrowOpen { transform:rotate(180deg); }
+.quantum-creator-scope .mcqcShortBuilder .saAccordion { width:100%; min-width:0; margin:0; padding:0; border:0; border-radius:8px; background:#DFE6E9; box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcShortBuilder .saAccordionTitle { display:flex; align-items:center; justify-content:space-between; width:100%; height:46px; min-height:46px; gap:16px; padding:0 16px 0 24px; border:0; border-radius:4px; background:#DFE6E9; color:#374151; box-shadow:-4px -4px 4px #fff,4px 4px 8px #C4C4C4; text-align:left; font:600 18px/24px 'Segoe UI',Arial,sans-serif !important; letter-spacing:.02em; }
+.quantum-creator-scope .mcqcShortBuilder .saSectionHeading { display:flex; align-items:center; gap:12px; min-width:0; }
+.quantum-creator-scope .mcqcShortBuilder .saSectionIcon { display:grid; place-items:center; flex:0 0 28px; width:28px; height:28px; border-radius:50%; background:#DFE6E9; box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcShortBuilder .saSectionMeta { display:flex; align-items:center; gap:16px; flex:none; font-size:14px; font-weight:400; line-height:24px; white-space:nowrap; }
+.quantum-creator-scope .mcqcShortBuilder .saAccordionBody { display:flex; flex-direction:column; align-items:stretch; gap:16px; min-width:0; padding:24px 16px 16px; }
+.quantum-creator-scope .mcqcShortBuilder .saAccordionBody[hidden] { display:none; }
+.quantum-creator-scope .mcqcShortBuilder .saLabeledField { display:flex; flex-direction:column; gap:16px; min-width:0; }
+.quantum-creator-scope .mcqcShortBuilder .saSmallLabel { margin:0; font-size:16px; line-height:24px; font-weight:600; color:inherit; }
+.quantum-creator-scope .mcqcShortBuilder .saLabelStrong { font-weight:700; }
+.quantum-creator-scope .mcqcShortBuilder .saRich { display:flex; flex-direction:column; width:100%; height:138px; min-width:0; padding:0; border:0; border-radius:8px; background:#DFE6E9; box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcShortBuilder .saRichTall { height:153px; }
+.quantum-creator-scope .mcqcShortBuilder .saMiniToolbar { display:flex; align-items:center; flex:none; gap:20px; width:100%; height:66px; padding:16px; overflow-x:auto; overflow-y:hidden; white-space:nowrap; border-radius:4px; background:#DFE6E9; box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4; scrollbar-width:thin; scrollbar-color:#C4C4C4 #DFE6E9; }
+.quantum-creator-scope .mcqcShortBuilder .saToolGroup { display:flex; align-items:center; gap:10px; flex:none; }
+.quantum-creator-scope .mcqcShortBuilder .saMiniToolbar button { display:inline-flex; align-items:center; justify-content:center; flex:0 0 37px; width:37px; height:34px; min-height:34px; margin:0; padding:0; border:0; border-radius:2px; background:#DFE6E9; color:#000; box-shadow:-2px -2px 2px #fff,2px 2px 2px #C4C4C4; font:400 20px/24px 'Segoe UI',Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcShortBuilder .saMiniToolbar .saToolFont { width:120px; flex-basis:120px; padding:0 10px; justify-content:space-between; }
+.quantum-creator-scope .mcqcShortBuilder .saMiniToolbar .saToolSize { width:77px; flex-basis:77px; padding:0 10px; justify-content:space-between; }
+.quantum-creator-scope .mcqcShortBuilder .saMiniToolbar .saToolColor { width:67px; flex-basis:67px; gap:10px; }
+.quantum-creator-scope .mcqcShortBuilder .saMiniToolbar .saToolBullet { width:46px; flex-basis:46px; gap:6px; }
+.quantum-creator-scope .mcqcShortBuilder .saMiniToolbar .saToolMore { width:20px; flex-basis:20px; background:transparent; box-shadow:none; }
+.quantum-creator-scope .mcqcShortBuilder .saRich textarea { display:block; width:100%; height:100%; min-height:0; flex:1 1 auto; margin:0; padding:18px 24px 12px; border:0; border-radius:0; resize:none; overflow:auto; color:inherit; background:transparent; box-shadow:none; font:400 16px/26px 'Segoe UI',Arial,sans-serif !important; letter-spacing:.02em; }
+.quantum-creator-scope .mcqcShortBuilder .saRich textarea::placeholder { color:inherit; opacity:1; }
+.quantum-creator-scope .mcqcShortBuilder .saRichPlain { height:102px; box-shadow:none; background:transparent; }
+.quantum-creator-scope .mcqcShortBuilder .saRichPlain .saMiniToolbar { height:54px; padding:10px 16px; }
+.quantum-creator-scope .mcqcShortBuilder .saRichPlain textarea { padding:24px 0 0; line-height:24px; }
+.quantum-creator-scope .mcqcShortBuilder .saAccordion-answer .saAccordionBody { padding-bottom:21px; }
+.quantum-creator-scope .mcqcShortBuilder .saSettingsGrid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); column-gap:29px; row-gap:24px; margin-top:34px; }
+.quantum-creator-scope .mcqcShortBuilder .saSettingsGrid label { display:flex; flex-direction:column; min-width:0; gap:16px; margin:0; font-size:16px; line-height:24px; font-weight:600; }
+.quantum-creator-scope .mcqcShortBuilder .saSettingsGrid label:nth-child(n+4) { max-width:260px; }
+.quantum-creator-scope .mcqcShortBuilder .saSelect { position:relative; display:block; width:100%; min-width:0; height:58px; flex:none; }
+.quantum-creator-scope .mcqcShortBuilder .saSelect select { display:block; appearance:none; -webkit-appearance:none; width:100%; min-width:0; height:100%; margin:0; border:0; border-radius:8px; padding:0 48px 0 24px; background:#DFE6E9; color:#374151; box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4; font:400 16px/24px 'Segoe UI',Arial,sans-serif !important; cursor:pointer; }
+.quantum-creator-scope .mcqcShortBuilder .saSelect > .saPathIcon { position:absolute; right:24px; top:50%; transform:translateY(-50%); pointer-events:none; }
+.quantum-creator-scope .mcqcShortBuilder .saSwitchLine { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:58px; height:58px; padding:0 16px 0 24px; border-radius:4px; background:#DFE6E9; box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4; font-size:16px; line-height:24px; font-weight:400; }
+.quantum-creator-scope .mcqcShortBuilder .saAccordion-answer .saSwitchLine { margin-right:16px; border-radius:8px; }
+.quantum-creator-scope .mcqcShortBuilder .saToggle { position:relative; width:72px; height:36px; min-height:36px; flex:0 0 72px; padding:0; border:0; border-radius:32px; background:#DFE6E9; box-shadow:-4px -4px 4px rgba(255,255,255,.5),4px 4px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcShortBuilder .saToggleTrack { position:absolute; inset:4px 5px; border-radius:32px; background:#DFE6E9; box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4; }
+.quantum-creator-scope .mcqcShortBuilder .saToggleTrack > span { position:absolute; right:5px; top:4px; font:600 12px/20px 'Segoe UI',Arial,sans-serif !important; color:#6b7280; }
+.quantum-creator-scope .mcqcShortBuilder .saToggleOn .saToggleTrack { background:linear-gradient(113.36deg,#2D4CC8 30.17%,#E01E5A 65.23%); box-shadow:none; }
+.quantum-creator-scope .mcqcShortBuilder .saToggleOn .saToggleTrack > span { left:10px; right:auto; color:#fff; }
+.quantum-creator-scope .mcqcShortBuilder .saToggleKnob { position:absolute; top:4px; left:5px; width:28px; height:28px; border-radius:50%; background:#666; }
+.quantum-creator-scope .mcqcShortBuilder .saToggleOn .saToggleKnob { left:39px; background:#DFE6E9; box-shadow:0 -2px 4px rgba(0,0,0,.1),0 4px 4px rgba(0,0,0,.25); }
+.quantum-creator-scope .mcqcShortBuilder .saAccordion-rubric .saAccordionBody { gap:0; }
+.quantum-creator-scope .mcqcShortBuilder .saCriteria { display:flex; flex-direction:column; gap:24px; }
+.quantum-creator-scope .mcqcShortBuilder .saCriterion { position:relative; display:flex; flex-direction:column; gap:16px; padding-bottom:26px; }
+.quantum-creator-scope .mcqcShortBuilder .saCriterion::after { content:""; position:absolute; bottom:0; left:0; right:0; height:1px; background:linear-gradient(90deg,#2D4CC8,#E01E5A); }
+.quantum-creator-scope .mcqcShortBuilder .saCriterion .saRich { height:137px; }
+.quantum-creator-scope .mcqcShortBuilder .saLevelGrid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:28px; margin-top:8px; }
+.quantum-creator-scope .mcqcShortBuilder .saLevel { display:flex; flex-direction:column; gap:16px; min-width:0; min-height:322px; padding:16px; background:#DFE6E9; border:0; border-radius:8px; box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcShortBuilder .saLevelTitle { position:relative; height:24px; text-align:center; color:#2D4CC8; font-size:16px; font-weight:700; line-height:24px; }
+.quantum-creator-scope .mcqcShortBuilder .saLevel:nth-child(3n+2) .saLevelTitle { color:#C05512; }
+.quantum-creator-scope .mcqcShortBuilder .saLevel:nth-child(3n) .saLevelTitle { color:#A91E2C; }
+.quantum-creator-scope .mcqcShortBuilder .saRemoveLevel { position:absolute; top:0; right:0; display:grid; place-items:center; width:22px; height:22px; padding:0; border:0; border-radius:50%; background:#DFE6E9; box-shadow:-2px -2px 2px #fff,2px 2px 2px #C4C4C4; }
+.quantum-creator-scope .mcqcShortBuilder .saLevelFields { display:flex; flex-direction:column; gap:8px; }
+.quantum-creator-scope .mcqcShortBuilder .saLevel label { display:flex; flex-direction:column; gap:10px; min-width:0; margin:0; font-size:14px; line-height:22px; font-weight:600; }
+.quantum-creator-scope .mcqcShortBuilder .saSelectCompact { height:32px; }
+.quantum-creator-scope .mcqcShortBuilder .saSelectCompact select { border-radius:4px; padding:0 32px 0 12px; box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4; font-size:14px; line-height:22px; }
+.quantum-creator-scope .mcqcShortBuilder .saSelectCompact > .saPathIcon { right:12px; }
+.quantum-creator-scope .mcqcShortBuilder .saLevel textarea { display:block; width:100%; min-width:0; height:74px; min-height:74px; padding:4px 12px; margin:0; resize:none; border:0; border-radius:4px; color:#374151; background:#DFE6E9; box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4; font:400 14px/22px 'Segoe UI',Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcShortBuilder .saCriterionActions { display:flex; align-items:center; gap:24px; margin-top:16px; }
+.quantum-creator-scope .mcqcShortBuilder .saCriterionActions button { display:inline-flex; align-items:center; justify-content:center; gap:8px; height:46px; width:130px; padding:0 10px; border:1px solid #2D4CC8; border-radius:36px; background:#DFE6E9; color:#2D4CC8; box-shadow:-4px -4px 8px #fff,4px 4px 8px rgba(196,196,196,.8); font:600 14px/24px 'Segoe UI',Arial,sans-serif !important; white-space:nowrap; }
+.quantum-creator-scope .mcqcShortBuilder .saCriterionActions button + button { width:144px; border:0; color:#374151; font-weight:400; }
+.quantum-creator-scope .mcqcShortBuilder .saAddCriterion { display:inline-flex; align-items:center; justify-content:center; gap:8px; width:230px; height:54px; align-self:center; margin:24px 0 0; padding:0 24px; border:1px solid transparent; border-radius:32px; background:linear-gradient(#DFE6E9,#DFE6E9) padding-box,linear-gradient(110deg,#2D4CC8,#E01E5A) border-box; box-shadow:-4px -4px 4px #fff,4px 4px 8px #C4C4C4; font:600 20px/24px 'Segoe UI',Arial,sans-serif !important; color:#800080; }
+.quantum-creator-scope .mcqcShortBuilder .saTotal { display:flex; align-items:center; justify-content:space-between; height:58px; margin-top:32px; padding:0 24px; border-radius:4px; box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4; font-size:16px; line-height:24px; }
+.quantum-creator-scope .mcqcShortBuilder .saTotal strong { font-weight:600; }
+.quantum-creator-scope .mcqcShortBuilder .saRubricOptions { display:flex; flex-direction:column; gap:24px; margin-top:36px; }
+.quantum-creator-scope .mcqcShortBuilder .saRubricSwitches { display:flex; flex-direction:column; gap:16px; }
+.quantum-creator-scope .mcqcShortBuilder .saAccordion-feedback .saAccordionBody { gap:24px; padding-bottom:23px; }
+.quantum-creator-scope .mcqcShortBuilder .saAccordion-feedback .saRich { height:137px; }
+.quantum-creator-scope .mcqcShortBuilder .saFeedback-0 { color:#2A7308; }
+.quantum-creator-scope .mcqcShortBuilder .saFeedback-1 { color:#C05512; }
+.quantum-creator-scope .mcqcShortBuilder .saFeedback-2 { color:#A91E2C; }
+.quantum-creator-scope .mcqcShortBuilder .saAccordion-explanation .saAccordionBody { min-height:176px; padding-top:20px; }
+.quantum-creator-scope .mcqcShortBuilder .saAccordion-hint .saAccordionBody { padding-top:20px; padding-bottom:18px; gap:20px; }
+.quantum-creator-scope .mcqcShortBuilder .saHintChecks { display:flex; flex-direction:column; gap:14px; }
+.quantum-creator-scope .mcqcShortBuilder .saCheck { position:relative; display:flex !important; flex-direction:row; align-items:center; gap:12px !important; margin:0; font-size:14px !important; line-height:24px; font-weight:400 !important; cursor:pointer; }
+.quantum-creator-scope .mcqcShortBuilder .saCheckOn { color:#2D4CC8; font-weight:600 !important; }
+.quantum-creator-scope .mcqcShortBuilder .saCheck input { position:absolute; left:0; top:0; opacity:0; width:24px; height:24px; margin:0; }
+.quantum-creator-scope .mcqcShortBuilder .saCheckBox { display:grid; place-items:center; width:24px; height:24px; flex:0 0 24px; border-radius:4px; background:#DFE6E9; box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px rgba(196,196,196,.8); }
+.quantum-creator-scope .mcqcShortBuilder .saCheckOn .saCheckBox { box-shadow:-4px -4px 4px #fff,4px 4px 4px rgba(196,196,196,.8); }
+.quantum-creator-scope .mcqcShortBuilder .saCheck input:focus-visible + .saCheckBox { outline:2px solid #2D4CC8; outline-offset:3px; }
+/* On narrower host layouts keep the design's sizes; scroll only toolbar controls. */
+@media (max-width:1100px) {
+  .quantum-creator-scope .mcqcShortBuilder .saAccordionTitle { height:auto; min-height:46px; padding-top:8px; padding-bottom:8px; }
+  .quantum-creator-scope .mcqcShortBuilder .saSectionMeta { gap:8px; font-size:12px; }
+  .quantum-creator-scope .mcqcShortBuilder .saSettingsGrid { column-gap:16px; }
+  .quantum-creator-scope .mcqcShortBuilder .saLevelGrid { gap:16px; }
+}
+@media (max-width:650px) {
+  .quantum-creator-scope .mcqcShortBuilder .mcqcShortAnswerSettings > .mcqcShortAnswerTrigger { height:auto; min-height:57px; padding:12px 16px; font-size:16px; }
+  .quantum-creator-scope .mcqcShortBuilder .mcqcBuilderField > .saExpanded { padding:19px 12px 22px; }
+  .quantum-creator-scope .mcqcShortBuilder .saAccordionTitle { padding-left:12px; padding-right:12px; gap:8px; font-size:15px; }
+  .quantum-creator-scope .mcqcShortBuilder .saSectionHeading { gap:8px; }
+  .quantum-creator-scope .mcqcShortBuilder .saSectionMeta { white-space:normal; max-width:100px; font-size:11px; line-height:16px; }
+  .quantum-creator-scope .mcqcShortBuilder .saAccordionBody { padding-left:12px; padding-right:12px; }
+  .quantum-creator-scope .mcqcShortBuilder .saSettingsGrid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .quantum-creator-scope .mcqcShortBuilder .saSettingsGrid label { font-size:14px; }
+  .quantum-creator-scope .mcqcShortBuilder .saSelect select { padding-left:12px; padding-right:32px; font-size:14px; }
+  .quantum-creator-scope .mcqcShortBuilder .saSelect > .saPathIcon { right:10px; }
+  .quantum-creator-scope .mcqcShortBuilder .saLevelGrid { grid-template-columns:1fr; gap:24px; }
+  .quantum-creator-scope .mcqcShortBuilder .saSwitchLine { height:auto; min-height:58px; padding:10px 12px; font-size:14px; }
+  .quantum-creator-scope .mcqcShortBuilder .saCriterionActions { gap:12px; flex-wrap:wrap; }
+  .quantum-creator-scope .mcqcShortBuilder .saRich textarea { padding-left:12px; padding-right:12px; font-size:14px; }
+  .quantum-creator-scope .mcqcShortBuilder .saRichPlain textarea { padding-left:0; padding-right:0; }
+  .quantum-creator-scope .mcqcShortBuilder .saTotal { padding:0 12px; font-size:14px; }
+}
+
+/* Toolbar containment and Figma typography; only Short Answer editors. */
+.quantum-creator-scope .mcqcShortBuilder .mcqcEditorSurface,
+.quantum-creator-scope .mcqcShortBuilder .saRich { container-type:inline-size; container-name:sa-editor; min-width:0; max-width:100%; }
+.quantum-creator-scope .mcqcShortBuilder .saExpanded { container-type:inline-size; container-name:sa-answer; }
+.quantum-creator-scope .mcqcShortBuilder .mcqcWriteField .mcqcFormHeading > label { font:600 16px/24px 'Segoe UI',Arial,sans-serif !important; letter-spacing:.02em; }
+.quantum-creator-scope .mcqcShortBuilder .mcqcWriteField .mcqcFormHeading > span { font:400 14px/24px 'Segoe UI',Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcShortBuilder .mcqcEditorSurface { padding:16px; min-height:150px; height:auto; }
+.quantum-creator-scope .mcqcShortBuilder .mcqcEditorSurface > textarea { display:block; width:100%; max-width:100%; min-width:0; height:48px; min-height:48px; margin:0; padding:24px 0 0; font:400 16px/24px 'Segoe UI',Arial,sans-serif !important; letter-spacing:.02em; overflow-wrap:anywhere; }
+.quantum-creator-scope .mcqcShortBuilder .saMiniToolbar { max-width:100%; min-width:0; overflow:visible; white-space:normal; }
+.quantum-creator-scope .mcqcShortBuilder .saMiniToolbar.mcqcShortToolbar { display:flex; justify-content:flex-start; gap:20px; height:54px; min-height:54px; margin:0; padding:10px 16px; border-radius:4px; box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcShortBuilder .saMiniToolbar.mcqcShortToolbar button { display:inline-flex; justify-content:center; align-items:center; flex:0 0 37px; width:37px; min-width:0; height:34px; min-height:34px; padding:0; border:0; border-radius:2px; background:#DFE6E9; color:#000; box-shadow:-2px -2px 2px #fff,2px 2px 2px #C4C4C4; font:400 20px/24px 'Segoe UI',Arial,sans-serif !important; }
+.quantum-creator-scope .mcqcShortBuilder .saMiniToolbar.mcqcShortToolbar .saToolFont { width:120px; flex-basis:120px; padding:0 10px; justify-content:space-between; }
+.quantum-creator-scope .mcqcShortBuilder .saMiniToolbar.mcqcShortToolbar .saToolSize { width:77px; flex-basis:77px; padding:0 10px; justify-content:space-between; }
+.quantum-creator-scope .mcqcShortBuilder .saMiniToolbar.mcqcShortToolbar .saToolColor { width:67px; flex-basis:67px; gap:10px; }
+.quantum-creator-scope .mcqcShortBuilder .saMiniToolbar.mcqcShortToolbar .saToolBullet { width:46px; flex-basis:46px; gap:6px; }
+.quantum-creator-scope .mcqcShortBuilder .saMiniToolbar.mcqcShortToolbar .saToolMore { width:20px; flex-basis:20px; background:transparent; box-shadow:none; }
+.quantum-creator-scope .mcqcShortBuilder .saToolGroup { max-width:100%; flex-wrap:wrap; }
+.quantum-creator-scope .mcqcShortBuilder .saSectionHeading { flex:1 1 auto; overflow-wrap:anywhere; }
+.quantum-creator-scope .mcqcShortBuilder .saAccordionTitle { font-size:18px; font-weight:600; line-height:24px; }
+@container sa-editor (max-width:827px) {
+  .quantum-creator-scope .mcqcShortBuilder .saRich .saMiniToolbar,
+  .quantum-creator-scope .mcqcShortBuilder .saMiniToolbar.mcqcShortToolbar { flex-wrap:wrap; gap:12px 20px; height:auto; min-height:54px; padding:10px 16px; }
+  .quantum-creator-scope .mcqcShortBuilder .saRich textarea { flex:0 0 auto; height:78px; min-height:78px; font-size:16px; line-height:26px; }
+  .quantum-creator-scope .mcqcShortBuilder .saRichPlain textarea { height:72px; min-height:72px; line-height:24px; }
+}
+/* The parent must grow along with wrapped controls instead of clipping its text. */
+.quantum-creator-scope .mcqcShortBuilder .saRich:has(.saMiniToolbar) { height:auto; min-height:138px; }
+.quantum-creator-scope .mcqcShortBuilder .saRichTall:has(.saMiniToolbar) { min-height:153px; }
+.quantum-creator-scope .mcqcShortBuilder .saRichPlain:has(.saMiniToolbar) { min-height:102px; }
+.quantum-creator-scope .mcqcShortBuilder .saRich:not(.saRichPlain) > textarea { flex:0 0 auto; height:72px; }
+.quantum-creator-scope .mcqcShortBuilder .saRichTall:not(.saRichPlain) > textarea { height:87px; }
+.quantum-creator-scope .mcqcShortBuilder .saRichPlain > textarea { flex:0 0 auto; height:48px; }
+.quantum-creator-scope .mcqcShortBuilder .saCriterion .saRich:has(.saMiniToolbar),
+.quantum-creator-scope .mcqcShortBuilder .saAccordion-feedback .saRich:has(.saMiniToolbar) { min-height:137px; }
+.quantum-creator-scope .mcqcShortBuilder .saCriterion .saRich > textarea,
+.quantum-creator-scope .mcqcShortBuilder .saAccordion-feedback .saRich > textarea { height:71px; }
+@container sa-answer (max-width:620px) {
+  .quantum-creator-scope .mcqcShortBuilder .saAccordionTitle { height:auto; min-height:46px; padding-top:10px; padding-bottom:10px; }
+  .quantum-creator-scope .mcqcShortBuilder .saSectionMeta { max-width:116px; white-space:normal; font-size:14px; line-height:24px; }
+  .quantum-creator-scope .mcqcShortBuilder .saSettingsGrid { grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:16px; }
+  .quantum-creator-scope .mcqcShortBuilder .saLevelGrid { grid-template-columns:1fr; gap:24px; }
+  .quantum-creator-scope .mcqcShortBuilder .saSwitchLine { height:auto; min-height:58px; padding-top:10px; padding-bottom:10px; }
+}
+@container sa-answer (max-width:360px) {
+  .quantum-creator-scope .mcqcShortBuilder .saAccordionTitle { flex-wrap:wrap; gap:8px; }
+  .quantum-creator-scope .mcqcShortBuilder .saSectionHeading { flex-basis:100%; }
+  .quantum-creator-scope .mcqcShortBuilder .saSectionMeta { margin-left:auto; max-width:none; }
+  .quantum-creator-scope .mcqcShortBuilder .saSettingsGrid { grid-template-columns:1fr; }
+  .quantum-creator-scope .mcqcShortBuilder .saSettingsGrid label:nth-child(n+4) { max-width:none; }
+  .quantum-creator-scope .mcqcShortBuilder .saCriterionActions { flex-wrap:wrap; }
+}
+
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderWelcome > div { min-width:0; }
+.quantum-creator-scope .mcqcShortBuilder .mcqcBuilderWelcome h2 { white-space:normal; overflow-wrap:anywhere; }
+
+/* Screenshot typography, applied consistently to the complete Short Answer page.
+   Editor text: Arial 16/24, normal. Toolbar captions: Arial 14/20, normal. */
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder { font-family:Arial,Helvetica,sans-serif !important; font-size:16px; line-height:24px; font-weight:400; letter-spacing:0; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder :is(button,input,select,textarea,label,h1,h2,h3,p,span,div,a) { font-family:Arial,Helvetica,sans-serif !important; letter-spacing:0; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .mcqcBuilderField > label,
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .mcqcFormHeading > label,
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saSmallLabel,
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saSettingsGrid label { font-size:16px; font-weight:600; line-height:24px; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .mcqcBuilderAside .mcqcBuilderField > label { font-size:14px; font-weight:600; line-height:22px; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .mcqcAsideSection h3 { font-size:18px; font-weight:600; line-height:24px; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saAccordionTitle,
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saSectionHeading { font-size:18px; font-weight:600; line-height:24px; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saSectionMeta,
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .mcqcFormHeading > span { font-size:14px; font-weight:400; line-height:24px; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saLabelStrong,
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saLevelTitle { font-size:16px; font-weight:700; line-height:24px; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saLevel label { font-size:14px; font-weight:600; line-height:22px; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saLevel textarea,
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saSelectCompact select { font-size:14px; font-weight:400; line-height:22px; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saSwitchLine,
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saTotal { font-size:16px; font-weight:400; line-height:24px; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saSelect:not(.saSelectCompact) select,
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .mcqcQuestionForm > .mcqcBuilderField > .mcqcSelectRoot > .mcqcSelectTrigger { font-size:16px; font-weight:400; line-height:24px; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .mcqcShortAnswerTrigger { font-size:18px; font-weight:600; line-height:28px; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .mcqcEditorSurface > textarea,
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saRich > textarea { font-family:Arial,Helvetica,sans-serif !important; font-size:16px; font-weight:400; line-height:24px; letter-spacing:0; font-style:normal; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .mcqcEditorSurface > textarea::placeholder,
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saRich > textarea::placeholder { font:inherit !important; letter-spacing:0; opacity:1; }
+/* One shared compact toolbar for the question and every expanded editor. */
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saMiniToolbar { display:flex; flex-direction:row; align-items:center; justify-content:flex-start; flex-wrap:nowrap; gap:8px; height:54px; min-height:54px; padding:9px 12px; max-width:100%; overflow:visible; border-radius:4px; background:#DFE6E9; box-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saMiniToolbar button { display:inline-flex; align-items:center; justify-content:center; flex:0 0 36px; width:36px; min-width:0; height:36px; min-height:36px; margin:0; padding:0; border:0; border-radius:4px; color:#141B34; background:#DFE6E9; box-shadow:-2px -2px 2px #fff,2px 2px 2px #C4C4C4; font-family:Arial,Helvetica,sans-serif !important; font-size:14px; font-weight:400; line-height:20px; letter-spacing:0; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saMiniToolbar .saToolFont { width:134px; flex-basis:134px; justify-content:space-between; padding:0 14px; }
+.quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saMiniToolbar .saToolSize { width:80px; flex-basis:80px; justify-content:space-between; padding:0 14px; }
+@container sa-editor (max-width:641px) {
+  .quantum-creator-scope .mcqcAppShell .mcqcShortBuilder .saMiniToolbar { flex-wrap:wrap; height:auto; min-height:54px; gap:8px; }
+}
+
+/* SHORT ANSWER PREVIEW — Figma desktop dimensions, fluid within the shared page.
+   Icon files: public/assets/assessmenticons/; filenames are in SA_ICON_PATHS.
+   Segoe UI is the supplied Figma font. Install it locally for identical metrics. */
+.quantum-creator-scope .sapPreview {
+  --sap-bg: #DFE6E9;
+  --sap-text: #374151;
+  --sap-blue: #2D4CC8;
+  --sap-raised: -4px -4px 4px #FFFFFF, 4px 4px 8px #C4C4C4;
+  --sap-inset: inset -4px -4px 4px #FFFFFF, inset 4px 4px 4px #C4C4C4;
+  width: 100%; max-width: 1328px; min-width: 0; margin: 0 auto;
+  color: var(--sap-text); background: var(--sap-bg);
+  font-family: "Segoe UI", Arial, sans-serif !important; font-size: 16px; font-weight: 400; line-height: 24px; letter-spacing: .02em;
+}
+.quantum-creator-scope .sapPreview *, .quantum-creator-scope .sapPreview *::before, .quantum-creator-scope .sapPreview *::after { box-sizing: border-box; }
+.quantum-creator-scope .sapPreview h1, .quantum-creator-scope .sapPreview h2, .quantum-creator-scope .sapPreview h3, .quantum-creator-scope .sapPreview p, .quantum-creator-scope .sapPreview dl, .quantum-creator-scope .sapPreview dd { margin: 0; }
+.quantum-creator-scope .sapPreview button, .quantum-creator-scope .sapPreview select, .quantum-creator-scope .sapPreview textarea { font: inherit !important; letter-spacing: inherit; color: inherit; }
+.quantum-creator-scope .sapPreview button { cursor: pointer; border: 0; }
+.quantum-creator-scope .sapPreview button:focus-visible, .quantum-creator-scope .sapPreview select:focus-visible, .quantum-creator-scope .sapPreview textarea:focus-visible { outline: 2px solid var(--sap-blue); outline-offset: 4px; }
+.quantum-creator-scope .sapPreview h1:focus { outline: none; }
+.quantum-creator-scope .sapPreview [hidden] { display: none !important; }
+.quantum-creator-scope .sapPreview .saPathIcon { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; vertical-align: middle; }
+.quantum-creator-scope .sapPreview .saPathIcon img { display: block; object-fit: contain; width: 100%; height: 100%; }
+.quantum-creator-scope .sapBreadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; min-height: 32px; margin-bottom: 40px; font-size: 16px; line-height: 24px; }
+.quantum-creator-scope .sapBreadcrumb a, .quantum-creator-scope .sapBreadcrumb button { text-decoration: none; color: inherit; background: none; padding: 0; }
+.quantum-creator-scope .sapBreadcrumb [aria-current] { color: var(--sap-blue); font-weight: 700; }
+.quantum-creator-scope .sapPageTitle { margin-bottom: 24px; }
+.quantum-creator-scope .sapPageTitle h1 { font-size: 20px; font-weight: 700; line-height: 28px; }
+.quantum-creator-scope .sapPageTitle p { margin-top: 8px; font-size: 14px; font-weight: 400; line-height: 22px; }
+.quantum-creator-scope .sapOverview { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+.quantum-creator-scope .sapSummary { display: grid; grid-template-columns: 166fr 149fr 227fr; gap: 36px; width: 655px; min-height: 78px; padding: 12px 16px; border-radius: 8px; box-shadow: -4px -4px 4px #FFFFFF, 4px 4px 4px #C4C4C4; }
+.quantum-creator-scope .sapCount, .quantum-creator-scope .sapReady { min-width: 0; border: 1px solid #D1D5DB; border-radius: 8px; min-height: 54px; }
+.quantum-creator-scope .sapCount { display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 14px; font-weight: 600; line-height: 20px; }
+.quantum-creator-scope .sapCount strong { font-size: 16px; font-weight: 600; }
+.quantum-creator-scope .sapReady { display: flex; align-items: flex-start; padding: 6px 8px; gap: 8px; font-size: 14px; line-height: 20px; }
+.quantum-creator-scope .sapReady strong { display: block; font-weight: 600; }
+.quantum-creator-scope .sapReadyComplete strong { color: #2A7308; }
+.quantum-creator-scope .sapReady span:not(.saPathIcon) { display: block; line-height: 24px; }
+.quantum-creator-scope .sapPreviewActions { display: flex; align-items: center; gap: 24px; flex-shrink: 0; }
+.quantum-creator-scope .sapFilter { position: relative; width: 186px; height: 48px; box-shadow: var(--sap-inset); border-radius: 8px; }
+.quantum-creator-scope .sapFilter select { width: 100%; height: 100%; appearance: none; background: transparent; border: 0; padding: 12px 44px 12px 24px; border-radius: inherit; cursor: pointer; font-size: 16px; line-height: 24px; }
+.quantum-creator-scope .sapFilter > .saPathIcon { position: absolute; right: 14px; top: 14px; pointer-events: none; }
+.quantum-creator-scope .sapLearnerButton { white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 14px; width: 223px; min-height: 48px; padding: 10px 12px; border-radius: 8px; background: var(--sap-bg); box-shadow: var(--sap-raised); color: var(--sap-blue) !important; font-size: 18px !important; font-weight: 700 !important; line-height: 26px !important; }
+.quantum-creator-scope .sapQuestionList { display: flex; flex-direction: column; gap: 24px; }
+.quantum-creator-scope .sapQuestion { display: flex; flex-direction: column; gap: 24px; min-width: 0; padding: 24px; border: 1px solid #AAA8A8; border-radius: 24px; }
+.quantum-creator-scope .sapMetadata { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 24px; min-height: 40px; }
+.quantum-creator-scope .sapPill { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 40px; padding: 10px 14px; background: var(--sap-bg); box-shadow: inset -2px -2px 2px #FFFFFF, inset 2px 2px 2px #C4C4C4; border-radius: 32px; font-size: 14px !important; line-height: 20px !important; font-weight: 400; }
+.quantum-creator-scope .sapPill:first-child { min-width: 205px; }
+.quantum-creator-scope .sapPill strong { font-weight: 600; }
+.quantum-creator-scope .sapStatus { min-width: 164px; }
+.quantum-creator-scope .sapStatusComplete strong { color: #2A7308; }
+.quantum-creator-scope .sapEdit { min-width: 81px; gap: 8px; }
+.quantum-creator-scope .sapQuestionText { box-shadow: var(--sap-inset); border-radius: 8px; overflow: hidden; min-height: 137px; }
+.quantum-creator-scope .sapQuestionText h2 { min-height: 56px; display: flex; align-items: center; padding: 16px 24px; box-shadow: -4px -4px 8px #FFFFFF, 4px 4px 8px #C4C4C4; font-size: 18px; line-height: 22px; font-weight: 700; color: #31344B; }
+.quantum-creator-scope .sapQuestionText p { padding: 28px 16px; font-size: 18px; font-weight: 400; line-height: 26px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.quantum-creator-scope .sapAnswerPlaceholder { display: flex; align-items: center; padding: 16px 24px; min-height: 57px; box-shadow: var(--sap-inset); border-radius: 4px; font-size: 16px; font-weight: 600; line-height: 24px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.quantum-creator-scope .sapSection { min-width: 0; box-shadow: var(--sap-inset); border-radius: 8px; }
+.quantum-creator-scope .sapSectionToggle { border-radius: 4px; display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; min-height: 70px; padding: 24px; text-align: left; background: var(--sap-bg); box-shadow: -4px -4px 8px #FFFFFF, 4px 4px 8px #C4C4C4; font-size: 18px !important; font-weight: 700 !important; line-height: 22px !important; color: #31344B !important; }
+.quantum-creator-scope .sapArrowClosed { transform: rotate(-90deg); }
+.quantum-creator-scope .sapSectionBody { display: flex; flex-direction: column; gap: 24px; padding: 24px; min-width: 0; }
+.quantum-creator-scope .sapAnswerGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+.quantum-creator-scope .sapAnswerGrid > div, .quantum-creator-scope .sapQuestionSettings > div { min-width: 0; }
+.quantum-creator-scope .sapAnswerGrid dt { margin-bottom: 16px; font-size: 16px; font-weight: 600; line-height: 24px; }
+.quantum-creator-scope .sapAnswerGrid dd { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 58px; padding: 16px 20px; border-radius: 8px; box-shadow: var(--sap-inset); font-size: 16px; line-height: 24px; overflow-wrap: anywhere; }
+.quantum-creator-scope .sapCard { padding: 24px; border-radius: 4px; box-shadow: -4px -4px 8px #FFFFFF, 4px 4px 8px #C4C4C4; min-width: 0; }
+.quantum-creator-scope .sapCard h3 { display: flex; align-items: center; gap: 14px; font-size: 18px; font-weight: 600; line-height: 24px; }
+.quantum-creator-scope .sapRoundIcon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 28px; width: 28px; height: 28px; border-radius: 50%; box-shadow: -2px -2px 4px #FFFFFF, 2px 2px 4px #C4C4C4; }
+.quantum-creator-scope .sapCardText { margin-top: 12px; margin-left: 42px; font-size: 16px; line-height: 24px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.quantum-creator-scope .sapRubric h3 { margin-bottom: 36px; }
+.quantum-creator-scope .sapRubricRows { border-top: 1px solid #AAA8A8; border-left: 1px solid #AAA8A8; }
+.quantum-creator-scope .sapRubricRow { display: grid; }
+.quantum-creator-scope .sapRubricRow > div { min-width: 0; min-height: 76px; padding: 12px 16px; border-bottom: 1px solid #AAA8A8; border-right: 1px solid #AAA8A8; overflow-wrap: anywhere; }
+.quantum-creator-scope .sapRubricRow strong { font-size: 16px; font-weight: 600; line-height: 22px; }
+.quantum-creator-scope .sapRubricRow p { margin-top: 4px; font-size: 14px; line-height: 22px; }
+.quantum-creator-scope .sapLevel-excellent strong { color: var(--sap-blue); }
+.quantum-creator-scope .sapLevel-fair strong { color: #C05512; }
+.quantum-creator-scope .sapLevel-poor strong { color: #A91E2C; }
+.quantum-creator-scope .sapEmptyRubric { padding: 16px; }
+.quantum-creator-scope .sapFeedbackCard { min-height: 146px; }
+.quantum-creator-scope .sapFeedbackText { display: flex; align-items: center; min-height: 50px; margin-top: 20px; padding: 12px 16px; border-radius: 4px; box-shadow: inset -2px -2px 2px #FFFFFF, inset 2px 2px 2px #C4C4C4; font-size: 14px; line-height: 22px; }
+.quantum-creator-scope .sapCard-full h3 { color: #2A7308; }
+.quantum-creator-scope .sapCard-partial h3 { color: #C05512; }
+.quantum-creator-scope .sapCard-zero h3 { color: #A91E2C; }
+.quantum-creator-scope .sapCard-explanation { min-height: 136px; }
+.quantum-creator-scope .sapCard-explanation .sapCardText { line-height: 26px; }
+.quantum-creator-scope .sapSectionCompact .sapSectionToggle { min-height: 56px; padding-block: 16px; }
+.quantum-creator-scope .sapSectionCompact .sapSectionBody { padding: 24px 48px; }
+.quantum-creator-scope .sapQuestionSettings { display: grid; grid-template-columns: 233fr 192fr 216fr 227fr 187fr; gap: 24px; }
+.quantum-creator-scope .sapQuestionSettings dt { margin-bottom: 8px; font-size: 16px; font-weight: 400; line-height: 24px; }
+.quantum-creator-scope .sapQuestionSettings dd { display: flex; align-items: center; gap: 12px; height: 58px; min-height: 58px; min-width: 0; padding: 14px; border-radius: 8px; box-shadow: var(--sap-inset); font-size: 18px; font-weight: 600; line-height: 26px; overflow-wrap: anywhere; }
+/* Keep long settings values inside the same 58px Figma box; full text is available on hover. */
+.quantum-creator-scope .sapQuestionSettings dd > span:not(.saPathIcon) { display: block; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.quantum-creator-scope .sapFooter { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-right: 56px; }
+.quantum-creator-scope .sapFooter button { min-height: 48px; width: 210px; padding: 10px 14px; border-radius: 24px; background: var(--sap-bg); box-shadow: var(--sap-raised); font-size: 18px; font-weight: 600; line-height: 26px; letter-spacing: .03em; }
+.quantum-creator-scope .sapFooter .sapContinue { width: 233px; color: var(--sap-blue); font-weight: 700; }
+.quantum-creator-scope .sapLearnerAnswer { display: flex; flex-direction: column; gap: 16px; }
+.quantum-creator-scope .sapLearnerAnswer textarea { width: 100%; min-width: 0; padding: 16px; background: var(--sap-bg); border: 0; border-radius: 8px; box-shadow: var(--sap-inset); resize: vertical; }
+.quantum-creator-scope .sapLearnerAnswer small { font-size: 14px; }
+.quantum-creator-scope .sapNoQuestions { display: flex; align-items: center; flex-wrap: wrap; gap: 24px; padding: 24px; }
+.quantum-creator-scope .sapNotice { padding: 16px 0; }
+@media (max-width: 1200px) {
+  .quantum-creator-scope .sapOverview { flex-wrap: wrap; }
+  .quantum-creator-scope .sapSummary { flex: 1 1 500px; }
+  .quantum-creator-scope .sapPreviewActions { margin-left: auto; }
+  .quantum-creator-scope .sapQuestionSettings { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .quantum-creator-scope .sapSectionCompact .sapSectionBody { padding: 24px; }
+}
+@media (max-width: 700px) {
+  .quantum-creator-scope .sapBreadcrumb { gap: 8px; margin-bottom: 24px; font-size: 14px; }
+  .quantum-creator-scope .sapSummary { width: 100%; gap: 12px; padding: 12px; grid-template-columns: 1fr 1fr 1.8fr; }
+  .quantum-creator-scope .sapReady { gap: 4px; padding-inline: 4px; }
+  .quantum-creator-scope .sapReady span:not(.saPathIcon) { font-size: 12px; line-height: 18px; }
+  .quantum-creator-scope .sapPreviewActions { width: 100%; gap: 16px; }
+  .quantum-creator-scope .sapFilter, .quantum-creator-scope .sapLearnerButton { flex: 1 1 0; min-width: 0; width: auto; }
+  .quantum-creator-scope .sapLearnerButton { font-size: 16px !important; gap: 8px; }
+  .quantum-creator-scope .sapFilter select { padding-left: 12px; }
+  .quantum-creator-scope .sapQuestion { padding: 16px; gap: 24px; }
+  .quantum-creator-scope .sapMetadata { gap: 12px; }
+  .quantum-creator-scope .sapPill:first-child { min-width: 0; }
+  .quantum-creator-scope .sapStatus { min-width: 0; }
+  .quantum-creator-scope .sapSectionBody, .quantum-creator-scope .sapSectionCompact .sapSectionBody { padding: 16px; }
+  .quantum-creator-scope .sapSectionToggle { padding: 16px; }
+  .quantum-creator-scope .sapAnswerGrid, .quantum-creator-scope .sapQuestionSettings { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .quantum-creator-scope .sapCard { padding: 16px; }
+  .quantum-creator-scope .sapCardText { margin-left: 0; }
+  .quantum-creator-scope .sapRubricRow { grid-template-columns: minmax(0, 1fr) !important; }
+  .quantum-creator-scope .sapRubric h3 { margin-bottom: 24px; }
+  .quantum-creator-scope .sapFooter { padding-right: 0; flex-wrap: wrap; }
+  .quantum-creator-scope .sapFooter button, .quantum-creator-scope .sapFooter .sapContinue { width: 100%; }
+}
+
+/* ==========================================================================
+   RESTORED TOP QUESTION NAVIGATOR
+   Reference: large raised numbered cards, green completed state, blue active
+   state, circular arrows and a recessed green completion rail.
+   Scoped to .mcqcTopQuestionNavigator so the rest of Content stays unchanged.
+   ========================================================================== */
+.quantum-creator-scope .mcqcTopQuestionNavigator {
+  width: 100%;
+  min-width: 0;
+  margin: 4px 0 28px;
+  padding: 6px 2px 0;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcNumberNavigation {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 72px;
+  align-items: center;
+  gap: 26px;
+  width: 100%;
+  min-width: 0;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcNumberScroller {
+  min-width: 0;
+  overflow: hidden;
+  padding: 5px 0 10px;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumbers {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  width: 100%;
+  max-width: none;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 5px 9px 12px;
+  overscroll-behavior-x: contain;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumbers::-webkit-scrollbar {
+  display: none;
+  height: 0;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumber {
+  position: relative;
+  display: flex;
+  flex: 0 0 136px;
+  width: 136px;
+  height: 104px;
+  min-width: 136px;
+  padding: 12px 10px 10px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  overflow: visible;
+  border: 2px solid #A6AFB5;
+  border-radius: 8px;
+  background: #DFE6E9;
+  color: #606162;
+  box-shadow:
+    -4px -4px 5px #FFFFFF,
+    8px 8px 0 rgba(196, 196, 196, .88);
+  font-family: "Segoe UI", Arial, sans-serif !important;
+  cursor: pointer;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumber .mcqcNumberValue {
+  display: block;
+  font-size: 31px;
+  line-height: 34px;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumber small {
+  display: block;
+  min-height: 25px;
+  color: inherit;
+  font: 500 22px/25px "Segoe UI", Arial, sans-serif !important;
+  letter-spacing: .01em;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumber.is-complete {
+  border-color: #21770F;
+  background: #DFE6E9;
+  color: #21770F;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumber.is-partial {
+  border-color: #C75A13;
+  background: #DFE6E9;
+  color: #C75A13;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumber.is-active {
+  border-color: #2D5AC8;
+  background: #DFE6E9;
+  color: #2D5AC8;
+  box-shadow:
+    -4px -4px 5px #FFFFFF,
+    8px 8px 0 rgba(196, 196, 196, .88);
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcNumberStatus {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #21770F;
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumber.is-partial .mcqcNumberStatus {
+  background: #C75A13;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcNumberStatus.is-active-dot {
+  background: #2D5AC8;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcRoundNav {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  min-width: 72px;
+  flex: 0 0 72px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #DFE6E9;
+  color: #141B34;
+  box-shadow:
+    -5px -5px 7px #FFFFFF,
+    5px 5px 7px #C4C4C4;
+  cursor: pointer;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcRoundNav:active {
+  box-shadow:
+    inset -4px -4px 5px #FFFFFF,
+    inset 4px 4px 5px #C4C4C4;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcRoundNav .mcqcIcon {
+  width: 30px !important;
+  height: 30px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: brightness(0) saturate(100%) invert(9%) sepia(16%) saturate(1102%) hue-rotate(183deg) brightness(94%) contrast(95%) !important;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionProgress {
+  width: calc(100% - 190px);
+  height: 34px;
+  margin: 13px auto 0;
+  padding: 8px 30px;
+  border-radius: 22px;
+  background: #DFE6E9;
+  box-shadow:
+    inset 4px 4px 6px #C4C4C4,
+    inset -4px -4px 6px #FFFFFF;
+}
+
+.quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionProgress span {
+  display: block;
+  height: 100%;
+  min-width: 10px;
+  border-radius: 20px;
+  background: #21770F;
+  transition: width .18s ease;
+}
+
+@media (max-width: 1250px) {
+  .quantum-creator-scope .mcqcTopQuestionNavigator .mcqcNumberNavigation {
+    grid-template-columns: 62px minmax(0, 1fr) 62px;
+    gap: 18px;
+  }
+  .quantum-creator-scope .mcqcTopQuestionNavigator .mcqcRoundNav {
+    width: 62px;
+    height: 62px;
+    min-width: 62px;
+  }
+  .quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumber {
+    flex-basis: 116px;
+    width: 116px;
+    min-width: 116px;
+    height: 92px;
+  }
+  .quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumber .mcqcNumberValue {
+    font-size: 27px;
+    line-height: 30px;
+  }
+  .quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumber small {
+    font-size: 18px;
+    line-height: 22px;
+  }
+  .quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionProgress {
+    width: calc(100% - 156px);
+  }
+}
+
+@media (max-width: 700px) {
+  .quantum-creator-scope .mcqcTopQuestionNavigator {
+    margin-bottom: 20px;
+  }
+  .quantum-creator-scope .mcqcTopQuestionNavigator .mcqcNumberNavigation {
+    grid-template-columns: 46px minmax(0, 1fr) 46px;
+    gap: 9px;
+  }
+  .quantum-creator-scope .mcqcTopQuestionNavigator .mcqcRoundNav {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+  }
+  .quantum-creator-scope .mcqcTopQuestionNavigator .mcqcRoundNav .mcqcIcon {
+    width: 23px !important;
+    height: 23px !important;
+  }
+  .quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumbers {
+    gap: 12px;
+    padding: 4px 6px 10px;
+  }
+  .quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumber {
+    flex-basis: 88px;
+    width: 88px;
+    min-width: 88px;
+    height: 76px;
+    gap: 5px;
+    box-shadow:
+      -3px -3px 4px #FFFFFF,
+      5px 5px 0 rgba(196, 196, 196, .88);
+  }
+  .quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumber .mcqcNumberValue {
+    font-size: 22px;
+    line-height: 25px;
+  }
+  .quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionNumber small {
+    min-height: 18px;
+    font-size: 15px;
+    line-height: 18px;
+  }
+  .quantum-creator-scope .mcqcTopQuestionNavigator .mcqcNumberStatus {
+    width: 11px;
+    height: 11px;
+    min-width: 11px;
+    top: 7px;
+    right: 8px;
+  }
+  .quantum-creator-scope .mcqcTopQuestionNavigator .mcqcQuestionProgress {
+    width: calc(100% - 112px);
+    height: 24px;
+    margin-top: 8px;
+    padding: 6px 14px;
+  }
+}
+

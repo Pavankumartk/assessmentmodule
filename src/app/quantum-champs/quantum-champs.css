@@ -1,0 +1,209 @@
+/* Quantum Champ — assessment details. Scoped to avoid affecting other pages. */
+.quantum-creator-scope .qc-app-shell{--qc-bg:#dfe6e9;--qc-text:#374151;--qc-blue:#2d4cc8;--qc-raised:-4px -4px 5px #fff,4px 4px 7px #c4c4c4;--qc-inset:inset -3px -3px 4px #fff,inset 3px 3px 5px #c4c4c4;background:var(--qc-bg);color:var(--qc-text);font-family:'Segoe UI',Arial,sans-serif !important;min-width:0;width:100%}
+.quantum-creator-scope .qc-app-shell *,.quantum-creator-scope .qc-app-shell *::before,.quantum-creator-scope .qc-app-shell *::after{box-sizing:border-box}
+.quantum-creator-scope .qc-dashboard{display:flex;height:100dvh;min-width:0;overflow:hidden}
+.quantum-creator-scope .qc-main{flex:1 1 auto;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+.quantum-creator-scope .qc-header{flex:0 0 auto;z-index:5}
+.quantum-creator-scope .qc-scroll{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain}
+.quantum-creator-scope .qc-page{background:var(--qc-bg);padding:20px 24px 26px;width:100%;min-width:0;max-width:none;font-size:14px;line-height:1.5}
+.quantum-creator-scope .qc-page button,.quantum-creator-scope .qc-page input,.quantum-creator-scope .qc-page select{font-family:inherit !important;color:inherit}
+.quantum-creator-scope .qc-page button{cursor:pointer}
+.quantum-creator-scope .qc-page button:disabled{opacity:.55;cursor:not-allowed}
+.quantum-creator-scope .qc-page :is(button,input,select,[contenteditable]):focus-visible{outline:2px solid var(--qc-blue);outline-offset:2px}
+.quantum-creator-scope .qc-breadcrumb{display:flex;align-items:center;gap:10px;min-height:27px;margin:0 0 22px;font-size:14px}
+.quantum-creator-scope .qc-breadcrumb a{color:#374151;text-decoration:none}
+.quantum-creator-scope .qc-breadcrumb a:last-child{color:var(--qc-blue);font-weight:700}
+.quantum-creator-scope .qc-breadcrumb span{font-size:19px;color:#7b8590}
+.quantum-creator-scope .qc-wizard{display:flex;align-items:stretch;width:min(100%,900px);height:46px;padding:0;margin:0 0 28px;list-style:none;isolation:isolate}
+.quantum-creator-scope .qc-wizard-step{--tip:19px;position:relative;display:flex;align-items:center;justify-content:center;gap:9px;flex:1 1 0;min-width:0;margin-left:calc(-1 * var(--tip));padding:0 12px 0 27px;background:#c8d0d3;clip-path:polygon(0 0,calc(100% - var(--tip)) 0,100% 50%,calc(100% - var(--tip)) 100%,0 100%,var(--tip) 50%);font-weight:600;color:#475569;font-size:14px;white-space:nowrap}
+.quantum-creator-scope .qc-wizard-step::before{content:"";position:absolute;inset:1px;background:var(--qc-bg);clip-path:inherit;z-index:-1}
+.quantum-creator-scope .qc-wizard-step:first-child{margin-left:0;padding-left:8px;clip-path:polygon(0 0,calc(100% - var(--tip)) 0,100% 50%,calc(100% - var(--tip)) 100%,0 100%)}
+.quantum-creator-scope .qc-wizard-step:nth-child(1){z-index:5}.quantum-creator-scope .qc-wizard-step:nth-child(2){z-index:4}.quantum-creator-scope .qc-wizard-step:nth-child(3){z-index:3}.quantum-creator-scope .qc-wizard-step:nth-child(4){z-index:2}.quantum-creator-scope .qc-wizard-step:nth-child(5){z-index:1}
+.quantum-creator-scope .qc-wizard-step.qc-completed{background:#438a38;color:#2a7308}.quantum-creator-scope .qc-wizard-step.qc-active{background:#2d4cc8;color:#2d4cc8}
+.quantum-creator-scope .qc-step-number{display:grid;place-items:center;width:20px;height:20px;flex:0 0 20px;border-radius:50%;box-shadow:var(--qc-inset);font-size:12px;font-weight:700}
+.quantum-creator-scope .qc-title{margin:0 0 24px}.quantum-creator-scope .qc-title h1{font-size:20px;line-height:1.35;font-weight:700;margin:0 0 6px}.quantum-creator-scope .qc-title p{font-size:14px;line-height:1.5;margin:0}
+.quantum-creator-scope .qc-accordion-list{display:flex;flex-direction:column;gap:20px}
+.quantum-creator-scope .qc-accordion{min-width:0;border-radius:15px;background:var(--qc-bg);box-shadow:var(--qc-raised);overflow:visible}
+.quantum-creator-scope .qc-accordion-trigger{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:61px;padding:13px 20px;border:0;border-radius:15px;background:transparent;text-align:left;font-size:16px;font-weight:700;letter-spacing:.01em}
+.quantum-creator-scope .qc-accordion-open .qc-accordion-trigger{border-radius:15px 15px 0 0;border-bottom:1px solid #c8d0d3;box-shadow:0 3px 4px rgba(120,130,135,.25)}
+.quantum-creator-scope .qc-chevron{flex:0 0 20px;transition:transform .2s ease}.quantum-creator-scope .qc-chevron-open{transform:rotate(180deg)}
+.quantum-creator-scope .qc-accordion-content{min-width:0;padding:24px 20px 22px}
+.quantum-creator-scope .qc-field{display:flex;flex-direction:column;gap:9px;min-width:0;font-size:14px;font-weight:500;line-height:1.4}
+.quantum-creator-scope .qc-field>span,.quantum-creator-scope .qc-field-heading{font-size:14px;font-weight:500;line-height:20px}
+.quantum-creator-scope .qc-field input,.quantum-creator-scope .qc-field select,.quantum-creator-scope .qc-rank-row select,.quantum-creator-scope .qc-access-code input{display:block;width:100%;min-width:0;height:48px;min-height:48px;padding:0 14px;border:0;border-radius:6px;background:var(--qc-bg);box-shadow:var(--qc-inset);font-size:14px;font-weight:400;outline:none}
+.quantum-creator-scope .qc-field input::placeholder{color:#8a939d}
+.quantum-creator-scope .qc-field select,.quantum-creator-scope .qc-rank-row select{appearance:none;padding-right:36px;background-image:url('/assets/assessmenticons/arrow-down-01.svg');background-position:right 12px center;background-repeat:no-repeat;background-size:17px;cursor:pointer}
+.quantum-creator-scope .qc-field input[type=date]{color-scheme:light}
+/* Basic information: 2, 3, 2 and full-width rows */
+.quantum-creator-scope .qc-basic-fields{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));column-gap:24px;row-gap:21px}
+.quantum-creator-scope .qc-basic-name,.quantum-creator-scope .qc-basic-code,.quantum-creator-scope .qc-basic-module,.quantum-creator-scope .qc-basic-tags{grid-column:span 3;min-width:0}
+.quantum-creator-scope .qc-basic-type,.quantum-creator-scope .qc-basic-course,.quantum-creator-scope .qc-basic-language{grid-column:span 2;min-width:0}
+.quantum-creator-scope .qc-basic-description{grid-column:1/-1;min-width:0}
+.quantum-creator-scope .qc-basic-description>.qc-field{margin-bottom:10px}
+.quantum-creator-scope .qc-basic-tags input{color:#2d4cc8;text-decoration:underline;font-weight:600}
+.quantum-creator-scope .qc-rich-editor{border-radius:7px;padding:12px;min-height:145px;box-shadow:var(--qc-inset);min-width:0}
+.quantum-creator-scope .qc-rich-toolbar{display:flex;align-items:center;gap:7px;min-height:47px;padding:6px 9px;box-shadow:var(--qc-raised);border-radius:4px;overflow-x:auto;scrollbar-width:thin}
+.quantum-creator-scope .qc-rich-toolbar button,.quantum-creator-scope .qc-rich-toolbar select{flex:0 0 auto;height:33px;min-width:32px;border:0;border-radius:4px;background:var(--qc-bg);box-shadow:-2px -2px 3px #fff,2px 2px 3px #c4c4c4;padding:0 9px;font-size:15px}
+.quantum-creator-scope .qc-rich-toolbar select{min-width:70px;max-width:150px;appearance:auto}.quantum-creator-scope .qc-rich-toolbar select:first-of-type{min-width:130px}
+.quantum-creator-scope .qc-rich-content{min-height:70px;padding:18px 10px 8px;outline:none;overflow-wrap:anywhere;font-size:14px;line-height:1.6;font-weight:400}
+/* Game setup */
+.quantum-creator-scope .qc-game-setup{min-width:0}.quantum-creator-scope .qc-game-setup>.qc-field-heading{display:block;margin-bottom:11px}
+.quantum-creator-scope .qc-game-modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:12px 14px;margin-bottom:18px;border-radius:5px;background:var(--qc-bg);box-shadow:inset 3px 3px 4px #c4c4c4,inset -3px -3px 4px #fff}
+/* Only game-mode fields are recessed; other toggle rows retain their styling. */
+.quantum-creator-scope .qc-game-modes .qc-toggle-row{min-height:36px;padding:5px 9px 5px 13px;border:0;border-radius:5px;background:var(--qc-bg);box-shadow:inset 3px 3px 4px #c4c4c4,inset -3px -3px 4px #fff}
+.quantum-creator-scope .qc-game-modes .qc-switch{flex:0 0 48px;width:48px;height:24px;border-radius:20px}
+.quantum-creator-scope .qc-game-modes .qc-switch::before{inset:3px}
+.quantum-creator-scope .qc-game-modes .qc-switch-text{top:3px;left:6px;font-size:9px;line-height:18px}
+.quantum-creator-scope .qc-game-modes .qc-switch-knob{top:3px;left:3px;width:18px;height:18px}
+.quantum-creator-scope .qc-game-modes .qc-switch-on .qc-switch-knob{transform:translateX(24px)}
+.quantum-creator-scope .qc-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0;min-height:49px;padding:8px 12px;border-radius:6px;box-shadow:var(--qc-raised);font-size:14px;font-weight:400}
+.quantum-creator-scope .qc-toggle-row>span{min-width:0;overflow-wrap:anywhere}
+.quantum-creator-scope .qc-switch{position:relative;flex:0 0 55px;width:55px;height:27px;border:0;border-radius:30px;background:var(--qc-bg);box-shadow:var(--qc-raised);padding:0;isolation:isolate}
+.quantum-creator-scope .qc-switch::before{content:"";position:absolute;inset:4px;border-radius:20px;background:#aab2b8;box-shadow:var(--qc-inset)}
+.quantum-creator-scope .qc-switch-on::before{background:linear-gradient(105deg,#2d4cc8 25%,#e01e5a 100%);box-shadow:none}
+.quantum-creator-scope .qc-switch-text{position:absolute;z-index:2;left:7px;top:5px;color:#fff;font-size:10px;font-weight:700;line-height:17px}
+.quantum-creator-scope .qc-switch:not(.qc-switch-on) .qc-switch-text{left:auto;right:5px;color:#374151;font-size:9px}
+.quantum-creator-scope .qc-switch-knob{position:absolute;z-index:3;left:4px;top:4px;width:19px;height:19px;border-radius:50%;background:#6d7680;transition:transform .18s ease}
+.quantum-creator-scope .qc-switch-on .qc-switch-knob{transform:translateX(28px);background:var(--qc-bg);box-shadow:0 2px 4px #858b91}
+.quantum-creator-scope .qc-game-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 24px}
+/* Teams */
+.quantum-creator-scope .qc-teams-top{display:flex;justify-content:flex-end;margin:-4px 0 17px}
+.quantum-creator-scope .qc-pill-button,.quantum-creator-scope .qc-access-code button,.quantum-creator-scope .qc-footer-button{border:0;border-radius:999px;background:var(--qc-bg);box-shadow:var(--qc-raised);font-size:14px;font-weight:600}
+.quantum-creator-scope .qc-pill-button{min-height:43px;padding:0 20px}
+.quantum-creator-scope .qc-team-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.quantum-creator-scope .qc-team-card{display:flex;flex-direction:column;gap:15px;min-width:0;padding:18px 17px 17px;border:1px solid #c3ccd0;border-radius:15px;box-shadow:inset 2px 2px 3px rgba(255,255,255,.8),inset -2px -2px 3px rgba(175,184,188,.45)}
+.quantum-creator-scope .qc-team-heading{display:flex;align-items:center;gap:9px;min-height:30px;margin-bottom:1px}
+.quantum-creator-scope .qc-team-emblem{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border-radius:50%;box-shadow:var(--qc-raised);font-size:17px}
+.quantum-creator-scope .qc-team-heading input{flex:1 1 auto;min-width:0;border:0;background:transparent;font-size:14px;font-weight:700;outline:none}
+.quantum-creator-scope .qc-team-heading>span:last-child{font-size:18px}
+.quantum-creator-scope .qc-member-count{font-size:13px;font-weight:400}.quantum-creator-scope .qc-member-count b{font-size:20px;color:#2d4cc8;margin-right:5px}
+.quantum-creator-scope .qc-member-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:-8px}
+.quantum-creator-scope .qc-member-chips button{border:0;background:var(--qc-bg);border-radius:999px;padding:5px 9px;box-shadow:var(--qc-raised);font-size:12px;max-width:100%;overflow-wrap:anywhere}
+.quantum-creator-scope .qc-member-chips button:last-child{color:#2d4cc8}
+.quantum-creator-scope .qc-team-card>.qc-field:last-of-type{margin-top:0;margin-bottom:-9px}
+.quantum-creator-scope .qc-access-code{display:flex;align-items:center;gap:9px;min-width:0}
+.quantum-creator-scope .qc-access-code input{flex:1 1 auto;min-width:0;color:#b01763;font-weight:700}
+.quantum-creator-scope .qc-access-code button{flex:0 0 auto;min-width:76px;min-height:43px;padding:0 10px;font-size:13px;font-weight:500}
+.quantum-creator-scope .qc-team-visibility{margin-top:19px;padding:7px;border-radius:5px;box-shadow:var(--qc-inset)}
+.quantum-creator-scope .qc-team-visibility .qc-toggle-row{box-shadow:none;min-height:44px}
+.quantum-creator-scope .qc-add-match{display:flex;align-items:center;flex-wrap:wrap;gap:18px;margin-top:21px;font-size:13px}
+.quantum-creator-scope .qc-add-match .qc-pill-button{color:#2d4cc8}
+/* XP and lifelines */
+.quantum-creator-scope .qc-xp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.quantum-creator-scope .qc-xp-panel{display:flex;flex-direction:column;gap:18px;min-width:0;padding:17px;border:1px solid #c3ccd0;border-radius:15px;box-shadow:inset 2px 2px 3px #fff,inset -2px -2px 3px #c6cdd1}
+.quantum-creator-scope .qc-xp-panel .qc-toggle-row{min-height:57px;padding:10px 12px}
+.quantum-creator-scope .qc-rank-ladder{padding:12px 14px;border-radius:8px;box-shadow:-3px -3px 5px #fff,3px 3px 5px #c4c4c4}
+.quantum-creator-scope .qc-rank-ladder .qc-field-heading{margin-bottom:11px}
+.quantum-creator-scope .qc-rank-row{display:grid;grid-template-columns:minmax(90px,1fr) minmax(0,1.3fr);align-items:center;gap:12px;margin:8px 0;font-size:14px}
+.quantum-creator-scope .qc-rank-row select{height:35px;min-height:35px;border-radius:4px;padding-left:10px}
+/* Timing */
+.quantum-creator-scope .qc-timing-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 24px}
+.quantum-creator-scope .qc-notification{margin-top:22px;padding:7px;border-radius:6px;box-shadow:var(--qc-inset)}
+.quantum-creator-scope .qc-notification .qc-toggle-row{box-shadow:none}
+/* Footer */
+.quantum-creator-scope .qc-message{margin:16px 0 0;color:#2d4cc8;font-size:14px}
+.quantum-creator-scope .qc-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:24px}
+.quantum-creator-scope .qc-footer-actions{display:flex;gap:22px;align-items:center}
+.quantum-creator-scope .qc-footer-button{min-width:125px;min-height:45px;padding:0 20px;font-size:15px;font-weight:700}
+.quantum-creator-scope .qc-continue{color:#2a7308}
+.quantum-creator-scope .qc-footer-button:active,.quantum-creator-scope .qc-pill-button:active,.quantum-creator-scope .qc-access-code button:active{box-shadow:var(--qc-inset)}
+@media(max-width:1100px){.quantum-creator-scope .qc-page{padding:18px}.quantum-creator-scope .qc-basic-fields{column-gap:17px}.quantum-creator-scope .qc-game-grid,.quantum-creator-scope .qc-timing-grid{gap:16px}.quantum-creator-scope .qc-team-card{padding:14px}.quantum-creator-scope .qc-access-code{flex-wrap:wrap}.quantum-creator-scope .qc-access-code input{flex-basis:100%}}
+@media(max-width:800px){.quantum-creator-scope .qc-wizard-step{--tip:12px;font-size:12px;gap:5px;padding-left:17px}.quantum-creator-scope .qc-team-grid,.quantum-creator-scope .qc-xp-grid{grid-template-columns:1fr}.quantum-creator-scope .qc-team-card{padding:17px}.quantum-creator-scope .qc-access-code{flex-wrap:nowrap}.quantum-creator-scope .qc-access-code input{flex-basis:auto}.quantum-creator-scope .qc-game-grid,.quantum-creator-scope .qc-timing-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.quantum-creator-scope .qc-page{padding:15px 12px 22px}.quantum-creator-scope .qc-breadcrumb{font-size:13px;margin-bottom:16px}.quantum-creator-scope .qc-wizard{height:42px;margin-bottom:22px}.quantum-creator-scope .qc-wizard-step{--tip:8px;height:42px;padding:0 3px 0 10px;font-size:10px;gap:3px;letter-spacing:-.02em}.quantum-creator-scope .qc-wizard-step:first-child{padding-left:2px}.quantum-creator-scope .qc-step-number{width:16px;height:16px;flex-basis:16px;font-size:10px}.quantum-creator-scope .qc-title{margin-bottom:18px}.quantum-creator-scope .qc-title h1{font-size:18px}.quantum-creator-scope .qc-title p{font-size:14px}.quantum-creator-scope .qc-accordion-list{gap:15px}.quantum-creator-scope .qc-accordion-trigger{min-height:54px;padding:12px;font-size:15px}.quantum-creator-scope .qc-accordion-content{padding:17px 12px}.quantum-creator-scope .qc-basic-fields{grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.quantum-creator-scope .qc-basic-name,.quantum-creator-scope .qc-basic-code,.quantum-creator-scope .qc-basic-type,.quantum-creator-scope .qc-basic-course,.quantum-creator-scope .qc-basic-language,.quantum-creator-scope .qc-basic-module,.quantum-creator-scope .qc-basic-tags{grid-column:span 2}.quantum-creator-scope .qc-basic-description{grid-column:1/-1}.quantum-creator-scope .qc-field input,.quantum-creator-scope .qc-field select{height:44px;min-height:44px}.quantum-creator-scope .qc-game-modes{grid-template-columns:1fr;gap:10px;padding:10px}.quantum-creator-scope .qc-game-grid,.quantum-creator-scope .qc-timing-grid{grid-template-columns:1fr;gap:15px}.quantum-creator-scope .qc-rich-toolbar{gap:6px}.quantum-creator-scope .qc-team-grid,.quantum-creator-scope .qc-xp-grid{gap:16px}.quantum-creator-scope .qc-team-card,.quantum-creator-scope .qc-xp-panel{padding:13px}.quantum-creator-scope .qc-access-code{gap:7px}.quantum-creator-scope .qc-access-code button{min-width:60px;padding:0 8px;font-size:12px}.quantum-creator-scope .qc-footer-button{min-width:82px;min-height:43px;padding:0 12px;font-size:14px}.quantum-creator-scope .qc-footer-actions{gap:10px}}
+@media(max-width:370px){.quantum-creator-scope .qc-wizard-step{font-size:9px;--tip:7px}.quantum-creator-scope .qc-wizard-step>span:last-child{overflow:hidden;text-overflow:clip}.quantum-creator-scope .qc-access-code{flex-wrap:wrap}.quantum-creator-scope .qc-access-code input{flex-basis:100%}.quantum-creator-scope .qc-footer{gap:8px}.quantum-creator-scope .qc-footer-button{min-width:75px;padding:0 8px}}
+@media(prefers-reduced-motion:reduce){.quantum-creator-scope .qc-chevron,.quantum-creator-scope .qc-switch-knob{transition:none}}
+
+/* Neumorphic dropdowns — existing layout dimensions and CSS classes retained */
+.quantum-creator-scope .qc-select-field,.quantum-creator-scope .qc-calendar-field{min-width:0}
+.quantum-creator-scope .qc-select-root,.quantum-creator-scope .qc-calendar-root{position:relative;min-width:0}
+.quantum-creator-scope .qc-page .qc-select-trigger,.quantum-creator-scope .qc-page .qc-calendar-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;height:48px;min-height:48px;padding:0 14px;border:0;border-radius:6px;background:var(--qc-bg);box-shadow:var(--qc-inset);font-size:14px;font-weight:400;text-align:left;color:var(--qc-text)}
+.quantum-creator-scope .qc-select-trigger>span:first-child,.quantum-creator-scope .qc-calendar-trigger>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.quantum-creator-scope .qc-select-chevron{width:9px;height:9px;flex:none;border-right:1.6px solid #354052;border-bottom:1.6px solid #354052;transform:rotate(45deg) translateY(-2px);transition:transform .15s}
+.quantum-creator-scope .qc-select-chevron-up{transform:rotate(225deg) translateY(-2px)}
+.quantum-creator-scope .qc-select-menu,.quantum-creator-scope .qc-calendar-popup{position:absolute;z-index:100;top:calc(100% + 3px);left:0;width:100%;min-width:260px;background:var(--qc-bg);border-radius:0 0 8px 8px;box-shadow:-3px -3px 5px #fff,4px 5px 9px #aeb8bd;max-height:390px;overflow-y:auto;overscroll-behavior:contain;padding:8px 4px}
+.quantum-creator-scope .qc-page .qc-select-option{display:flex;align-items:center;gap:12px;width:100%;min-height:37px;padding:7px 12px;border:0;background:transparent;border-radius:5px;text-align:left;font-size:13px;line-height:1.4;color:#374151}
+.quantum-creator-scope .qc-select-option:hover,.quantum-creator-scope .qc-select-option:focus-visible{background:#d4dce0}
+.quantum-creator-scope .qc-radio-indicator{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border-radius:50%;background:var(--qc-bg);box-shadow:inset 3px 3px 5px #b9c2c7,inset -3px -3px 5px #fff}
+.quantum-creator-scope .qc-radio-indicator>span{display:grid;place-items:center;width:19px;height:19px;border:3px solid #c4cdd1;border-radius:50%;background:var(--qc-bg);box-shadow:inset 1px 1px 2px #bdc6cb,inset -1px -1px 2px #fff}
+.quantum-creator-scope .qc-select-selected .qc-radio-indicator>span{width:19px;height:19px;border:0;background:#2d4cc8;box-shadow:inset 2px 2px 3px #19358c,inset -1px -1px 2px #7e97f0}
+.quantum-creator-scope .qc-select-selected .qc-radio-indicator>span::after{content:'✓';display:grid;place-items:center;color:#fff;font-size:12px;line-height:19px;font-weight:700}
+.quantum-creator-scope .qc-input-error{color:#b42318;font-size:12px}
+/* Fully custom neumorphic calendar; no browser-native popup */
+.quantum-creator-scope .qc-calendar-popup{width:300px;max-width:min(300px,calc(100vw - 45px));padding:15px;border-radius:12px;overflow:visible}
+.quantum-creator-scope .qc-calendar-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.quantum-creator-scope .qc-calendar-header strong{font-size:14px;font-weight:600}
+.quantum-creator-scope .qc-page .qc-calendar-header button,.quantum-creator-scope .qc-page .qc-calendar-footer button{display:grid;place-items:center;border:0;border-radius:8px;background:var(--qc-bg);box-shadow:var(--qc-raised);height:31px;min-width:32px;padding:0 10px;font-size:19px}
+.quantum-creator-scope .qc-calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;text-align:center}
+.quantum-creator-scope .qc-calendar-weekday{font-size:11px;font-weight:600;padding:7px 0;color:#637080}
+.quantum-creator-scope .qc-page .qc-calendar-days button{border:0;border-radius:8px;aspect-ratio:1;background:var(--qc-bg);box-shadow:var(--qc-raised);font-size:12px;padding:0}
+.quantum-creator-scope .qc-page .qc-calendar-days button:hover{box-shadow:var(--qc-inset)}
+.quantum-creator-scope .qc-page .qc-calendar-days button.qc-calendar-active{background:#2d4cc8;color:white;box-shadow:inset 2px 2px 4px #183184,inset -1px -1px 3px #7793fa}
+.quantum-creator-scope .qc-page .qc-calendar-days button:disabled{opacity:.3;cursor:not-allowed;box-shadow:none}
+.quantum-creator-scope .qc-calendar-footer{display:flex;justify-content:space-between;gap:12px;margin-top:16px}
+.quantum-creator-scope .qc-page .qc-calendar-footer button{font-size:12px;min-width:65px}
+@media(max-width:600px){.quantum-creator-scope .qc-page .qc-select-trigger,.quantum-creator-scope .qc-page .qc-calendar-trigger{height:44px;min-height:44px}.quantum-creator-scope .qc-select-menu{min-width:0}}
+
+/* Real-time form feedback; original spacing and toggle appearance retained. */
+.quantum-creator-scope .qc-page [aria-invalid="true"]{outline:1px solid #b42318;outline-offset:1px}
+.quantum-creator-scope .qc-page .qc-input-error{display:block;margin-top:3px;color:#b42318;font-size:12px;line-height:1.4;font-weight:500}
+.quantum-creator-scope .qc-page .qc-rank-row .qc-input-error{grid-column:2}
+.quantum-creator-scope .qc-page .qc-rich-content:empty::before{content:"Enter description or instructions...";color:#8a939d;pointer-events:none}
+
+/* Reference MCQ toggle design — exact 61 × 28 track and inset well */
+.quantum-creator-scope .qc-page .qc-switch{position:relative;flex:0 0 61px;width:61px;height:28px;border:0;border-radius:32px;padding:0;background:#DFE6E9;box-shadow:-4px -4px 4px rgba(255,255,255,.5),4px 4px 4px #C4C4C4;cursor:pointer;isolation:isolate}
+.quantum-creator-scope .qc-page .qc-switch::before{content:"";position:absolute;inset:auto;left:4px;top:4px;width:53px;height:20px;border-radius:32px;background:#DFE6E9;box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4}
+.quantum-creator-scope .qc-page .qc-switch-on::before{background:linear-gradient(113.24deg,#2D4CC8 21.1%,#E01E5A 65.02%);box-shadow:none}
+.quantum-creator-scope .qc-page .qc-switch-text{position:absolute;top:4px;right:9px;left:auto;z-index:1;color:#2F3547;font:400 12px/20px "Segoe UI",Arial,sans-serif !important;letter-spacing:.03em}
+.quantum-creator-scope .qc-page .qc-switch:not(.qc-switch-on) .qc-switch-text{right:9px;left:auto;color:#2F3547;font-size:12px}
+.quantum-creator-scope .qc-page .qc-switch-on .qc-switch-text{right:auto;left:11px;color:#fff}
+.quantum-creator-scope .qc-page .qc-switch-knob{position:absolute;top:4px;left:4px;width:20px;height:20px;z-index:2;background:#606162;border-radius:50%;transform:none}
+.quantum-creator-scope .qc-page .qc-switch-on .qc-switch-knob{left:37px;transform:none;background:#DFE6E9;box-shadow:0 -2px 4px rgba(0,0,0,.1),0 4px 4px rgba(0,0,0,.25)}
+/* Apply reference switch dimensions to game-mode toggles too */
+.quantum-creator-scope .qc-page .qc-game-modes .qc-switch{flex:0 0 61px;width:61px;height:28px}
+.quantum-creator-scope .qc-page .qc-game-modes .qc-switch::before{inset:auto;left:4px;top:4px;width:53px;height:20px}
+.quantum-creator-scope .qc-page .qc-game-modes .qc-switch-text{top:4px;left:auto;right:9px;font-size:12px;line-height:20px}
+.quantum-creator-scope .qc-page .qc-game-modes .qc-switch-on .qc-switch-text{left:11px;right:auto}
+.quantum-creator-scope .qc-page .qc-game-modes .qc-switch-knob{top:4px;left:4px;width:20px;height:20px}
+.quantum-creator-scope .qc-page .qc-game-modes .qc-switch-on .qc-switch-knob{left:37px;transform:none}
+.quantum-creator-scope .qc-page [aria-invalid="true"]{outline:1px solid #b42318;outline-offset:1px}
+
+/* Neumorphic dropdown scrollbar */
+.quantum-creator-scope .qc-select-menu {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #aeb8be #dfe6e9;
+}
+
+/* Scrollbar width */
+.quantum-creator-scope .qc-select-menu::-webkit-scrollbar {
+  width: 13px;
+}
+
+/* Recessed scrollbar track */
+.quantum-creator-scope .qc-select-menu::-webkit-scrollbar-track {
+  background: #dfe6e9;
+  border-radius: 20px;
+  box-shadow:
+    inset 2px 2px 4px #b7c0c5,
+    inset -2px -2px 4px #ffffff;
+}
+
+/* Neumorphic scrollbar thumb */
+.quantum-creator-scope .qc-select-menu::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #c7d0d4, #aab5bb);
+  border: 3px solid #dfe6e9;
+  border-radius: 20px;
+  box-shadow:
+    inset 1px 1px 2px #ffffff,
+    inset -2px -2px 3px #929da4;
+}
+
+/* Hover state */
+.quantum-creator-scope .qc-select-menu::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #b8c3c9, #98a5ad);
+}
+
+/* Remove scrollbar corner */
+.quantum-creator-scope .qc-select-menu::-webkit-scrollbar-corner {
+  background: #dfe6e9;
+}

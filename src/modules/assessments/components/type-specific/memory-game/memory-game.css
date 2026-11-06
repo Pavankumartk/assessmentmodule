@@ -587,3 +587,50 @@
 .memFigmaTile.done i::after{content:'✓';position:absolute;inset:0;color:#fff;font:700 10px/12px Arial,sans-serif;text-align:center;}
 
 .memFigmaTile:not(.done){border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}.memFigmaTile:not(.done) i{background:#2D4CC8!important;border:0}
+
+
+/* MEMORY_GAME_AI_EDITOR_FIGMA_FIX */
+.memFigmaApp { --mem-raised:-4px -4px 4px #fff,4px 4px 8px #C4C4C4; }
+.memFigmaApp .memFigmaColumns { grid-template-columns:minmax(0,1fr) minmax(258px,304px); }
+.memFigmaApp .memFigmaQuestionHeader p { font:400 16px/24px 'Segoe UI',Arial,sans-serif; color:#2F3547; }
+.memFigmaApp .memFigmaRound {
+  display:grid; place-items:center; flex:0 0 38px; width:38px; height:38px; padding:0;
+  border:1px solid #fff; border-radius:50%; background:#DFE6E9; color:#2F3547;
+  box-shadow:-3px -3px 4px #fff,3px 3px 4px #C4C4C4;
+}
+.memFigmaApp .memFigmaRound img { width:20px; height:20px; opacity:1; filter:contrast(1.4); }
+.memFigmaApp .memFigmaRound:disabled { opacity:.46; cursor:not-allowed; }
+.memFigmaApp .memFigmaRound:not(:disabled):hover { box-shadow:inset -2px -2px 3px #fff,inset 2px 2px 3px #C4C4C4; }
+.memFigmaApp .memFigmaField { font:600 16px/24px 'Segoe UI',Arial,sans-serif; color:#374151; }
+.memFigmaApp .memNewEditorLabel { font:600 16px/24px 'Segoe UI',Arial,sans-serif; color:inherit; }
+.memFigmaApp .memFigmaAside > label,
+.memFigmaApp .memFigmaSettingsGrid > label { font:600 16px/24px 'Segoe UI',Arial,sans-serif; color:#374151; }
+.memFigmaApp .memFigmaReadOnly { min-height:58px; font:400 16px/24px 'Segoe UI',Arial,sans-serif; }
+.memFigmaApp .memFigmaField input,
+.memFigmaApp .memFigmaSettingsGrid input,
+.memFigmaApp .memFigmaAside input:not([type="checkbox"]),
+.memFigmaApp .memFigmaPairInputs input:not([type="file"]),
+.memFigmaApp .memDropdownTrigger {
+  background:#DFE6E9; color:#374151; border:0; border-radius:8px;
+  box-shadow:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4;
+}
+.memFigmaApp .memFigmaAside input:not([type="checkbox"]),
+.memFigmaApp .memFigmaAside .memDropdownTrigger {
+  min-height:36px; height:36px; border-radius:4px; font:400 16px/24px 'Segoe UI',Arial,sans-serif;
+  box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4;
+}
+.memFigmaApp .memNewEditor .aiEditor {
+  --ai-bg:#DFE6E9; --ai-shadow:-4px -4px 4px #fff,4px 4px 4px #C4C4C4;
+  --ai-inset:inset -4px -4px 4px #fff,inset 4px 4px 4px #C4C4C4;
+  position:relative; min-height:155px; padding:8px; border-radius:8px;
+  background:#DFE6E9; box-shadow:var(--ai-inset);
+}
+.memFigmaApp .memNewEditor .aiEditorInputLine { min-height:92px; padding:14px 8px 25px; }
+.memFigmaApp .memNewEditor .aiEditable { min-height:66px; color:inherit; }
+.memFigmaApp .memNewEditor .aiEditorCharacterCount {
+  position:absolute; right:12px; bottom:7px; color:#374151;
+  font:400 12px/18px 'Segoe UI',Arial,sans-serif; text-align:right; pointer-events:none;
+}
+.memFigmaApp .memNewAccordion:has(.aiEditorCharacterCount) > .memNewAccordionHead .memNewAccordionRight > small { display:none; }
+@media(max-width:880px) { .memFigmaApp .memFigmaColumns { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:620px) { .memFigmaApp .memFigmaAside input:not([type="checkbox"]), .memFigmaApp .memFigmaAside .memDropdownTrigger { min-height:44px; height:44px; } }

@@ -1,5 +1,5 @@
 "use client";
-import { AssessmentEditorDropdown } from "@/modules/assessments/components/common/steps/DetailsStep/DetailsStep";
+import { AIToolbarEditor } from "@/modules/assessments/components/type-specific/ai-interviews-and-quizzes/Content";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -65,39 +65,16 @@ function MemoryAccordion({ title, icon, open, onChange, children, count }: { tit
   </section>;
 }
 
-function MemoryTextEditor({ label, value, onChange, placeholder, maxLength = 250, accent }: { label?: string; value: string; onChange: (s: string) => void; placeholder: string; maxLength?: number; accent?: string }) {
-  const ref = useRef<HTMLTextAreaElement>(null);
-  const [font, setFont] = useState("Segoe UI");
-  const [size, setSize] = useState("16");
-  const [bold, setBold] = useState(false);
-  const [italic, setItalic] = useState(false);
-  const [underline, setUnderline] = useState(false);
-  const undo = useRef<string[]>([]);
-  const redo = useRef<string[]>([]);
-  const edit = (text: string) => { undo.current.push(value); if (undo.current.length > 60) undo.current.shift(); redo.current = []; onChange(text); };
-  const wrap = (before: string, after = before) => {
-    const box = ref.current; if (!box) return;
-    const start = box.selectionStart; const end = box.selectionEnd;
-    const selection = value.slice(start, end);
-    edit(value.slice(0, start) + before + selection + after + value.slice(end));
-    requestAnimationFrame(() => { box.focus(); box.setSelectionRange(start + before.length, end + before.length); });
-  };
-  const goBack = () => { const previous = undo.current.pop(); if (previous === undefined) return; redo.current.push(value); onChange(previous); };
-  const goForward = () => { const next = redo.current.pop(); if (next === undefined) return; undo.current.push(value); onChange(next); };
-  return <div className="memNewEditor">
+function MemoryTextEditor({ label, value, onChange, placeholder, maxLength = 250, accent, editorKey, html, onHtmlChange, onError }: {
+  label?: string; value: string; onChange: (s: string) => void; placeholder: string; maxLength?: number; accent?: string;
+  editorKey: string; html?: string; onHtmlChange: (html: string) => void; onError: (message: string) => void;
+}) {
+  const plainAsHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\r?\n/g, "<br>");
+  return <div className="memNewEditor" style={{ color: accent || "#374151" }}>
     {label && <div className="memNewEditorLabel"><strong>{label}</strong></div>}
-    <div className="memNewToolbar" role="toolbar" aria-label={`${label || "Text"} formatting`}>
-      <button type="button" onClick={goBack} title="Undo"><Icon name="undo" size={15} /></button>
-      <button type="button" onClick={goForward} title="Redo"><Icon name="redo" size={15} /></button>
-      <AssessmentEditorDropdown className="mcqEditorFont" label="Font family" value={font} options={["Segoe UI", "Inter"]} onChange={setFont} />
-      <AssessmentEditorDropdown className="mcqEditorSize" label="Font size" value={size} options={["12", "14", "16", "18", "20", "24"]} onChange={setSize} />
-      <button type="button" aria-pressed={bold} onClick={() => setBold(v => !v)} title="Bold"><b>B</b></button>
-      <button type="button" aria-pressed={italic} onClick={() => setItalic(v => !v)} title="Italic"><i>I</i></button>
-      <button type="button" aria-pressed={underline} onClick={() => setUnderline(v => !v)} title="Underline"><u>U</u></button>
-      <button type="button" title="Insert bullet" onClick={() => wrap("• ", "")}>≡</button>
-      <button type="button" title="Insert quotation marks" onClick={() => wrap("“", "”")}>❞</button>
-    </div>
-    <div className="assessmentEditorInput">    <textarea ref={ref} maxLength={maxLength} rows={3} value={value} placeholder={placeholder} onChange={event => edit(event.target.value)} style={{ fontFamily: `"${font}", sans-serif`, fontSize: `${size}px`, fontWeight: bold ? 700 : 400, fontStyle: italic ? "italic" : "normal", textDecoration: underline ? "underline" : "none", color: accent || "#374151" }} /><small className="assessmentEditorCounter">{value.length}/{maxLength}</small></div>
+    <AIToolbarEditor key={editorKey} value={html ?? plainAsHtml(value)} questionNumber={0} showQuestionPrefix={false} maxChars={maxLength}
+      editorLabel={label || placeholder} placeholder={placeholder} onError={onError}
+      onChange={onHtmlChange} onTextChange={onChange}/>
   </div>;
 }
 
@@ -131,6 +108,7 @@ function positive(value: unknown, fallback: number) { const n = Number(value); r
 export default function MemoryGameContent() {
   const router = useRouter();
   const [questions, setQuestions] = useState<MemoryQuestion[]>([makeQuestion()]);
+  const [richHtml, setRichHtml] = useState<Record<string, string>>({});
   const [draftReady, setDraftReady] = useState(false);
   const [active, setActive] = useState(0);
   const [limits, setLimits] = useState({ count: 1, marks: 1, per: 1, duration: "60" });
@@ -152,20 +130,24 @@ export default function MemoryGameContent() {
     setLimits(config);
     const storedDraft = getDraft("memoryGameContentDraft");
     const existing = readMemoryQuestions(storedDraft);
+    if (storedDraft.richHtml && typeof storedDraft.richHtml === "object" && !Array.isArray(storedDraft.richHtml)) {
+      setRichHtml(Object.fromEntries(Object.entries(storedDraft.richHtml).filter((entry): entry is [string, string] => typeof entry[1] === "string")));
+    }
     if (Number.isInteger(storedDraft.active)) setActive(Math.max(0, Math.min(Math.max(config.count, existing.length)-1, Number(storedDraft.active))));
     setQuestions(Array.from({length:Math.max(config.count,existing.length)},(_,index)=>existing[index] ?? makeQuestion(config.per)));
     setDraftReady(true);
   }, []);
-  useEffect(()=>{if(!draftReady)return;try{assessmentStorage.setItem("memoryGameContentDraft",JSON.stringify({questions,active}));}catch{setNotice("Could not save this draft in your browser.");}},[draftReady,questions,active]);
+  useEffect(()=>{if(!draftReady)return;try{assessmentStorage.setItem("memoryGameContentDraft",JSON.stringify({ questions, active, richHtml }));}catch{setNotice("Could not save this draft in your browser.");}},[draftReady,questions,active,richHtml]);
 
   const question = questions[active] || questions[0];
+  const memoryEditorProps = (field: string) => { const editorKey = `${question.id}:${field}`; return { editorKey, html: richHtml[editorKey], onHtmlChange: (html: string) => setRichHtml(previous => ({ ...previous, [editorKey]: html })), onError: setNotice }; };
   const completed = useMemo(() => questions.filter(isMemoryComplete).length, [questions]);
   const marks = questions.reduce((sum, q) => sum + (Number(q.points) || 0), 0);
   const canContinue = questions.length === limits.count && questions.every(isMemoryComplete) && Math.abs(marks - limits.marks) < 0.001;
   const update = (changes: Partial<MemoryQuestion>) => setQuestions(old => old.map((q, i) => i === active ? { ...q, ...changes } : q));
   const editPair = (id: string, changes: Partial<MemoryPair>) => update({ pairs: question.pairs.map(pair => pair.id === id ? { ...pair, ...changes } : pair) });
   const save = (showNotice = true) => {
-    assessmentStorage.setItem("memoryGameContentDraft", JSON.stringify({ questions }));
+    assessmentStorage.setItem("memoryGameContentDraft", JSON.stringify({ questions, active, richHtml }));
     updateAssessment({ questions: questions.length, marks });
     if (showNotice) setNotice("Saved");
   };
@@ -209,7 +191,7 @@ export default function MemoryGameContent() {
             <div className="memFigmaProgress"><div style={{ width: `${completed / limits.count * 100}%` }} /></div>
             <div className="memFigmaQuestionBox"><label className="memFigmaField"><span>Question Type</span><div className="memFigmaInset memFigmaReadOnly">Memory Game <Icon name="chevron" /></div></label>
               <MemoryAccordion title="Question and Image" icon="question" open={panelOpen.question} onChange={() => switchPanel("question")}>
-                <MemoryTextEditor label="Write Your Question" value={question.text} onChange={text => update({ text })} placeholder="Write the matching-pairs question..." />
+                <MemoryTextEditor {...memoryEditorProps("text")} label="Write Your Question" value={question.text} onChange={text => update({ text })} placeholder="Write the matching-pairs question..." />
                 <div className="memFigmaSubpanel"><h3>Add pictures to cards</h3><p className="memFigmaMuted">Add text or images to each pair. The matching pair is saved together.</p>
                   <div className="memFigmaCardPairs">{question.pairs.map((pair, index) => <div key={pair.id} className="memFigmaPair"><div className="memFigmaPairHeader"><b>Pair {index + 1}</b><button type="button" disabled={question.pairs.length <= 2} onClick={() => update({ pairs: question.pairs.filter(p => p.id !== pair.id) })}>Remove</button></div>
                     <div className="memFigmaPairInputs"><label>Card A<input value={pair.left} maxLength={250} placeholder="Card text" onChange={e => editPair(pair.id, { left: e.target.value })} /></label><MemoryImageSlot label={`Card A, pair ${index + 1}`} value={pair.leftImage || ""} onChange={leftImage => editPair(pair.id, { leftImage })} /></div>
@@ -238,15 +220,15 @@ export default function MemoryGameContent() {
                 <div className="memFigmaSwitchRow memFigmaWideSetting">Calculate grade with a minimum score of 0 <MemoryToggle label="Minimum score zero" checked={question.minimumScoreZero ?? true} onChange={minimumScoreZero => update({ minimumScoreZero })} /></div>
               </MemoryAccordion>
               <MemoryAccordion title="Feedback" icon="feedback" open={panelOpen.feedback} onChange={() => switchPanel("feedback")} count={`${Math.max(question.feedbackFull.length, question.feedbackPartial.length, question.feedbackZero.length)}/250`}>
-                <MemoryTextEditor label="Full Marks" value={question.feedbackFull} onChange={feedbackFull => update({ feedbackFull })} placeholder="Feedback for full marks" accent="#2A7308" />
-                <MemoryTextEditor label="Partial Marks" value={question.feedbackPartial} onChange={feedbackPartial => update({ feedbackPartial })} placeholder="Feedback for partial marks" accent="#DA6207" />
-                <MemoryTextEditor label="Zero Marks" value={question.feedbackZero} onChange={feedbackZero => update({ feedbackZero })} placeholder="Feedback for zero marks" accent="#BA2637" />
+                <MemoryTextEditor {...memoryEditorProps("feedbackFull")} label="Full Marks" value={question.feedbackFull} onChange={feedbackFull => update({ feedbackFull })} placeholder="Feedback for full marks" accent="#2A7308" />
+                <MemoryTextEditor {...memoryEditorProps("feedbackPartial")} label="Partial Marks" value={question.feedbackPartial} onChange={feedbackPartial => update({ feedbackPartial })} placeholder="Feedback for partial marks" accent="#C05512" />
+                <MemoryTextEditor {...memoryEditorProps("feedbackZero")} label="Zero Marks" value={question.feedbackZero} onChange={feedbackZero => update({ feedbackZero })} placeholder="Feedback for zero marks" accent="#A91E2C" />
               </MemoryAccordion>
               <MemoryAccordion title="Explanation" icon="explanation" open={panelOpen.explanation} onChange={() => switchPanel("explanation")} count={`${question.explanation.length}/250`}>
-                <MemoryTextEditor value={question.explanation} onChange={explanation => update({ explanation })} placeholder="Explain the correct matching pairs" />
+                <MemoryTextEditor {...memoryEditorProps("explanation")} value={question.explanation} onChange={explanation => update({ explanation })} placeholder="Explain the correct matching pairs" />
               </MemoryAccordion>
               <MemoryAccordion title="Hint" icon="hint" open={panelOpen.hint} onChange={() => switchPanel("hint")} count={`${question.hint.length}/250`}>
-                <MemoryTextEditor value={question.hint} onChange={hint => update({ hint })} placeholder="Enter a hint for learners" />
+                <MemoryTextEditor {...memoryEditorProps("hint")} value={question.hint} onChange={hint => update({ hint })} placeholder="Enter a hint for learners" />
                 <label className="memFigmaCheckbox"><input type="checkbox" checked={question.showHintBefore ?? true} onChange={e => update({ showHintBefore: e.target.checked })} /> Show hint before answering</label>
                 <label className="memFigmaCheckbox"><input type="checkbox" checked={question.allowHintRequest ?? false} onChange={e => update({ allowHintRequest: e.target.checked })} /> Allow learner to request hint</label>
               </MemoryAccordion>

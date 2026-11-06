@@ -1,0 +1,138 @@
+.quantum-player-scope .qc-landscape-root {
+  display: contents;
+}
+
+.quantum-player-scope .qc-rotate-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px;
+  background: radial-gradient(ellipse at 50% 0%, #b9e3f3 0%, #d7e5eb 55%, #e3e9ec 100%);
+  color: #343b50;
+  text-align: center;
+  font-family: "Segoe UI", Arial, sans-serif !important;
+}
+
+.quantum-player-scope .qc-rotate-badge {
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #e6edf0;
+  box-shadow: 10px 10px 22px #bcc8cf, -10px -10px 22px #ffffff;
+}
+
+.quantum-player-scope .qc-rotate-phone {
+  position: relative;
+  width: 40px;
+  height: 66px;
+  border: 4px solid #67096e;
+  border-radius: 10px;
+  animation: qc-rotate-turn 2.4s ease-in-out infinite;
+}
+
+.quantum-player-scope .qc-rotate-phone::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e01e5a;
+  transform: translateX(-50%);
+}
+
+.quantum-player-scope .qc-rotate-screen h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #67096e;
+}
+
+.quantum-player-scope .qc-rotate-screen p {
+  margin: 0;
+  max-width: 280px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+@keyframes qc-rotate-turn {
+  0%,
+  20% {
+    transform: rotate(0deg);
+  }
+  60%,
+  100% {
+    transform: rotate(-90deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quantum-player-scope .qc-rotate-phone {
+    animation: none;
+    transform: rotate(-90deg);
+  }
+}
+
+
+/* .qc-game-visible {
+  width: 100%;
+  min-height: 100dvh;
+}
+
+.qc-game-hidden {
+  display: none;
+}
+
+.qc-rotate-screen {
+  display: none;
+}
+
+@media screen and (max-width: 900px) and (orientation: portrait) {
+  .qc-rotate-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 24px;
+    background: #dfe6e9;
+    color: #2f3547;
+    text-align: center;
+    font-family: "Segoe UI", Arial, sans-serif;
+  }
+
+  .qc-rotate-icon {
+    font-size: 65px;
+  }
+
+  .qc-rotate-screen h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .qc-rotate-screen p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+}
+
+@media screen and (max-width: 900px) and (orientation: landscape) {
+  .qc-game-visible {
+    width: 100%;
+    min-height: 100dvh;
+    overflow-x: auto;
+  }
+} */

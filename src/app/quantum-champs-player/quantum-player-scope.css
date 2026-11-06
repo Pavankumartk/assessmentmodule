@@ -1,0 +1,3 @@
+.quantum-player-scope { font-family: Arial, sans-serif !important; }
+.quantum-player-scope :where(*) { font-family: inherit !important; }
+.quantum-player-scope .qc-winner-page { --font-fredoka: var(--qc-font-fredoka); }

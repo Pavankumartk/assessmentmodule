@@ -1,0 +1,5 @@
+.quantum-creator-scope { font-family: Arial, sans-serif !important; }
+.quantum-creator-scope :where(:not(.sidebar, .sidebar *, .topHeader, .topHeader *, .sidebarCollapseToggle, .sidebarCollapseToggle *)) { font-family: inherit !important; }
+.quantum-creator-scope .sidebarItem[href="/assessments"] { color:#2D4CC8 !important; background:#DFE6E9; box-shadow:inset -4px -4px 8px #fff,inset 4px 4px 8px #C4C4C4; }
+.quantum-creator-scope .sidebarItem[href="/assessments"] span { color:#2D4CC8 !important; font-weight:700; }
+.quantum-creator-scope .sidebarItem[href="/assessments"] .sidebarIcon { filter:brightness(0) saturate(100%) invert(24%) sepia(75%) saturate(2039%) hue-rotate(222deg) brightness(91%) contrast(96%) !important; }

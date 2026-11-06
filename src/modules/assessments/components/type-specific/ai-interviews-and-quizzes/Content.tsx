@@ -191,13 +191,17 @@ function RoleSelector({ value, onChange }: { value: string; onChange: (next: str
     </div>}
   </div>;
 }
-function AIToolbarEditor({ value, onChange, questionNumber, onError }: {
+export function AIToolbarEditor({ value, onChange, questionNumber, onError, maxChars, placeholder, editorLabel, onTextChange, showQuestionPrefix = true }: {
   value: string; onChange: (html: string) => void; questionNumber: number; onError: (error: string) => void;
+
+  maxChars?: number; placeholder?: string; editorLabel?: string; onTextChange?: (text: string) => void; showQuestionPrefix?: boolean;
 }) {
   const editable = useRef<HTMLDivElement>(null);
   const pictureInput = useRef<HTMLInputElement>(null);
   const savedRange = useRef<Range | null>(null);
   const root = useRef<HTMLDivElement>(null);
+  const lastValidHtml = useRef("");
+  const [characterCount, setCharacterCount] = useState(0);
   const [family, setFamily] = useState("Arial");
   const [size, setSize] = useState("16");
   const [heading, setHeading] = useState("");
@@ -212,7 +216,12 @@ function AIToolbarEditor({ value, onChange, questionNumber, onError }: {
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 160 });
   const menuRoot = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (editable.current) editable.current.innerHTML = safeHtml(value);
+    if (editable.current) {
+      editable.current.innerHTML = safeHtml(value);
+      lastValidHtml.current = editable.current.innerHTML;
+      const text = (editable.current.innerText || editable.current.textContent || "").replace(/\u00a0/g, " ");
+      setCharacterCount(/^[\r\n\u200B\uFEFF]+$/.test(text) ? 0 : text.length);
+    }
     // Each question owns its own editor instance via key={selectedQuestion.id}.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -284,7 +293,37 @@ function AIToolbarEditor({ value, onChange, questionNumber, onError }: {
     try { selection?.removeAllRanges(); selection?.addRange(savedRange.current); }
     catch { /* Use the current caret when an old range is no longer valid. */ }
   };
-  const notify = () => { if (editable.current) onChange(safeHtml(editable.current.innerHTML)); };
+  const editorText = () => {
+    const element = editable.current;
+    if (!element) return "";
+    const text = (element.innerText || element.textContent || "").replace(/\u00a0/g, " ");
+    return /^[\r\n\u200B\uFEFF]+$/.test(text) ? "" : text;
+  };
+  const allowedText = (text: string) => {
+    if (maxChars === undefined || !editable.current) return text;
+    const selected = window.getSelection();
+    const replacing = selected?.anchorNode && selected.focusNode && editable.current.contains(selected.anchorNode) && editable.current.contains(selected.focusNode) ? selected.toString().length : 0;
+    const remaining = Math.max(0, maxChars - editorText().length + replacing);
+    let allowed = "";
+    for (const character of text) { if (allowed.length + character.length > remaining) break; allowed += character; }
+    return allowed;
+  };
+  const notify = () => {
+    const element = editable.current;
+    if (!element) return;
+    const text = editorText();
+    if (maxChars !== undefined && text.length > maxChars) {
+      element.innerHTML = lastValidHtml.current;
+      const range = document.createRange(); range.selectNodeContents(element); range.collapse(false);
+      const selected = window.getSelection(); selected?.removeAllRanges(); selected?.addRange(range);
+      onError(`This field allows a maximum of ${maxChars} characters.`);
+      return;
+    }
+    lastValidHtml.current = safeHtml(element.innerHTML);
+    setCharacterCount(text.length);
+    onChange(lastValidHtml.current);
+    onTextChange?.(text);
+  };
   const apply = (command: string, argument?: string) => {
     restore();
     if (command === "fontName" && argument) applyAssessmentFont(editable.current, argument); else document.execCommand(command, false, command === "fontSize" ? "7" : argument);
@@ -384,19 +423,19 @@ function AIToolbarEditor({ value, onChange, questionNumber, onError }: {
       {SYMBOLS.map(symbol => <button type="button" key={symbol} title={`Insert ${symbol}`} aria-label={`Insert ${symbol}`}
         onMouseDown={event => { event.preventDefault(); remember(); }} onClick={() => { apply("insertText", symbol); setSymbolsOpen(false); }}>{symbol}</button>)}
     </div>}
-    <input ref={pictureInput} type="file" accept="image/*" hidden onChange={event => { const file = event.target.files?.[0]; if (file) insertPicture(file); }} />
-    <div className="aiEditorInputLine"><span className="aiQuestionPrefix">Q{questionNumber}-</span>
-      <div ref={editable} className="aiEditable" role="textbox" aria-label={`Question ${questionNumber} text`} aria-multiline="true"
-        contentEditable suppressContentEditableWarning data-placeholder="Write your question here..." onInput={notify}
+    <input style={{display:"none"}} ref={pictureInput} type="file" accept="image/*" hidden onChange={event => { const file = event.target.files?.[0]; if (file) insertPicture(file); }} />
+    <div className="aiEditorInputLine">{showQuestionPrefix && <span className="aiQuestionPrefix">Q{questionNumber}-</span>}
+      <div onBeforeInput={event => { const input = event.nativeEvent as InputEvent; if (input.data && allowedText(input.data) !== input.data) event.preventDefault(); }} ref={editable} className="aiEditable" role="textbox" aria-label={editorLabel || `Question ${questionNumber} text`} aria-multiline="true"
+        contentEditable suppressContentEditableWarning data-placeholder={placeholder || "Write your question here..."} onInput={notify}
         onMouseUp={remember} onKeyUp={remember} onFocus={remember}
         onKeyDown={event => {
           if ((event.ctrlKey || event.metaKey) && event.key === "\\") {
             event.preventDefault(); remember(); apply("removeFormat");
           }
         }}
-        onPaste={event => { event.preventDefault(); document.execCommand("insertText", false, event.clipboardData.getData("text/plain")); notify(); }} />
+        onPaste={event => { event.preventDefault(); const text = event.clipboardData.getData("text/plain"); const allowed = allowedText(text); if (allowed) document.execCommand("insertText", false, allowed); if (allowed !== text && maxChars !== undefined) onError(`This field allows a maximum of ${maxChars} characters.`); notify(); }} />
     </div>
-  </div>;
+  {maxChars !== undefined && <small className="aiEditorCharacterCount" aria-live="polite">{characterCount}/{maxChars}</small>}</div>;
 }
 function sampleForRole(role: string, difficulty: string, count: number): AIQuestion[] {
   const field = role.trim() || "this role";

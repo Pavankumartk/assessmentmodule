@@ -1,0 +1,347 @@
+.quantum-player-scope .qc-access-root,
+.quantum-player-scope .qc-access-root *,
+.quantum-player-scope .qc-access-root *::before,
+.quantum-player-scope .qc-access-root *::after {
+  box-sizing: border-box;
+}
+
+.quantum-player-scope .qc-access-root {
+  --u: min(calc(100vw / 1440), calc(100dvh / 1024));
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+  background: #dfe6e9;
+  font-family: "Segoe UI", Arial, sans-serif !important;
+  color: #374151;
+}
+
+.quantum-player-scope .qc-access-panel {
+  position: absolute;
+  inset: calc(32 * var(--u));
+  overflow: hidden;
+  background: linear-gradient(180deg, #b2def1 0%, #efdde3 50%, #dfe6e9 100%);
+  box-shadow:
+    -4px -4px 4px #ffffff,
+    4px 4px 4px #c4c4c4;
+  border-radius: calc(16 * var(--u));
+}
+
+.quantum-player-scope .qc-access-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  margin: 0;
+  justify-content: center;
+}
+
+.quantum-player-scope .qc-access-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(24 * var(--u));
+}
+
+.quantum-player-scope .qc-access-logo-frame {
+  position: relative;
+  width: calc(387 * var(--u));
+  height: calc(221 * var(--u));
+}
+
+.quantum-player-scope .qc-access-logo {
+  position: absolute;
+  left: 50%;
+  top: calc(22 * var(--u));
+  width: calc(131 * var(--u));
+  height: calc(177 * var(--u));
+  transform: translateX(-50%);
+}
+
+.quantum-player-scope .qc-access-logo-crown {
+  position: absolute;
+  left: 10%;
+  top: 0;
+  width: 82%;
+  height: 46%;
+  filter: drop-shadow(0 2px 1px rgba(192, 85, 18, 0.35));
+}
+
+.quantum-player-scope .qc-access-logo-shield {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 41.38%;
+  bottom: 0.45%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: calc(18 * var(--u));
+  border-radius: calc(10 * var(--u)) calc(10 * var(--u)) 0 0;
+  clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%);
+  background: conic-gradient(from 0deg at 50% 50%, rgba(255, 255, 255, 0.08) 0deg 90deg, rgba(0, 0, 0, 0.14) 90deg 180deg, rgba(255, 255, 255, 0.08) 180deg 270deg, rgba(0, 0, 0, 0.14) 270deg 360deg), linear-gradient(128.79deg, #67096e -1.23%, #e01e5a 86.72%);
+  color: #ffffff;
+  font-size: calc(21 * var(--u));
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.quantum-player-scope .qc-access-heading {
+  width: max-content;
+  min-width: calc(944 * var(--u));
+  height: calc(93 * var(--u));
+  margin: 0;
+  padding: 0 0.08em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(64 * var(--u));
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  text-align: center;
+  white-space: nowrap;
+  background: linear-gradient(90.31deg, #67096e 0.28%, #e01e5a 43.04%, #944254 78.91%, #5a2808 95.94%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25));
+}
+
+.quantum-player-scope .qc-access-fields {
+  display: grid;
+  grid-template-columns: repeat(2, calc(420 * var(--u)));
+  column-gap: calc(64 * var(--u));
+  margin-top: calc(40 * var(--u));
+}
+
+.quantum-player-scope .qc-access-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(12 * var(--u));
+}
+
+.quantum-player-scope .qc-access-field label {
+  font-size: calc(34 * var(--u));
+  font-weight: 600;
+  line-height: 1.33;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  color: #374151;
+}
+
+.quantum-player-scope .qc-access-input-box {
+  width: calc(420 * var(--u));
+  height: calc(80 * var(--u));
+  border-radius: calc(8 * var(--u));
+  background: #dfe6e9;
+  box-shadow:
+    inset -4px -4px 4px #ffffff,
+    inset 4px 4px 8px #c4c4c4;
+}
+
+.quantum-player-scope .qc-access-input-box:focus-within {
+  outline: 2px solid #2d4cc8;
+  outline-offset: 3px;
+}
+
+.quantum-player-scope .qc-access-input-box.is-invalid {
+  box-shadow:
+    inset -4px -4px 4px #ffffff,
+    inset 4px 4px 8px #c4c4c4,
+    0 0 0 1px #c5223e;
+}
+
+.quantum-player-scope .qc-access-input {
+  width: 100%;
+  height: 100%;
+  padding: 0 calc(6 * var(--u));
+  border: 0;
+  outline: none;
+  background: linear-gradient(90deg, #2d4cc8 0%, #e01e5a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  caret-color: #67096e;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25));
+  font-family: inherit !important;
+  font-size: calc(32 * var(--u));
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.quantum-player-scope .qc-access-input::placeholder {
+  background: linear-gradient(90deg, #2d4cc8 0%, #e01e5a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  opacity: 1;
+}
+
+.quantum-player-scope .qc-access-field-error {
+  min-height: calc(40 * var(--u));
+  max-width: 100%;
+  font-size: max(12px, calc(14 * var(--u)));
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  color: #c5223e;
+}
+
+.quantum-player-scope .qc-access-hint {
+  min-height: 24px;
+  margin: calc(8 * var(--u)) 0 0;
+  white-space: nowrap;
+  font-size: calc(34 * var(--u));
+  font-weight: 600;
+  line-height: 1.33;
+  letter-spacing: 0.06em;
+  text-align: center;
+  color: #374151;
+}
+
+.quantum-player-scope .qc-access-button {
+  flex: none;
+  width: calc(320 * var(--u));
+  height: calc(90 * var(--u));
+  margin-top: calc(56 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 50px;
+  background:
+    linear-gradient(#dfe6e9, #dfe6e9) padding-box,
+    linear-gradient(90deg, #2d4cc8, #e01e5a) border-box;
+  box-shadow:
+    -4px -4px 4px #ffffff,
+    4px 4px 8px #c4c4c4;
+  font-family: inherit !important;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.quantum-player-scope .qc-access-button span {
+  font-size: calc(36 * var(--u));
+  font-weight: 700;
+  line-height: 1.14;
+  letter-spacing: 0.03em;
+  background: linear-gradient(90deg, #2d4cc8 0%, #e01e5a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.quantum-player-scope .qc-access-button:hover {
+  filter: brightness(1.025);
+}
+
+.quantum-player-scope .qc-access-button:focus-visible {
+  outline: 3px solid #2d4cc8;
+  outline-offset: 4px;
+}
+
+.quantum-player-scope .qc-access-embers {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.quantum-player-scope .qc-access-embers span {
+  position: absolute;
+  bottom: calc(-32 * var(--u));
+  left: calc(4% + var(--i) * 8%);
+  font-size: calc(36 * var(--u));
+  line-height: 1;
+  color: #e01e5a;
+  text-shadow:
+    0 0 calc(6 * var(--u)) #ffffff,
+    0 0 calc(18 * var(--u)) rgba(224, 30, 90, 0.85);
+  opacity: 0;
+  animation: qc-access-rise 7s linear infinite;
+  animation-delay: calc(var(--i) * -0.63s);
+}
+
+.quantum-player-scope .qc-access-embers span:nth-child(3n) {
+  font-size: calc(26 * var(--u));
+  animation-duration: 9s;
+  color: #2d4cc8;
+  text-shadow:
+    0 0 calc(6 * var(--u)) #ffffff,
+    0 0 calc(18 * var(--u)) rgba(45, 76, 200, 0.85);
+}
+
+.quantum-player-scope .qc-access-embers span:nth-child(3n + 1) {
+  font-size: calc(46 * var(--u));
+  animation-duration: 8s;
+}
+
+.quantum-player-scope .qc-access-embers span:nth-child(4n) {
+  color: #67096e;
+  text-shadow:
+    0 0 calc(6 * var(--u)) #ffffff,
+    0 0 calc(18 * var(--u)) rgba(103, 9, 110, 0.85);
+}
+
+.quantum-player-scope .qc-access-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.85) 50%, transparent 70%);
+  transform: translateX(-120%);
+  pointer-events: none;
+  animation: qc-access-sheen 3s ease-in-out infinite;
+}
+
+@keyframes qc-access-rise {
+  0% {
+    translate: 0 0;
+    scale: 0.6;
+    opacity: 0;
+  }
+  10%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    translate: calc(30 * var(--u)) calc(-900 * var(--u));
+    scale: 1.1;
+    opacity: 0;
+  }
+}
+
+@keyframes qc-access-sheen {
+  0% {
+    transform: translateX(-120%);
+  }
+  55%,
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quantum-player-scope .qc-access-embers span,
+  .quantum-player-scope .qc-access-button::after {
+    animation: none;
+  }
+}

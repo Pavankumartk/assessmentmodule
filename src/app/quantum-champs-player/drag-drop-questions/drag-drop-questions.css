@@ -1,0 +1,184 @@
+.quantum-player-scope .dd-root.qc-nova-root {
+  --dd-tab: linear-gradient(180deg, #67096e 0%, #248181 100%);
+}
+
+.quantum-player-scope .dd-root.qc-blaze-root {
+  --dd-tab: linear-gradient(180deg, #5a2808 0%, #e01e5a 100%);
+}
+
+.quantum-player-scope .dd-tiles {
+  position: absolute;
+  left: 50%;
+  top: calc(90 * var(--u));
+  width: calc(948 * var(--u));
+  margin-left: calc(-474 * var(--u));
+  display: grid;
+  grid-template-columns: repeat(2, calc(465 * var(--u)));
+  grid-template-rows: repeat(2, calc(88 * var(--u)));
+  column-gap: calc(18 * var(--u));
+  row-gap: calc(16 * var(--u));
+}
+
+.quantum-player-scope .dd-tile {
+  position: relative;
+  min-width: 0;
+  border-radius: calc(12 * var(--u));
+  background: #dfe6e9;
+  box-shadow: -4px -4px 4px #ffffff, 4px 4px 4px #c4c4c4;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.quantum-player-scope .dd-tile:focus-visible {
+  outline: 3px solid var(--hq-accent);
+  outline-offset: 3px;
+}
+
+.quantum-player-scope .dd-tile.is-dragging {
+  opacity: 0.3;
+}
+
+.quantum-player-scope .dd-tile.is-correct {
+  box-shadow: -4px -4px 4px #ffffff, 4px 4px 4px #c4c4c4, 0 0 0 2px #2a7308;
+  cursor: default;
+}
+
+.quantum-player-scope .dd-tile.is-wrong {
+  box-shadow: -4px -4px 4px #ffffff, 4px 4px 4px #c4c4c4, 0 0 0 2px #c5223e;
+  cursor: default;
+}
+
+.quantum-player-scope .dd-number {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: calc(46 * var(--u));
+  height: calc(53 * var(--u));
+  margin-top: calc(-26.5 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 calc(26 * var(--u)) calc(26 * var(--u)) 0;
+  background: var(--dd-tab);
+  color: #ffffff;
+  font-size: max(14px, calc(24 * var(--u)));
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.quantum-player-scope .dd-slot {
+  position: absolute;
+  left: calc(58 * var(--u));
+  right: calc(12 * var(--u));
+  top: 50%;
+  height: calc(62 * var(--u));
+  margin-top: calc(-31 * var(--u));
+  display: flex;
+  align-items: center;
+  gap: calc(14 * var(--u));
+  padding: 0 calc(16 * var(--u));
+  border-radius: calc(12 * var(--u));
+  background: #dfe6e9;
+  box-shadow: inset -4px -4px 4px #ffffff, inset 4px 4px 4px #c4c4c4;
+}
+
+.quantum-player-scope .dd-icon {
+  flex: none;
+  font-size: max(18px, calc(36 * var(--u)));
+  line-height: 1;
+}
+
+.quantum-player-scope .dd-label {
+  min-width: 0;
+  font-size: max(13px, calc(24 * var(--u)));
+  font-weight: 600;
+  line-height: calc(30 * var(--u));
+  letter-spacing: 0.05em;
+  color: #374151;
+}
+
+.quantum-player-scope .dd-tile.dd-ghost {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  cursor: grabbing;
+  box-shadow: -4px -4px 8px #ffffff, 10px 14px 24px rgba(0, 0, 0, 0.28);
+  transform: scale(1.03);
+}
+
+.quantum-player-scope .hq-root .hq-reveal .dd-row {
+  top: calc(310 * var(--u));
+  flex-wrap: wrap;
+  align-content: flex-start;
+  row-gap: calc(6 * var(--u));
+}
+
+.quantum-player-scope .hq-root .hq-reveal .hq-lifelines {
+  top: calc(396 * var(--u));
+}
+
+.quantum-player-scope .dd-lock {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(12 * var(--u));
+  width: calc(278 * var(--u));
+  height: calc(58 * var(--u));
+  border: 1.5px solid transparent;
+  border-radius: 100px;
+  background: linear-gradient(#dfe6e9, #dfe6e9) padding-box, linear-gradient(90deg, #2d4cc8, #e01e5a) border-box;
+  box-shadow: -4px -4px 4px #ffffff, 4px 4px 8px #c4c4c4;
+  font-family: inherit !important;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.quantum-player-scope .dd-lock:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.quantum-player-scope .dd-lock:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.quantum-player-scope .dd-lock svg {
+  flex: none;
+  width: calc(28 * var(--u));
+  height: calc(28 * var(--u));
+}
+
+.quantum-player-scope .dd-lock span {
+  font-size: max(14px, calc(24 * var(--u)));
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: linear-gradient(90deg, #2d4cc8, #e01e5a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.quantum-player-scope .dd-hint-text {
+  flex-basis: 100%;
+  max-width: none;
+  text-align: center;
+  font-size: max(12px, calc(20 * var(--u)));
+  line-height: calc(26 * var(--u));
+}
+
+.quantum-player-scope .dd-tile.is-correct {
+  outline: 2px solid #2a7308;
+  outline-offset: 0;
+  cursor: default;
+}
+
+.quantum-player-scope .dd-tile.is-wrong {
+  outline: 2px solid #c5223e;
+  outline-offset: 0;
+  cursor: default;
+}

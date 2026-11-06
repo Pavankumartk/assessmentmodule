@@ -173,8 +173,8 @@ function MCQRichEditor({ editorId, value, html, onChange, onHtmlChange, placehol
     <div ref={editor} id={editorId} role="textbox" aria-label={placeholder} aria-multiline="true" contentEditable suppressContentEditableWarning data-placeholder={placeholder}
       className="mcqcRichEditable" onBeforeInput={beforeInput} onInput={notify} onKeyUp={remember} onMouseUp={remember} onFocus={remember} onPaste={pasteText}
       onDrop={event => { event.preventDefault(); event.currentTarget.focus(); const value = allowedInsertion(event.dataTransfer.getData("text/plain")); if (value) document.execCommand("insertText", false, value); notify(); }}/>
-    {maxWords !== undefined && <small className="assessmentEditorCounter" aria-live="polite">{Array.from(value).length}/{maxWords}</small>}
-  {maxWords !== undefined && <small className="assessmentRichCounter" aria-live="polite">{Array.from((value || "").replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/^\r?\n$/, "")).length}/{maxWords}</small>}</div>;
+    
+  {maxWords !== undefined && <small className="cdEditorCounter" aria-live="polite">{Array.from(/^[\r\n\u200B\uFEFF]+$/.test(value) ? "" : value || "").length}/{maxWords}</small>}</div>;
 }
 
 const ASSESSMENT_TYPE_GROUPS = [

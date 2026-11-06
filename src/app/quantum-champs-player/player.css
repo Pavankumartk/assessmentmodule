@@ -1,0 +1,272 @@
+.quantum-player-scope .qp-welcome-root,
+.quantum-player-scope .qp-welcome-root *,
+.quantum-player-scope .qp-welcome-root *::before,
+.quantum-player-scope .qp-welcome-root *::after {
+  box-sizing: border-box;
+}
+
+.quantum-player-scope .qp-welcome-root {
+  --u: min(calc(100vw / 1440), calc(100dvh / 1024));
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+  background: #dfe6e9;
+  font-family: "Segoe UI", Arial, sans-serif !important;
+}
+
+.quantum-player-scope .qp-welcome-panel {
+  position: absolute;
+  inset: calc(23 * var(--u)) calc(32 * var(--u)) calc(41 * var(--u));
+  overflow: hidden;
+  background: linear-gradient(180deg, #b2def1 0%, #efdde3 50%, #dfe6e9 100%);
+  box-shadow:
+    -4px -4px 4px #ffffff,
+    4px 4px 4px #c4c4c4;
+  border-radius: calc(16 * var(--u));
+}
+
+.quantum-player-scope .qp-welcome-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  padding-top: calc(100 * var(--u));
+}
+
+.quantum-player-scope .qp-welcome-orbit {
+  position: relative;
+  flex: none;
+  width: calc(387 * var(--u));
+  height: calc(300 * var(--u));
+}
+
+.quantum-player-scope .qp-welcome-logo {
+  position: absolute;
+  z-index: 1;
+  width: calc(131 * var(--u));
+  height: calc(177 * var(--u));
+  left: 50%;
+  top: calc(61 * var(--u));
+  transform: translateX(-50%);
+}
+
+.quantum-player-scope .qp-welcome-crown {
+  position: absolute;
+  left: 10%;
+  right: 8%;
+  top: 0;
+  width: 82%;
+  height: 46%;
+  filter: drop-shadow(0 2px 1px rgba(192, 85, 18, 0.35));
+}
+
+.quantum-player-scope .qp-welcome-shield {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 41.38%;
+  bottom: 0.45%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: calc(18 * var(--u));
+  border-radius: calc(10 * var(--u)) calc(10 * var(--u)) 0 0;
+  clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%);
+  background: conic-gradient(from 0deg at 50% 50%, rgba(255, 255, 255, 0.08) 0deg 90deg, rgba(0, 0, 0, 0.14) 90deg 180deg, rgba(255, 255, 255, 0.08) 180deg 270deg, rgba(0, 0, 0, 0.14) 270deg 360deg), linear-gradient(128.79deg, #67096e -1.23%, #e01e5a 86.72%);
+  color: #ffffff;
+  font-size: calc(21 * var(--u));
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.quantum-player-scope .qp-welcome-title {
+  flex: none;
+  width: max-content;
+  min-width: calc(782 * var(--u));
+  height: calc(71 * var(--u));
+  padding: 0 0.08em;
+  margin: calc(63 * var(--u)) 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(64 * var(--u));
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  text-align: center;
+  white-space: nowrap;
+  background: linear-gradient(90.31deg, #67096e 0.28%, #e01e5a 43.04%, #944254 78.91%, #5a2808 95.94%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25));
+}
+
+.quantum-player-scope .qp-welcome-button {
+  flex: none;
+  width: calc(303 * var(--u));
+  height: calc(70 * var(--u));
+  margin-top: calc(80 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 50px;
+  background:
+    linear-gradient(#dfe6e9, #dfe6e9) padding-box,
+    linear-gradient(90deg, #2d4cc8, #e01e5a) border-box;
+  box-shadow:
+    -4px -4px 4px #ffffff,
+    4px 4px 8px #c4c4c4;
+  font-family: inherit !important;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.quantum-player-scope .qp-welcome-button span {
+  font-size: calc(28 * var(--u));
+  font-weight: 700;
+  line-height: 1.14;
+  letter-spacing: 0.03em;
+  background: linear-gradient(90deg, #2d4cc8 0%, #e01e5a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.quantum-player-scope .qp-welcome-button:hover {
+  filter: brightness(1.025);
+}
+
+.quantum-player-scope .qp-welcome-button:focus-visible {
+  outline: 3px solid #2d4cc8;
+  outline-offset: 4px;
+}
+
+.quantum-player-scope .qp-welcome-embers {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.quantum-player-scope .qp-welcome-embers span {
+  position: absolute;
+  bottom: calc(-32 * var(--u));
+  left: calc(4% + var(--i) * 8%);
+  font-size: calc(36 * var(--u));
+  line-height: 1;
+  color: #e01e5a;
+  text-shadow:
+    0 0 calc(6 * var(--u)) #ffffff,
+    0 0 calc(18 * var(--u)) rgba(224, 30, 90, 0.85);
+  opacity: 0;
+  animation: qp-welcome-rise 7s linear infinite;
+  animation-delay: calc(var(--i) * -0.63s);
+}
+
+.quantum-player-scope .qp-welcome-embers span:nth-child(3n) {
+  font-size: calc(26 * var(--u));
+  animation-duration: 9s;
+  color: #2d4cc8;
+  text-shadow:
+    0 0 calc(6 * var(--u)) #ffffff,
+    0 0 calc(18 * var(--u)) rgba(45, 76, 200, 0.85);
+}
+
+.quantum-player-scope .qp-welcome-embers span:nth-child(3n + 1) {
+  font-size: calc(46 * var(--u));
+  animation-duration: 8s;
+}
+
+.quantum-player-scope .qp-welcome-embers span:nth-child(4n) {
+  color: #67096e;
+  text-shadow:
+    0 0 calc(6 * var(--u)) #ffffff,
+    0 0 calc(18 * var(--u)) rgba(103, 9, 110, 0.85);
+}
+
+.quantum-player-scope .qp-welcome-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.85) 50%, transparent 70%);
+  transform: translateX(-120%);
+  pointer-events: none;
+  animation: qp-welcome-sheen 3s ease-in-out infinite;
+}
+
+.quantum-player-scope .qp-welcome-hexwave {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: calc(150 * var(--u));
+  width: calc(150 * var(--u));
+  height: calc(116 * var(--u));
+  margin: calc(-58 * var(--u)) 0 0 calc(-75 * var(--u));
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: linear-gradient(180deg, rgba(224, 30, 90, 0.45) 0%, rgba(103, 9, 110, 0.45) 100%);
+  opacity: 0;
+  pointer-events: none;
+  animation: qp-welcome-hexpulse 3.6s ease-out infinite;
+  animation-delay: calc(var(--d) * 1.2s);
+}
+
+@keyframes qp-welcome-rise {
+  0% {
+    translate: 0 0;
+    scale: 0.6;
+    opacity: 0;
+  }
+  10%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    translate: calc(30 * var(--u)) calc(-900 * var(--u));
+    scale: 1.1;
+    opacity: 0;
+  }
+}
+
+@keyframes qp-welcome-hexpulse {
+  0% {
+    scale: 0.8;
+    opacity: 0.9;
+  }
+  100% {
+    scale: 2.7;
+    opacity: 0;
+  }
+}
+
+@keyframes qp-welcome-sheen {
+  0% {
+    transform: translateX(-120%);
+  }
+  55%,
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quantum-player-scope .qp-welcome-embers span,
+  .quantum-player-scope .qp-welcome-button::after,
+  .quantum-player-scope .qp-welcome-hexwave {
+    animation: none;
+  }
+}

@@ -104,6 +104,11 @@ export default function CreateStep({ onCancel }: { onCancel: () => void }) {
   );
 
   const startAssessment = (label: string | undefined) => {
+    // QUANTUM_CHAMPS_ENTRY: open the supplied game without changing other assessment flows.
+    if (typeof label === "string" && /^(?:team battle\s*\(quantum champs?\)|quantum champs?)$/i.test(label.trim())) {
+      router.push("/quantum-champs");
+      return true;
+    }
     const configured = label ? findAssessmentTypeByLabel(label) : null;
     if (!configured?.implemented || !hasAssessmentWorkflow(configured.code)) return false;
     if (startingRef.current) return true;

@@ -1798,3 +1798,36 @@
 .mcqcBuilder .mcqcNumberStatus.is-pending{background:#2D4CC8!important;border:0!important;color:#fff!important}
 
 .mcqcBuilder .mcqcQuestionNumber.is-empty{border-color:#2D4CC8;color:#2D4CC8;background:#D9E2FB}.mcqcBuilder .mcqcQuestionNumber:not(.is-complete) i{background:#2D4CC8!important;border:0}
+
+
+/* CONNECT_DOTS_CHECKBOX_COUNTER_FIX */
+.mcqcAppShell .mcqcConnectBuilder .mcqcRichEditorRoot { position:relative; padding-bottom:23px; }
+.mcqcAppShell .mcqcConnectBuilder .mcqcRichEditable { padding-bottom:15px; }
+.mcqcAppShell .mcqcConnectBuilder .mcqcRichEditorRoot > .cdEditorCounter {
+  position:absolute; right:10px; bottom:4px; z-index:2; display:block; text-align:right;
+  color:#374151; font:400 12px/16px 'Segoe UI',Arial,sans-serif; pointer-events:none;
+}
+.mcqcConnectBuilder .mcqcBuilderField:has(.cdEditorCounter) > label > small,
+.mcqcConnectBuilder .mcqcMatchExtraEditor:has(.cdEditorCounter) .mcqcMatchExtraTopCounter,
+.mcqcConnectBuilder .mcqcEditorSurface:has(.cdEditorCounter) :is(.assessmentEditorCounter, .assessmentRichCounter, .mcqcRichWordCount, .mcqcCharacterCount),
+.mcqcConnectBuilder .mcqcDDFeedbackSubpanel:has(.cdEditorCounter) .mcqcDDFeedbackSubhead small,
+.mcqcConnectBuilder .mcqcDDPanel.is-open:has(.mcqcDDFeedbackField .cdEditorCounter) > .mcqcDDPanelHead .mcqcDDPanelCount { display:none; }
+.mcqcAppShell .mcqcConnectBuilder .mcqcHintChecks label,
+.mcqcAppShell .mcqcConnectBuilder .mcqcHintChecks label.is-checked { color:#374151; font-weight:500; }
+.mcqcAppShell .mcqcConnectBuilder .mcqcHintChecks input[type="checkbox"] {
+  appearance:none; -webkit-appearance:none; position:relative; display:block; flex:0 0 24px;
+  width:24px; height:24px; margin:0; border:0; border-radius:4px; background:#DFE6E9;
+  box-shadow:inset -2px -2px 2px #fff,inset 2px 2px 2px #C4C4C4;
+}
+.mcqcAppShell .mcqcConnectBuilder .mcqcHintChecks input[type="checkbox"]::before,
+.mcqcAppShell .mcqcConnectBuilder .mcqcHintChecks input[type="checkbox"]::after { content:none; }
+.mcqcAppShell .mcqcConnectBuilder .mcqcHintChecks input[type="checkbox"]:checked::before {
+  content:""; position:absolute; left:4px; top:4px; width:16px; height:16px; border:0;
+  border-radius:3px; background:#2D4CC8; transform:none; box-shadow:none; z-index:1;
+}
+.mcqcAppShell .mcqcConnectBuilder .mcqcHintChecks input[type="checkbox"]:checked::after {
+  content:""; position:absolute; left:8px; top:8px; width:8px; height:5px;
+  display:block; border:solid #fff; border-width:0 0 2px 2px; border-radius:0;
+  background:transparent; box-shadow:none; clip-path:none; transform:rotate(-45deg); opacity:1; z-index:2;
+}
+.mcqcAppShell .mcqcConnectBuilder .mcqcHintChecks input[type="checkbox"]:focus-visible { outline:2px solid #2D4CC8; outline-offset:3px; }

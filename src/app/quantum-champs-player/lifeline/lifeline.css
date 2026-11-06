@@ -1,0 +1,212 @@
+.quantum-player-scope .qc-timer-page,
+.quantum-player-scope .qc-timer-page *,
+.quantum-player-scope .qc-timer-page *::before,
+.quantum-player-scope .qc-timer-page *::after {
+  box-sizing: border-box;
+}
+
+.quantum-player-scope .qc-timer-page {
+  --u: var(--qc-u);
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+  background: #dfe6e9;
+  font-family: "Segoe UI", Arial, sans-serif !important;
+}
+
+.quantum-player-scope .qc-timer-shell {
+  position: absolute;
+  inset: calc(32 * var(--u));
+  overflow: hidden;
+  border-radius: calc(16 * var(--u));
+  background: linear-gradient(180deg, #b2def1 0%, #efdde3 50%, #dfe6e9 100%);
+  box-shadow:
+    -4px -4px 4px #ffffff,
+    4px 4px 4px #c4c4c4;
+}
+
+.quantum-player-scope .qc-timer-embers {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.quantum-player-scope .qc-timer-embers span {
+  position: absolute;
+  bottom: calc(-32 * var(--u));
+  left: calc(4% + var(--i) * 8%);
+  font-size: calc(36 * var(--u));
+  line-height: 1;
+  color: #e01e5a;
+  text-shadow:
+    0 0 calc(6 * var(--u)) #ffffff,
+    0 0 calc(18 * var(--u)) rgba(224, 30, 90, 0.85);
+  opacity: 0;
+  animation: qc-timer-rise 7s linear infinite;
+  animation-delay: calc(var(--i) * -0.63s);
+}
+
+.quantum-player-scope .qc-timer-embers span:nth-child(3n) {
+  font-size: calc(26 * var(--u));
+  animation-duration: 9s;
+  color: #2d4cc8;
+  text-shadow:
+    0 0 calc(6 * var(--u)) #ffffff,
+    0 0 calc(18 * var(--u)) rgba(45, 76, 200, 0.85);
+}
+
+.quantum-player-scope .qc-timer-embers span:nth-child(3n + 1) {
+  font-size: calc(46 * var(--u));
+  animation-duration: 8s;
+}
+
+.quantum-player-scope .qc-timer-embers span:nth-child(4n) {
+  color: #67096e;
+  text-shadow:
+    0 0 calc(6 * var(--u)) #ffffff,
+    0 0 calc(18 * var(--u)) rgba(103, 9, 110, 0.85);
+}
+
+.quantum-player-scope .qc-timer-logo {
+  position: absolute;
+  z-index: 2;
+  top: calc(32 * var(--u));
+  left: calc(32 * var(--u));
+  width: calc(70 * var(--u));
+  height: calc(95 * var(--u));
+}
+
+.quantum-player-scope .qc-timer-logo-crown {
+  position: absolute;
+  left: 10%;
+  top: 0;
+  width: 82%;
+  height: 46%;
+  filter: drop-shadow(0 1px 1px rgba(192, 85, 18, 0.35));
+}
+
+.quantum-player-scope .qc-timer-logo-shield {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 41.38%;
+  bottom: 0.45%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: calc(10 * var(--u));
+  border-radius: calc(6 * var(--u)) calc(6 * var(--u)) 0 0;
+  clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%);
+  background: conic-gradient(from 0deg at 50% 50%, rgba(255, 255, 255, 0.08) 0deg 90deg, rgba(0, 0, 0, 0.14) 90deg 180deg, rgba(255, 255, 255, 0.08) 180deg 270deg, rgba(0, 0, 0, 0.14) 270deg 360deg), linear-gradient(128.79deg, #67096e -1.23%, #e01e5a 86.72%);
+  color: #ffffff;
+  font-size: calc(11.5 * var(--u));
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.25);
+}
+
+.quantum-player-scope .qc-timer-panel {
+  position: absolute;
+  z-index: 1;
+  top: calc(151 * var(--u));
+  right: calc(32 * var(--u));
+  bottom: calc(32 * var(--u));
+  left: calc(32 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: calc(24 * var(--u));
+  background: linear-gradient(180deg, #248181 0%, #67096e 100%);
+  box-shadow:
+    inset -2px -2px 2px #ffffff,
+    inset 2px 2px 2px #c4c4c4;
+}
+
+.quantum-player-scope .qc-timer-blaze .qc-timer-panel {
+  background: linear-gradient(105.35deg, #67096e 30.16%, #e01e5a 97.84%);
+}
+
+.quantum-player-scope .qc-timer-nova.qc-timer-blitz .qc-timer-panel {
+  background: linear-gradient(105.74deg, #67096e -1.78%, #248181 95.11%);
+}
+
+.quantum-player-scope .qc-timer-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url("/quantum-champs/instructions-pattern.png");
+  background-size: calc(32 * var(--u)) calc(40 * var(--u));
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.quantum-player-scope .qc-timer-ring {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(290 * var(--u));
+  height: calc(290 * var(--u));
+}
+
+.quantum-player-scope .qc-timer-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-conic-gradient(#e6e0e0 0deg 2.2deg, transparent 2.2deg 4deg);
+  -webkit-mask: radial-gradient(circle farthest-side, transparent calc(100% - 25 * var(--u)), #000 calc(100% - 25 * var(--u)));
+  mask: radial-gradient(circle farthest-side, transparent calc(100% - 25 * var(--u)), #000 calc(100% - 25 * var(--u)));
+  animation: qc-timer-spin 30s linear infinite;
+}
+
+.quantum-player-scope .qc-timer-ring span {
+  position: relative;
+  color: #ffffff;
+  font-family: "Segoe UI", Arial, sans-serif !important;
+  font-size: calc(54 * var(--u));
+  font-weight: 700;
+  line-height: calc(60 * var(--u));
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+@keyframes qc-timer-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes qc-timer-rise {
+  0% {
+    translate: 0 0;
+    scale: 0.6;
+    opacity: 0;
+  }
+  10%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    translate: calc(30 * var(--u)) calc(-900 * var(--u));
+    scale: 1.1;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quantum-player-scope .qc-timer-ring::before,
+  .quantum-player-scope .qc-timer-embers span {
+    animation: none;
+  }
+}
