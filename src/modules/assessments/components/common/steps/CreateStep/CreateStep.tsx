@@ -184,6 +184,14 @@ export default function CreateStep({ onCancel }: { onCancel: () => void }) {
                   <button type="button" key={item} className={`asm-subtype-option ${selectedSubtype[openType] === item ? "is-selected" : ""}`}
                     role="radio" aria-checked={selectedSubtype[openType] === item}
                     onClick={() => {
+                      // QUANTUM_CHAMPS_DIRECT_OPEN_V3: Quantum Champs has its own creator flow.
+                      const quantumChoice = String(item).trim().replace(/\s+/g, ' ');
+                      if (/^(?:team battle(?:\s*\(\s*quantum champs?\s*\))?|quantum champs?)$/i.test(quantumChoice)) {
+                        setOpenType(null);
+                        router.push('/quantum-champs');
+                        return;
+                      }
+
                       setSelectedSubtype(prev => ({ ...prev, [openType]: item }));
                       setSelected(openType);
                       setOpenType(null);
