@@ -321,3 +321,23 @@
     transition: none !important;
   }
 }
+
+/* BEGIN ASSESSMENT MOBILE RIGHT DRAWER */
+@media (max-width: 700px) {
+  body .sidebar.sidebar.sidebar.sidebar {
+    display: flex !important; left: auto !important; right: 0 !important;
+    border-radius: 10px 0 0 10px !important;
+    transform: translateX(110%) !important;
+  }
+  body.mobileSidebarOpen .sidebar.sidebar.sidebar.sidebar,
+  body .shell--mobile-sidebar-open > .sidebar.sidebar.sidebar.sidebar {
+    transform: translateX(0) !important; visibility: visible !important; pointer-events: auto !important;
+  }
+  /* Some viewers wrap the shared sidebar in an element hidden on phones. */
+  body .viewaiApp .viewaiSidebar.viewaiSidebar,
+  body .ilvApp .ilvSidebar.ilvSidebar,
+  body .asgn-app .asgn-sidebar.asgn-sidebar { display: contents !important; }
+  /* Their desktop grid reserves a left column; the mobile drawer does not need it. */
+  body .ilvApp.ilvApp, body .asgn-app.asgn-app { grid-template-columns: minmax(0, 1fr) !important; }
+}
+/* END ASSESSMENT MOBILE RIGHT DRAWER */

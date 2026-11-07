@@ -1,6 +1,7 @@
 "use client";
 import { quantumStorage as localStorage, quantumSessionStorage as sessionStorage } from "../quantum-storage";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useId } from "react";
+import { MCQRichEditor } from "@/modules/assessments/components/common/steps/ContentStep/ContentStep";
 import { useRouter } from "next/navigation";
 import {
     Undo2, Redo2, ChevronDown, ChevronRight, GripVertical,
@@ -40,6 +41,8 @@ type Answer = {
     feedback: string;
     fact: string;
     image?: string;
+
+    qcRichHtml?: Record<string, { text: string; html: string; kind: string }>;
 };
 type Question = {
     type: Kind;
@@ -82,6 +85,8 @@ type Question = {
     audioName: string;
     audioUrl: string;
     hostAudioName: string;
+
+    qcRichHtml?: Record<string, { text: string; html: string; kind: string }>;
 };
 const kinds: Kind[] = ["MCQ (Text answers)", "Arrange the Answers", "Hidden Answer tiles", "Audio Question (Verbal Response)"];
 const makeAnswer = (): Answer => ({
@@ -125,11 +130,15 @@ const makeQuestion = (): Question => ({
     audioName: "", audioUrl: "", hostAudioName: ""
 });
 const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-function Toggle({ checked, onChange }: {
+function Toggle({ checked, onChange, label }: {
     checked: boolean;
     onChange: (v: boolean) => void;
+    label: string;
 }) {
-    return <button type="button" className={`qcc-toggle ${checked ? "on" : ""}`} onClick={() => onChange(!checked)} aria-pressed={checked}><span>{checked ? "ON" : "OFF"}</span><i /></button>;
+    return <button type="button" className={`qcc-toggle ${checked ? "on" : ""}`}
+      role="switch" aria-label={label} aria-checked={checked} onClick={() => onChange(!checked)}>
+      <span>{checked ? "ON" : "OFF"}</span><i />
+    </button>;
 }
 function Field({ title, value, values, onChange, error }: {
     title: string;
@@ -140,32 +149,60 @@ function Field({ title, value, values, onChange, error }: {
 }) {
     return <label className="qcc-field"><span>{title}</span><select value={value} aria-invalid={!!error} onChange={e => onChange(e.target.value)}>{value === "" && <option value="" disabled>Select {title}</option>}{values.map(v => <option key={v} value={v}>{v}</option>)}</select>{error && <small className="qcc-validation-error" role="alert">{error}</small>}</label>;
 }
-function Editor({ label, value, onChange, placeholder = "", max = 250 }: {
+function Editor({ label, value, html, onChange, placeholder = "", max = 250 }: {
     label?: string;
     value: string;
-    onChange: (v: string) => void;
+    html?: string;
+    onChange: (text: string, html: string) => void;
     placeholder?: string;
     max?: number;
 }) {
-    const ref = useRef<HTMLTextAreaElement>(null);
-    const [size, setSize] = useState("16");
-    const [family, setFamily] = useState("Arial");
-    const wrap = (a: string, b: string) => {
-        const el = ref.current;
-        if (!el)
-            return;
-        const start = el.selectionStart, end = el.selectionEnd;
-        onChange(value.slice(0, start) + a + (value.slice(start, end) || "text") + b + value.slice(end));
-        el.focus();
-    };
-    return <div className="qcc-editor-group">{label && <div className="qcc-editor-label"><strong>{label}</strong><small>{value.length}/{max}</small></div>}
-    <div className="qcc-rich"><div className="qcc-toolbar">
-      <button type="button" title="Undo" onClick={() => ref.current?.focus()}><Undo2 size={16} strokeWidth={1.8} /></button><button type="button" title="Redo" onClick={() => ref.current?.focus()}><Redo2 size={16} strokeWidth={1.8} /></button>
-      <select aria-label="Font" value={family} onChange={e => setFamily(e.target.value)}><option>Arial</option><option>Georgia</option><option>Verdana</option></select>
-      <select aria-label="Size" value={size} onChange={e => setSize(e.target.value)}>{[14, 16, 18, 20, 24].map(v => <option key={v}>{v}</option>)}</select>
-      <button type="button" onClick={() => wrap("**", "**")}><Bold size={15} strokeWidth={1.8} /></button><button type="button" onClick={() => wrap("*", "*")}><Italic size={15} strokeWidth={1.8} /></button><button type="button" onClick={() => wrap("<u>", "</u>")}><Underline size={15} strokeWidth={1.8} /></button>
-      <button type="button" onClick={() => ref.current?.focus()}>A <ChevronDown size={12} /></button><button type="button" onClick={() => ref.current?.focus()}><Pencil size={15} /></button><button type="button" onClick={() => ref.current?.focus()}><Highlighter size={15} /></button><button type="button" onClick={() => ref.current?.focus()}><Eraser size={15} /></button><MoreHorizontal size={17} strokeWidth={1.8} />
-    </div><textarea ref={ref} maxLength={max} style={{ fontFamily: family, fontSize: `${size}px` }} value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)}/></div></div>;
+    // QC_SINGLE_EDITOR_COUNTER_V1: the Quantum editor owns the visible counter.
+    // Some installed versions of the shared editor also render a counter.
+    const qccCounterRoot = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const root = qccCounterRoot.current;
+        if (!root || typeof MutationObserver === "undefined") return;
+        const hidden = new Set<HTMLElement>();
+        const scan = () => {
+            const primary = root.querySelector(".qcc-rich > .qcc-editor-counter");
+            const found = new Set<HTMLElement>();
+            if (primary) root.querySelectorAll<HTMLElement>("small, span, output, p, div, label").forEach(element => {
+                if (element === primary || element.contains(primary) || primary.contains(element)) return;
+                if (element.closest("[contenteditable], textarea, button, select, a, [role='button']")) return;
+                if (element.querySelector(".qcc-editor-counter, [contenteditable], textarea, button, select, input, a, [role='button']")) return;
+                const text = (element.textContent || "").replace(/\u00a0/g, " ").trim();
+                const count = /^(?:characters?\s*:?\s*)?(\d+)\s*\/\s*(\d+)(?:\s+characters?)?$/i.exec(text);
+                if (!count || Number(count[2]) !== max) return;
+                element.setAttribute("data-qcc-duplicate-counter", "true");
+                found.add(element);
+            });
+            for (const element of hidden) if (!found.has(element)) element.removeAttribute("data-qcc-duplicate-counter");
+            hidden.clear();
+            for (const element of found) hidden.add(element);
+        };
+        const observer = new MutationObserver(scan);
+        observer.observe(root, { childList: true, characterData: true, subtree: true });
+        scan();
+        return () => { observer.disconnect(); for (const element of hidden) element.removeAttribute("data-qcc-duplicate-counter"); };
+    }, [max]);
+
+    const id = useId();
+    const pendingHtml = useRef(html ?? "");
+    const [editorError, setEditorError] = useState("");
+    useEffect(() => { pendingHtml.current = html ?? ""; }, [html]);
+    return <div ref={qccCounterRoot} className="qcc-editor-group">
+      {label && <div className="qcc-editor-label"><strong>{label}</strong></div>}
+      <div className="qcc-rich">
+        <MCQRichEditor editorId={id} value={value} html={html}
+          placeholder={placeholder || label || "Enter text"} maxLength={max}
+          onHtmlChange={next => { pendingHtml.current = next; }}
+          onChange={text => { onChange(text, pendingHtml.current); setEditorError(""); }}
+          onError={setEditorError}/>
+        <small className="qcc-editor-counter">{value.length}/{max}</small>
+      </div>
+      {editorError && <small className="qcc-validation-error" role="alert">{editorError}</small>}
+    </div>;
 }
 function SettingToggle({ title, subtitle, value, onChange }: {
     title: string;
@@ -173,7 +210,7 @@ function SettingToggle({ title, subtitle, value, onChange }: {
     value: boolean;
     onChange: (v: boolean) => void;
 }) {
-    return <div className="qcc-setting-toggle"><div><strong>{title}</strong><small>{subtitle}</small></div><Toggle checked={value} onChange={onChange}/></div>;
+    return <div className="qcc-setting-toggle"><div><strong>{title}</strong><small>{subtitle}</small></div><Toggle label={title} checked={value} onChange={onChange}/></div>;
 }
 function validateQuestionLive(question: Question | undefined, round: number, index: number): string[] {
     if (!question) return [`Round ${round}, question ${index + 1}: question is required.`];
@@ -224,10 +261,29 @@ export default function QCCreateQuestionPage() {
     const q = current[active] || makeQuestion();
     const change = (patch: Partial<Question>) => setQuestions(prev => {
         const list = [...(prev[round] || [makeQuestion()])];
-        list[active] = { ...list[active], ...patch };
+        list[active] = { ...list[active], ...patch, ...(patch.type && patch.type !== list[active]?.type ? { qcRichHtml: undefined } : {}) };
         return { ...prev, [round]: list };
     });
     const changeAnswer = (i: number, patch: Partial<Answer>) => change({ answers: q.answers.map((a, n) => n === i ? { ...a, ...patch } : a) });
+    // QC_MCQRICH_UPDATE_V1
+    // Keep the existing plain text fields for the game and save formatting alongside them.
+    const changeQuestionRich = (field: "text" | "boosterTitle" | "boosterCaption" | "didYouKnow" | "feedback", text: string, html: string) => setQuestions(prev => {
+        const list = [...(prev[round] || [makeQuestion()])];
+        const question = list[active];
+        if (!question) return prev;
+        list[active] = { ...question, [field]: text, qcRichHtml: { ...question.qcRichHtml, [field]: { text, html, kind: question.type } } };
+        return { ...prev, [round]: list };
+    });
+    const changeAnswerRich = (index: number, field: "text" | "feedback" | "fact", text: string, html: string) => setQuestions(prev => {
+        const list = [...(prev[round] || [makeQuestion()])];
+        const question = list[active];
+        if (!question || !question.answers[index]) return prev;
+        const answers = question.answers.map((answer, i) => i === index
+            ? { ...answer, [field]: text, qcRichHtml: { ...answer.qcRichHtml, [field]: { text, html, kind: question.type } } }
+            : answer);
+        list[active] = { ...question, answers };
+        return { ...prev, [round]: list };
+    });
     const toggleOpen = (key: string) => setOpen(p => ({ ...p, [key]: !(p[key] ?? (q.type !== kinds[1] && q.type !== kinds[2])) }));
     const setType = (type: Kind) => {
         if (type === kinds[2] && q.type !== kinds[2]) {
@@ -375,12 +431,12 @@ export default function QCCreateQuestionPage() {
             return true;
         } catch { setNotice("Could not save questions. Check browser storage."); return false; }
     };
-    const continueToEvaluation = () => {
+    const continueToEvaluation = async () => {
         setAttempted(true);
         const errors = validate();
         setValidationErrors(errors);
         if (errors.length) { setNotice(""); focusFirstError(errors); return; }
-        if (!isSaved) { setNotice("Please click Save before Continue."); return; }
+        if (!(await save())) return;
         router.push("/quantum-champs/QC_Evaluation");
     };
     const backToContent = () => router.push("/quantum-champs/QC_Content");
@@ -419,11 +475,11 @@ export default function QCCreateQuestionPage() {
         const key = `answer-${i}`;
         const expanded = open[key] ?? (q.type !== kinds[1] && q.type !== kinds[2]);
         return <div className={`qcc-answer ${q.type === kinds[1] ? "qcc-arrange-answer" : ""}`} key={i}><button type="button" className="qcc-answer-heading" aria-expanded={expanded} onClick={() => toggleOpen(key)}> <span>{q.type === kinds[1] ? <GripVertical size={14} /> : ""}Option {letters[i]}</span><span className={`qcc-chevron ${expanded ? "is-open" : ""}`} aria-hidden="true"/></button>
-      {expanded && <div className="qcc-answer-body"><Editor label="Text" value={a.text} onChange={text => changeAnswer(i, { text })} placeholder={`Enter option ${letters[i]}`}/>{attempted && !a.text.trim() && <small className="qcc-validation-error" role="alert">Option {letters[i]} is required.</small>}
+      {expanded && <div className="qcc-answer-body"><Editor label="Text" value={a.text} html={a.qcRichHtml?.text?.text === a.text && a.qcRichHtml?.text?.kind === q.type ? a.qcRichHtml?.text?.html : undefined} key={`qcc-${round}-${active}-${q.type}-answer-${i}-text`} onChange={(text, html) => changeAnswerRich(i, "text", text, html)} placeholder={`Enter option ${letters[i]}`}/>{attempted && !a.text.trim() && <small className="qcc-validation-error" role="alert">Option {letters[i]} is required.</small>}
         {(q.type === kinds[1] || q.type === kinds[2]) && <div className="qcc-image-upload"><label className="qcc-upload-image"><ImagePlus size={14} /> {a.image ? "Image Uploaded" : "Upload Image"}<input type="file" accept="image/*" onChange={e => uploadImage(i, e.target.files?.[0])}/></label>{a.image && <img className="qcc-answer-image" src={a.image} alt={`Option ${letters[i]}`}/>}</div>}
         {q.type !== kinds[1] && <label className="qcc-checkbox"><input type="checkbox" checked={a.correct} onChange={e => change({ answers: q.answers.map((v, j) => ({ ...v, correct: j === i ? e.target.checked : false })) })}/>Correct Answers</label>}
-        <div className="qcc-nested qcc-nested-feedback"><span className="qcc-section-icon"><CircleHelp size={14} /></span><Editor label="Feedback" value={a.feedback} onChange={feedback => changeAnswer(i, { feedback })}/></div>
-        <div className="qcc-nested qcc-nested-fact"><span className="qcc-section-icon"><Lightbulb size={14} /></span><Editor label="Did You Know ? (Shown After the Answer)" value={a.fact} onChange={fact => changeAnswer(i, { fact })}/></div>
+        <div className="qcc-nested qcc-nested-feedback"><span className="qcc-section-icon"><CircleHelp size={14} /></span><Editor label="Feedback" value={a.feedback} html={a.qcRichHtml?.feedback?.text === a.feedback && a.qcRichHtml?.feedback?.kind === q.type ? a.qcRichHtml?.feedback?.html : undefined} key={`qcc-${round}-${active}-${q.type}-answer-${i}-feedback`} onChange={(text, html) => changeAnswerRich(i, "feedback", text, html)}/></div>
+        <div className="qcc-nested qcc-nested-fact"><span className="qcc-section-icon"><Lightbulb size={14} /></span><Editor label="Did You Know ? (Shown After the Answer)" value={a.fact} html={a.qcRichHtml?.fact?.text === a.fact && a.qcRichHtml?.fact?.kind === q.type ? a.qcRichHtml?.fact?.html : undefined} key={`qcc-${round}-${active}-${q.type}-answer-${i}-fact`} onChange={(text, html) => changeAnswerRich(i, "fact", text, html)}/></div>
         {q.answers.length > 2 && <button type="button" className="qcc-remove" onClick={() => change({ answers: q.answers.filter((_, j) => j !== i) })}>Remove option</button>}
       </div>}</div>;
     };
@@ -437,7 +493,7 @@ export default function QCCreateQuestionPage() {
     const audioSettings = () => q.type === kinds[3] ? <>
     <section className="qcc-section"><h3>Question</h3><div className="qcc-inset"><div className="qcc-two"><Field title="Banner Label" value={q.audioBanner} values={["Situation Question", "Audio Question", "Scenario", "Challenge"]} onChange={audioBanner => change({ audioBanner })}/><Field title="XP for this Question" value={String(q.xp)} values={["250", "500", "1000", "1500", "2000"]} onChange={v => change({ xp: Number(v) })}/></div><p>Question audio - team can listen to the situation (optional)</p><div className="qcc-audio-buttons"><label>＋ Upload Audio<input type="file" accept="audio/*" onChange={e => audioUpload(e.target.files?.[0])}/></label><button type="button" onClick={record}>{recording ? "■ Stop" : "◉ Record"}</button><small>{q.audioName || (audioPreview ? "Audio Recorded" : "No Audio Added")}</small></div>{audioPreview && <audio controls src={audioPreview}/>}</div></section>
     <section className="qcc-section qcc-audio-response-settings"><div className="qcc-section-title"><h3>Audio Response Box</h3><small>What the team uses to answer</small></div><div className="qcc-inset"><div className="qcc-three"><Field title="Box Title" value={q.audioBoxTitle} values={["Give your verbal Response", "Record your answer", "Speak your answer"]} onChange={audioBoxTitle => change({ audioBoxTitle })}/><Field title="Helper Text" value={q.audioHelper} values={["Tap the mic and speak now", "Tap to record", "Speak clearly"]} onChange={audioHelper => change({ audioHelper })}/><Field title="Submit Button" value={q.audioSubmit} values={["Submit the Response", "Submit Response", "Send Answer"]} onChange={audioSubmit => change({ audioSubmit })}/></div><div className="qcc-three"><Field title="Max Recording" value={q.maxRecording} values={["15s", "30s", "60s", "90s", "120s"]} onChange={maxRecording => change({ maxRecording })}/><Field title="Min Recording" value={q.minRecording} values={["None", "5s", "10s", "15s"]} onChange={minRecording => change({ minRecording })}/><Field title="Answer Language" value={q.language} values={["English", "Hindi", "Kannada", "Tamil", "Telugu"]} onChange={language => change({ language })}/></div><div className="qcc-three"><SettingToggle title="Play Response" subtitle="" value={q.playResponse} onChange={playResponse => change({ playResponse })}/><SettingToggle title="Re-Record" subtitle="" value={q.reRecord} onChange={reRecord => change({ reRecord })}/><SettingToggle title="Auto transcript" subtitle="" value={q.transcript} onChange={transcript => change({ transcript })}/></div><Field title="Re-record limit" value={q.reRecordLimit} values={["Unlimited", "1", "2", "3"]} onChange={reRecordLimit => change({ reRecordLimit })}/></div></section>
-    <section className="qcc-section qcc-audio-booster-settings"><h3>Response Boosters</h3><div className="qcc-inset"><Editor label="Section Title" value={q.boosterTitle} onChange={boosterTitle => change({ boosterTitle })}/><Editor label="Caption" value={q.boosterCaption} onChange={boosterCaption => change({ boosterCaption })}/><Field title="Number Of Boosters" value={String(q.boosterCount)} values={["2", "3", "4"]} onChange={v => change({ boosterCount: Number(v) })}/><div className="qcc-booster-table">{["Protect|Stop Sharing", "Explain|Explain Risk", "Report|Notify Team", "Prevent|Remove Data"].slice(0, q.boosterCount).map((item, i) => <div key={item}><b>{i + 1}. {item.split("|")[0]}</b><span>{item.split("|")[1]}</span><strong>250 XP</strong></div>)}</div><SettingToggle title="Show booster to teams" subtitle="" value={q.hint} onChange={hint => change({ hint })}/><Editor label="Did you know" value={q.didYouKnow} onChange={didYouKnow => change({ didYouKnow })}/><Editor label="Feedback" value={q.feedback} onChange={feedback => change({ feedback })}/></div></section>
+    <section className="qcc-section qcc-audio-booster-settings"><h3>Response Boosters</h3><div className="qcc-inset"><Editor label="Section Title" value={q.boosterTitle} html={q.qcRichHtml?.boosterTitle?.text === q.boosterTitle && q.qcRichHtml?.boosterTitle?.kind === q.type ? q.qcRichHtml?.boosterTitle?.html : undefined} key={`qcc-${round}-${active}-${q.type}-question-boosterTitle`} onChange={(text, html) => changeQuestionRich("boosterTitle", text, html)}/><Editor label="Caption" value={q.boosterCaption} html={q.qcRichHtml?.boosterCaption?.text === q.boosterCaption && q.qcRichHtml?.boosterCaption?.kind === q.type ? q.qcRichHtml?.boosterCaption?.html : undefined} key={`qcc-${round}-${active}-${q.type}-question-boosterCaption`} onChange={(text, html) => changeQuestionRich("boosterCaption", text, html)}/><Field title="Number Of Boosters" value={String(q.boosterCount)} values={["2", "3", "4"]} onChange={v => change({ boosterCount: Number(v) })}/><div className="qcc-booster-table">{["Protect|Stop Sharing", "Explain|Explain Risk", "Report|Notify Team", "Prevent|Remove Data"].slice(0, q.boosterCount).map((item, i) => <div key={item}><b>{i + 1}. {item.split("|")[0]}</b><span>{item.split("|")[1]}</span><strong>250 XP</strong></div>)}</div><SettingToggle title="Show booster to teams" subtitle="" value={q.hint} onChange={hint => change({ hint })}/><Editor label="Did you know" value={q.didYouKnow} html={q.qcRichHtml?.didYouKnow?.text === q.didYouKnow && q.qcRichHtml?.didYouKnow?.kind === q.type ? q.qcRichHtml?.didYouKnow?.html : undefined} key={`qcc-${round}-${active}-${q.type}-question-didYouKnow`} onChange={(text, html) => changeQuestionRich("didYouKnow", text, html)}/><Editor label="Feedback" value={q.feedback} html={q.qcRichHtml?.feedback?.text === q.feedback && q.qcRichHtml?.feedback?.kind === q.type ? q.qcRichHtml?.feedback?.html : undefined} key={`qcc-${round}-${active}-${q.type}-question-feedback`} onChange={(text, html) => changeQuestionRich("feedback", text, html)}/></div></section>
     <section className="qcc-section qcc-audio-marking"><div className="qcc-section-title"><h3>Marking</h3><small>How the Answer earns XP</small></div><div className="qcc-inset"><p>Marked by</p><div className="qcc-pills">{(["AI", "Host"] as const).map(v => <button key={v} className={q.marking === v ? "active" : ""} type="button" onClick={() => change({ marking: v })}>{v}</button>)}</div><div className="qcc-two"><Field title="XP per Booster covered" value={String(q.xpPerAnswer)} values={["100", "200", "250", "500"]} onChange={v => change({ xpPerAnswer: Number(v) })}/><Field title="Pass when team covers at least" value={String(q.minAnswers)} values={["1", "2", "3", "4"]} onChange={v => change({ minAnswers: Number(v) })}/></div><label className="qcc-plain-field">Model Answer text (Host only)<textarea value={q.modelAnswer} onChange={e => change({ modelAnswer: e.target.value })}/></label><p>Model answer - audio (host only, optional)</p><div className="qcc-audio-buttons"><label>＋ Upload Audio<input type="file" accept="audio/*" onChange={e => change({ hostAudioName: e.target.files?.[0]?.name || "" })}/></label><button type="button" onClick={record}>{recording ? "■ Stop" : "◉ Record"}</button><small>{q.hostAudioName || "No Audio Added"}</small></div></div></section>
   </> : null;
     const hiddenTilesPreview = () => {
@@ -681,7 +737,7 @@ export default function QCCreateQuestionPage() {
   </div>
 </div>    <div className="qcc-intro"><h1>Challenge Details (Quantum Champ)</h1><p>Add Questions To Each Round. Every Question Is Shown On The Game Screen Exactly As Previewed On The Right.</p></div>
     <div className="qcc-columns"><section className="qcc-left"><div className="qcc-rounds">{Array.from({ length: roundCount }, (_, i) => <button type="button" key={i} className={round === i + 1 ? "active" : ""} onClick={() => selectRound(i + 1)}>Round {i + 1}</button>)}</div>
-      <div className="qcc-form"><label className="qcc-form-label">Question Type</label><select className="qcc-type" value={q.type} onChange={e => setType(e.target.value as Kind)}>{kinds.map(k => <option key={k}>{k}</option>)}</select><Editor label="Write Your Question" value={q.text} onChange={text => change({ text })} placeholder="Write your question here..."/>{inlineError("question text is required")}
+      <div className="qcc-form"><label className="qcc-form-label">Question Type</label><select className="qcc-type" value={q.type} onChange={e => setType(e.target.value as Kind)}>{kinds.map(k => <option key={k}>{k}</option>)}</select><Editor label="Write Your Question" value={q.text} html={q.qcRichHtml?.text?.text === q.text && q.qcRichHtml?.text?.kind === q.type ? q.qcRichHtml?.text?.html : undefined} key={`qcc-${round}-${active}-${q.type}-question-text`} onChange={(text, html) => changeQuestionRich("text", text, html)} placeholder="Write your question here..."/>{inlineError("question text is required")}
       {audioSettings()}{answerSettings()}
 {q.type !== kinds[3] && (
   <section className="qcc-section">
@@ -722,7 +778,7 @@ export default function QCCreateQuestionPage() {
       <footer className="qcc-footer"><button type="button" onClick={() => { if (q.type === kinds[0])
         setPreview(!preview);
     else
-        backToContent(); }}>{q.type === kinds[0] ? "Preview Questions" : "Back"}</button><div><button type="button" onClick={save}>Save</button><button type="button" className="qcc-continue" onClick={continueToEvaluation}>Continue</button></div></footer>
+        backToContent(); }}>{q.type === kinds[0] ? "Preview Questions" : "Back"}</button><div><button type="button" className="qcc-continue" onClick={continueToEvaluation}>Save &amp; Continue</button></div></footer>
   </div></div></section></div></main>;
 }
 

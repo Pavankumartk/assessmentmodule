@@ -1,4 +1,6 @@
 "use client";
+import { quantumPlayerStorage as localStorage } from "../lib/player-storage";
+
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";

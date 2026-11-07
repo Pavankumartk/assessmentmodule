@@ -1,3 +1,5 @@
+
+import { quantumPlayerStorage as localStorage } from "./player-storage";
 /** Quantum Champs — frontend-only dummy data and local game tracker.
  * All data is shared across tabs on the SAME browser origin only.
  * Replace storage functions with backend calls for genuine multi-device live play.

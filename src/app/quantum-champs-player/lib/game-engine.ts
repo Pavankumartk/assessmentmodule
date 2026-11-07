@@ -1,4 +1,6 @@
 
+import { quantumPlayerStorage as localStorage } from "./player-storage";
+
 import {
   getQuestionByIndex,
   getQuestionCount,
@@ -179,7 +181,7 @@ export function canPlayerAnswer(team: Team = getCurrentTeam()): boolean {
 export function subscribeToGameChanges(onChange: () => void): () => void {
   if (!canUseStorage()) return () => {};
   const onStorage = (event: StorageEvent) => {
-    if (event.storageArea === localStorage && event.key?.startsWith("qc")) onChange();
+    if (event.storageArea === window.localStorage && event.key?.startsWith("qc")) onChange();
   };
   const onLocal = () => onChange();
   window.addEventListener("storage", onStorage);

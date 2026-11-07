@@ -1,4 +1,6 @@
 "use client";
+import { quantumPlayerStorage as localStorage } from "../lib/player-storage";
+
 
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";

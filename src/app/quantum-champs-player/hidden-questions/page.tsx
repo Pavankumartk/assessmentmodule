@@ -1,4 +1,6 @@
 "use client";
+import { quantumPlayerStorage as localStorage } from "../lib/player-storage";
+
 
 import { Flag, Flame, SunMedium } from "lucide-react";
 import { fredoka } from "../fredoka";

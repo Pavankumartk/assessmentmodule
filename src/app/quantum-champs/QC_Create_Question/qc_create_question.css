@@ -2429,3 +2429,179 @@
 .quantum-creator-scope .qcc-assessment-id{margin:15px 0 8px;font-size:12px;line-height:1.5;color:#374151;overflow-wrap:anywhere}
 .quantum-creator-scope .qcc-assessment-id strong{font-weight:700;color:#2d4cc8;user-select:text}
 .quantum-creator-scope .qcc-assessment-id span{font-weight:700;color:#267342}
+
+/* BEGIN QUANTUM QUESTION CREATOR ALIGNMENT */
+.qcc-shell.qcc-shell {
+  --qcc-bg: #dfe6e9;
+  --qcc-ink: #374151;
+  --qcc-outer: -4px -4px 4px #fff, 4px 4px 4px #c4c4c4;
+  --qcc-card: -3px -3px 5px #fff, 3px 3px 5px #c4c4c4;
+  --qcc-inner: inset -4px -4px 4px #fff, inset 4px 4px 4px #c4c4c4;
+  --qcc-small: -2px -2px 3px #fff, 2px 2px 3px #c4c4c4;
+  color: #374151;
+  font-family: "Segoe UI", Arial, sans-serif !important;
+}
+.qcc-shell.qcc-shell .qcc-page { padding: 20px 24px 32px; }
+.qcc-shell.qcc-shell .qcc-columns { grid-template-columns: minmax(0, 1fr) 304px; gap: 24px; align-items: start; }
+.qcc-shell.qcc-shell .qcc-left,
+.qcc-shell.qcc-shell .qcc-right {
+  min-width: 0; padding: 24px; border: 0; border-radius: 16px;
+  background: #dfe6e9; box-shadow: var(--qcc-outer);
+}
+.qcc-shell.qcc-shell .qcc-right { display: flex; flex-direction: column; gap: 20px; }
+.qcc-shell.qcc-shell .qcc-form { gap: 24px; padding: 16px; border-radius: 16px; }
+.qcc-shell.qcc-shell .qcc-form-label,
+.qcc-shell.qcc-shell .qcc-editor-label strong { font-size: 16px; line-height: 24px; font-weight: 600; }
+.qcc-shell.qcc-shell .qcc-form-label { margin-bottom: -12px; }
+.qcc-shell.qcc-shell .qcc-section h3 { font-size: 18px; line-height: 26px; font-weight: 600; }
+.qcc-shell.qcc-shell .qcc-side-settings,
+.qcc-shell.qcc-shell .qcc-summary {
+  gap: 12px; min-width: 0; padding: 14px 12px; border: 1px solid #cbd2d5;
+  border-radius: 8px; background: #dfe6e9;
+}
+.qcc-shell.qcc-shell .qcc-side-settings h2,
+.qcc-shell.qcc-shell .qcc-summary h2 { font-size: 16px; line-height: 23px; font-weight: 600; }
+.qcc-shell.qcc-shell .qcc-field { gap: 7px; }
+.qcc-shell.qcc-shell .qcc-field > span,
+.qcc-shell.qcc-shell .qcc-tags > strong { font-size: 14px; line-height: 20px; font-weight: 600; }
+.qcc-shell.qcc-shell .qcc-field select,
+.qcc-shell.qcc-shell .qcc-field input,
+.qcc-shell.qcc-shell .qcc-type {
+  min-height: 42px; height: 42px; padding: 8px 12px; border: 0; border-radius: 6px;
+  color: #374151; background-color: #dfe6e9; box-shadow: var(--qcc-inner); font-size: 14px !important;
+}
+.qcc-shell.qcc-shell .qcc-field select,
+.qcc-shell.qcc-shell .qcc-type { padding-right: 34px; }
+.qcc-shell.qcc-shell .qcc-editor-group { gap: 10px; }
+.qcc-shell.qcc-shell .qcc-rich,
+.qcc-shell.qcc-shell .qcc-answer-body .qcc-rich {
+  position: relative; min-width: 0; padding: 10px 10px 28px; border: 0; border-radius: 8px;
+  background: #dfe6e9; box-shadow: var(--qcc-inner);
+}
+.qcc-shell.qcc-shell .qcc-toolbar,
+.qcc-shell.qcc-shell .qcc-answer-body .qcc-toolbar {
+  display: flex; flex-wrap: nowrap; align-items: center; min-width: 0; min-height: 56px;
+  gap: 8px; padding: 7px 8px; overflow-x: auto; overflow-y: hidden;
+  border: 0; border-radius: 6px; background: #dfe6e9;
+  box-shadow: -3px -3px 4px #fff, 3px 3px 4px #c4c4c4;
+  scrollbar-width: thin;
+}
+.qcc-shell.qcc-shell .qcc-toolbar button,
+.qcc-shell.qcc-shell .qcc-toolbar select,
+.qcc-shell.qcc-shell .qcc-answer-body .qcc-toolbar button,
+.qcc-shell.qcc-shell .qcc-answer-body .qcc-toolbar select {
+  flex: 0 0 auto; min-width: 40px; height: 40px; padding: 5px 8px; border: 0; border-radius: 5px;
+  background: #dfe6e9; box-shadow: -2px -2px 3px #fff, 2px 2px 3px #c4c4c4;
+  color: #374151; font: 400 14px/20px "Segoe UI", Arial, sans-serif !important;
+}
+.qcc-shell.qcc-shell .qcc-toolbar select:first-of-type { min-width: 115px; }
+.qcc-shell.qcc-shell .qcc-toolbar select:nth-of-type(2) { min-width: 68px; }
+.qcc-shell.qcc-shell .qcc-rich textarea,
+.qcc-shell.qcc-shell .qcc-answer-body .qcc-rich textarea {
+  display: block; width: 100%; min-width: 0; min-height: 104px; margin: 12px 0 0; padding: 10px 6px;
+  border: 0; border-radius: 0; outline: none; resize: vertical; background: transparent; box-shadow: none;
+  color: #374151; font-family: var(--qcc-editor-font, Arial) !important;
+  font-size: var(--qcc-editor-size, 16px) !important; line-height: 1.5;
+}
+.qcc-shell.qcc-shell .qcc-answer-body .qcc-rich textarea { min-height: 75px; }
+.qcc-shell.qcc-shell .qcc-rich textarea:focus-visible { outline: 2px solid #2d4cc8; outline-offset: 2px; border-radius: 4px; }
+.qcc-shell.qcc-shell .qcc-editor-counter {
+  position: absolute; right: 14px; bottom: 8px; margin: 0; color: #374151;
+  font: 400 12px/16px "Segoe UI", Arial, sans-serif;
+}
+.qcc-shell.qcc-shell .qcc-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; margin-top: 32px; }
+.qcc-shell.qcc-shell .qcc-footer button {
+  min-width: 135px; min-height: 48px; padding: 10px 20px; border: 0; border-radius: 28px;
+  background: #dfe6e9; box-shadow: var(--qcc-card); color: #374151;
+  font: 700 16px/24px "Segoe UI", Arial, sans-serif !important;
+}
+.qcc-shell.qcc-shell .qcc-footer .qcc-continue { min-width: 190px; color: #2a7308; }
+.qcc-shell.qcc-shell .qcc-footer button:active { box-shadow: var(--qcc-inner); }
+@media (max-width: 1100px) {
+  .qcc-shell.qcc-shell .qcc-page { padding: 18px; }
+  .qcc-shell.qcc-shell .qcc-columns { grid-template-columns: minmax(0, 1fr) 255px; gap: 16px; }
+  .qcc-shell.qcc-shell .qcc-left, .qcc-shell.qcc-shell .qcc-right { padding: 16px; }
+}
+@media (max-width: 850px) {
+  .qcc-shell.qcc-shell .qcc-columns { grid-template-columns: minmax(0, 1fr); }
+  .qcc-shell.qcc-shell .qcc-right { display: flex; flex-direction: column; }
+}
+@media (max-width: 600px) {
+  .qcc-shell.qcc-shell .qcc-page { padding: 14px 12px 28px; }
+  .qcc-shell.qcc-shell .qcc-left, .qcc-shell.qcc-shell .qcc-right { padding: 12px; border-radius: 12px; }
+  .qcc-shell.qcc-shell .qcc-form { gap: 20px; padding: 12px; }
+  .qcc-shell.qcc-shell .qcc-toolbar { gap: 6px; }
+  .qcc-shell.qcc-shell .qcc-toolbar button, .qcc-shell.qcc-shell .qcc-toolbar select { min-width: 36px; height: 36px; }
+  .qcc-shell.qcc-shell .qcc-toolbar select:first-of-type { min-width: 100px; }
+  .qcc-shell.qcc-shell .qcc-footer .qcc-continue { min-width: 170px; }
+}
+/* END QUANTUM QUESTION CREATOR ALIGNMENT */
+
+/* BEGIN QUANTUM MCQ EDITOR AND CONTROLS */
+.qcc-shell.qcc-shell .qcc-rich { position: relative; min-width: 0; padding: 10px 10px 28px; border: 0; border-radius: 8px; background: #dfe6e9; box-shadow: inset -4px -4px 4px #fff, inset 4px 4px 4px #c4c4c4; }
+.qcc-shell.qcc-shell .qcc-rich .mcqcRichEditorRoot { position: relative; min-width: 0; }
+.qcc-shell.qcc-shell .qcc-rich .mcqcRichToolbar {
+  display: flex; flex-wrap: nowrap; align-items: center; min-width: 0; min-height: 52px;
+  gap: 8px; padding: 7px 8px; overflow-x: auto; overflow-y: hidden; border: 0; border-radius: 6px;
+  background: #dfe6e9; box-shadow: -3px -3px 4px #fff, 3px 3px 4px #c4c4c4; scrollbar-width: thin;
+}
+.qcc-shell.qcc-shell .qcc-rich .mcqcRichToolbar > button,
+.qcc-shell.qcc-shell .qcc-rich .mcqcRichToolbar .mcqcRichMenuRoot > button {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 38px;
+  width: 38px; min-width: 38px; height: 38px; min-height: 38px; padding: 4px;
+  border: 0; border-radius: 5px; background: #dfe6e9; color: #374151;
+  box-shadow: -2px -2px 3px #fff, 2px 2px 3px #c4c4c4;
+}
+.qcc-shell.qcc-shell .qcc-rich .mcqcRichToolbar .mcqcToolbarSelect { flex: 0 0 auto; width: auto; min-width: 70px; padding: 4px 8px; gap: 8px; justify-content: space-between; white-space: nowrap; font: 400 14px/20px "Segoe UI", Arial, sans-serif !important; }
+.qcc-shell.qcc-shell .qcc-rich .mcqcRichToolbar .mcqcToolbarFont { min-width: 112px; }
+.qcc-shell.qcc-shell .qcc-rich .mcqcRichToolbar .mcqcToolbarSize { min-width: 66px; }
+.qcc-shell.qcc-shell .qcc-rich .mcqcRichEditable { min-height: 104px; width: 100%; margin-top: 12px; padding: 10px 6px; color: #374151; font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; white-space: pre-wrap; }
+.qcc-shell.qcc-shell .qcc-answer-body .qcc-rich .mcqcRichEditable { min-height: 75px; }
+.qcc-shell.qcc-shell .qcc-rich .mcqcRichEditable:empty::before { content: attr(data-placeholder); color: #8b949c; pointer-events: none; }
+.qcc-shell.qcc-shell .qcc-rich .mcqcHiddenColorInput { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.qcc-shell.qcc-shell .qcc-editor-counter { position: absolute; right: 14px; bottom: 8px; color: #374151; font: 400 12px/16px "Segoe UI", Arial, sans-serif; }
+/* Preserve the MCQ editor's chosen font despite the app-wide default font. */
+.qcc-shell .mcqcRichEditable * { font-family: inherit !important; }
+.qcc-shell .mcqcRichEditable font[face="Arial" i], .qcc-shell .mcqcRichEditable [style*="font-family: Arial" i] { font-family: Arial, sans-serif !important; }
+.qcc-shell .mcqcRichEditable font[face="Segoe UI" i], .qcc-shell .mcqcRichEditable [style*="Segoe UI" i] { font-family: "Segoe UI", sans-serif !important; }
+.qcc-shell .mcqcRichEditable font[face="Georgia" i], .qcc-shell .mcqcRichEditable [style*="Georgia" i] { font-family: Georgia, serif !important; }
+.qcc-shell .mcqcRichEditable font[face="Times New Roman" i], .qcc-shell .mcqcRichEditable [style*="Times New Roman" i] { font-family: "Times New Roman", serif !important; }
+.qcc-shell .mcqcRichEditable font[face="Verdana" i], .qcc-shell .mcqcRichEditable [style*="Verdana" i] { font-family: Verdana, sans-serif !important; }
+/* Icons sit in their own circle; label letters remain the standard text colour. */
+.qcc-shell.qcc-shell .qcc-nested { position: relative; }
+.qcc-shell.qcc-shell .qcc-nested .qcc-section-icon {
+  position: absolute; left: 8px; top: 7px; display: grid; place-items: center;
+  width: 26px; height: 26px; border-radius: 50%; background: #dfe6e9;
+  box-shadow: -2px -2px 3px #fff, 2px 2px 3px #c4c4c4; color: #b38c27;
+}
+.qcc-shell.qcc-shell .qcc-nested-fact .qcc-section-icon { color: #9b43a6; }
+.qcc-shell.qcc-shell .qcc-nested .qcc-editor-label { min-height: 28px; padding-left: 36px; }
+.qcc-shell.qcc-shell .qcc-nested .qcc-editor-label strong { color: #374151 !important; font-size: 14px; }
+.qcc-shell.qcc-shell .qcc-nested .qcc-editor-label strong::first-letter { color: inherit !important; }
+.qcc-shell.qcc-shell .qcc-nested .qcc-editor-label::after { content: none; }
+/* Match the existing MCQ correct-answer checkbox without colouring its label. */
+.qcc-shell.qcc-shell .qcc-checkbox { display: flex; align-items: center; gap: 8px; color: #374151; font: 600 14px/20px "Segoe UI", Arial, sans-serif; }
+.qcc-shell.qcc-shell .qcc-checkbox input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none; position: relative; display: grid; place-items: center;
+  flex: 0 0 24px; width: 24px; height: 24px; min-width: 24px; min-height: 24px; margin: 0; padding: 0;
+  border: 0; border-radius: 4px; background: #dfe6e9; box-shadow: inset -2px -2px 2px #fff, inset 2px 2px 2px rgba(196,196,196,.8); cursor: pointer;
+}
+.qcc-shell.qcc-shell .qcc-checkbox input[type="checkbox"]:checked { box-shadow: -4px -4px 4px #fff, 4px 4px 4px rgba(196,196,196,.8); }
+.qcc-shell.qcc-shell .qcc-checkbox input[type="checkbox"]:checked::after { content: ""; display: block; width: 16px; height: 16px; border-radius: 3px; background: #2a7308; }
+.qcc-shell.qcc-shell .qcc-checkbox input[type="checkbox"]:checked::before { content: ""; position: absolute; left: 8px; top: 6px; width: 6px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); z-index: 1; }
+.qcc-shell.qcc-shell .qcc-checkbox input[type="checkbox"]:focus-visible { outline: 2px solid #2d4cc8; outline-offset: 3px; }
+/* Same 72 x 36 shared assessment switch, also when the shared CSS loads later. */
+.qcc-shell.qcc-shell button.qcc-toggle[role="switch"] { box-sizing: border-box; position: relative; display: inline-block; flex: 0 0 72px; width: 72px; min-width: 72px; height: 36px; min-height: 36px; padding: 0; border: 0; border-radius: 32px; background: #dfe6e9; box-shadow: -4px -4px 4px rgba(255,255,255,.5), 4px 4px 4px #c4c4c4; font-size: 0; line-height: 0; }
+.qcc-shell.qcc-shell button.qcc-toggle[role="switch"] > * { visibility: hidden; pointer-events: none; }
+.qcc-shell.qcc-shell button.qcc-toggle[role="switch"]::before { content: "OFF"; position: absolute; box-sizing: border-box; inset: 4px 5px; width: 62px; height: 28px; padding: 4px 8px 4px 4px; border-radius: 32px; background: #dfe6e9; box-shadow: inset -2px -2px 2px #fff, inset 2px 2px 2px #c4c4c4; color: #374151; text-align: right; font: 600 12px/20px "Segoe UI", Arial, sans-serif; }
+.qcc-shell.qcc-shell button.qcc-toggle[role="switch"][aria-checked="true"]::before { content: "ON"; padding: 4px 4px 4px 7px; background: linear-gradient(113.36deg,#2d4cc8 30.17%,#e01e5a 65.23%); box-shadow: none; color: #fff; text-align: left; }
+.qcc-shell.qcc-shell button.qcc-toggle[role="switch"]::after { content: ""; position: absolute; z-index: 2; top: 4px; left: 4px; width: 28px; height: 28px; border-radius: 50%; background: #dfe6e9; box-shadow: 0 -2px 4px rgba(0,0,0,.1), 0 4px 4px rgba(0,0,0,.25); transition: left .17s ease; }
+.qcc-shell.qcc-shell button.qcc-toggle[role="switch"][aria-checked="true"]::after { left: 40px; }
+.qcc-shell.qcc-shell button.qcc-toggle[role="switch"]:focus-visible { outline: 2px solid #2d4cc8; outline-offset: 3px; }
+@media (max-width: 600px) { .qcc-shell.qcc-shell .qcc-rich .mcqcRichToolbar { gap: 6px; } .qcc-shell.qcc-shell .qcc-rich .mcqcRichToolbar > button, .qcc-shell.qcc-shell .qcc-rich .mcqcRichToolbar .mcqcRichMenuRoot > button { width: 35px; min-width: 35px; height: 35px; min-height: 35px; flex-basis: 35px; } }
+@media (prefers-reduced-motion: reduce) { .qcc-shell.qcc-shell button.qcc-toggle[role="switch"]::after { transition: none; } }
+/* END QUANTUM MCQ EDITOR AND CONTROLS */
+
+/* BEGIN QC SINGLE EDITOR COUNTER */
+.qcc-shell .qcc-editor-group [data-qcc-duplicate-counter="true"] { display: none !important; }
+/* END QC SINGLE EDITOR COUNTER */

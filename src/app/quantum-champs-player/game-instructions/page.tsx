@@ -1,4 +1,6 @@
 "use client";
+import { quantumPlayerStorage as localStorage } from "../lib/player-storage";
+
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Flame, SunMedium } from "lucide-react";
